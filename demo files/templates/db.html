@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+
+{% block header %}
+  <title>{{student.firstName}} {{student.LastName}}</title>
+{% endblock %}
+
+{% block content %}
+<h1> {{student.firstName}} {{student.lastName}} </h1>
+<ul>
+  <li>students id: {{student.studentId}}</li>
+  <li>students major: {{student.major}}</li>
+  <li>students gpa: {{student.gpa}}</li>
+</ul>
+{% endblock %}
