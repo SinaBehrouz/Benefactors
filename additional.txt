@@ -1,0 +1,26 @@
+#########################################
+#   Additional things to cover/demo    # 
+#########################################
+- just notes for myself - simran
+
+- Security e.g login, authentication: lots of easy to use support, some examples: 
+    - Flask support: login, logout, sessions, protecting endpoints, and more 
+    - @login required, @login manager, and more 
+    - deals with unauthorized cases 
+    - can then also decorate functions with @login_required, @login_manager etc
+    - authentication e.g via tokens with flask_jwt_extended ex. @jwt_required, e.g send bearer token in header 
+    - authorization 
+- API documentation and "Try it out functionality" with is similar to postman 
+    - flask swagger / flasgger 
+- Testing support with flask client (combine with pytest)  
+    - Has test client, can use it with test module of our choice (e.g pyttest)
+    - can use flask client to send requests into application
+- Error handling
+   - error handlers 
+   - debugger in terminal (shown earlier) 
+
+- talk about pros and cons for vanilla flask vs flask restful vs flask rest plus etc?
+- compare to other frameworks?
+- Any other areas we want to address? 
+
+coordinate security @martin
