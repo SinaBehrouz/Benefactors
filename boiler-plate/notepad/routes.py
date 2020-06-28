@@ -9,18 +9,17 @@ from flask_restful import abort
 # add password reset API 
 # all non-admins are now called consumers
 
-class Login(Resource):
-    def post(self):
-        login_info = request.get_json()
-        # will change drastically when we implement login properly, this is just a dummy implementation
-        # return success/failure accordingly
-        return {"Message": "Successfully logged in as " + login_info['email']}, 200
+@app.route("/login", methods=['POST'])
+def login():
+    login_info = request.get_json()
+    # will change drastically when we implement login properly, this is just a dummy implementation
+    # return success/failure accordingly
+    return {"Message": "Successfully logged in as " + login_info['email']}, 200
 
-class SignUp(Resource):
-    def post(self):
-        sign_up_info = request.get_json()
-        # will change drastically when we implement login properly, this is just a dummy implementation
-        return {"Message": "Successfully signed up as " + sign_up_info['email']}, 201
+def signup():
+    sign_up_info = request.get_json()
+    # will change drastically when we implement login properly, this is just a dummy implementation
+    return {"Message": "Successfully signed up as " + sign_up_info['email']}, 201
 
 # Get all posts
 @app.route("/posts", methods=['GET'])
