@@ -1,12 +1,57 @@
 from notepad import app, db
 from flask import Flask, request, jsonify
-from flask_restful import abort
+# from flask_restful import abort
 
-# to do: 
+from flask_sqlalchemy import SQLAlchemy
+from enum import Enum
+from datetime import datetime
+
+class genderEnum(Enum):
+    male = 1
+    female = 2
+    others = 3
+class roleEnum(Enum):
+    consumer = 1
+    admin = 2
+class statusEnum(Enum):
+    open = 1
+    in_progress = 2
+    cancelled = 3
+    closed = 4
+
+class User(db.Model):
+    email = db.Column(db.String(120), primary_key=True)
+    first_name = db.Column(db.String(20), nullable = False)
+    last_name = db.Column(db.String(20), nullable = False)
+    password = db.Column(db.String(20), nullable = False)
+    gender = db.Column( db.Enum(genderEnum), default = genderEnum.others)
+    phone_number = db.Column(db.String(16), nullable = False)
+    postal_code = db.Column(db.String(10), nullable = False)
+    role = db.Column( db.Enum(roleEnum), nullable = False)
+    display_pic = db.Column( db.String(20), default = 'default')
+
+    posts = db.relationship('Post', backref='Author', lazy=True)
+    def __repr__(self):
+        return f"User('{self.email}'| '{self.first_name}'| '{self.last_name}')"
+
+class Post(db.Model):
+    post_id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.Text)
+    title = db.Column(db.String(100), nullable = False)
+    date_posted = db.Column(db.DateTime, nullable = False, default=datetime.utcnow)
+    #sample DateTime value: 2020-06-28 20:40:55.952515
+    date_deadline: db.Column(db.DateTime, nullable = False)
+    status= db.Column( db.Enum(statusEnum), nullable = False)
+    author_email = db.Column(db.String(120), db.ForeignKey('user.email'), nullable = False)
+    def __repr__(self):
+        return f"Post('{self.title}'| '{self.date_posted}' )"
+
+
+# to do:
 # figure out if we want to authenticate/authorize on each endpoint
 # organize project into multiple files
 # add error handling/validation once db has been added
-# add password reset API 
+# add password reset API
 # all non-admins are now called consumers
 
 @app.route("/login", methods=['POST'])
@@ -24,7 +69,10 @@ def signup():
 # Get all posts
 @app.route("/posts", methods=['GET'])
 def get_all_posts():
-    # dummy data for now, replace with db call  
+    # dummy data for now, replace with db call
+        x = User.query.get('a@a.com');
+        print(x)
+        return ("done")
         client_post_1_info = {
             'post_id': "128976",
             'title': "Dummy Title 1",
@@ -53,20 +101,20 @@ def get_all_posts():
             'status': 'CLOSED'
         }
         return jsonify(client_post_1_info, client_post_2_info, client_post_3_info), 200
-        
+
 # Create new post
 @app.route("/post/new", methods=['POST'])
 def create_new_post():
     post_info = request.get_json()
     # add db call in here to post information to the db
-    return {'Post saved! ': post_info}, 201 
+    return {'Post saved! ': post_info}, 201
 
 
 # Get/Edit/Delete a single post
 @app.route("/posts/<int:post_id>", methods=['GET', 'PUT', 'DELETE'])
 def single_post(post_id):
     if request.method == 'GET':
-        # replace with db call to get post info from db  
+        # replace with db call to get post info from db
         post_info = {
             'post_id': post_id,
             'title': "Dummy Title",
@@ -85,4 +133,3 @@ def single_post(post_id):
         post_to_delete = request.get_json()
         # add db call to delete post from db
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
-
