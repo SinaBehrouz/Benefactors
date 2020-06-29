@@ -20,6 +20,7 @@ def login():
 def signup():
     sign_up_info = request.get_json()
     # will change drastically when we implement login properly, this is just a dummy implementation
+
     return {"Message": "Successfully signed up as " + sign_up_info['email']}, 201
 
 # Get all posts
@@ -27,10 +28,9 @@ def signup():
 def get_all_posts():
     # dummy data for now, replace with db call
         query = Post.query.all();
-        for p in query:
-            print(p)
-        # return "Ill have to do the templating for it too :("
-        return render_template("posts.html", posts=query)
+        # for p in query:
+        #     print(p)
+        return render_template("posts.html", posts=query),200
         # client_post_1_info = {
         #     'post_id': "128976",
         #     'title': "Dummy Title 1",
@@ -73,21 +73,34 @@ def create_new_post():
 def single_post(post_id):
     if request.method == 'GET':
         # replace with db call to get post info from db
+        query = Post.query.get(post_id)
         post_info = {
-            'post_id': post_id,
-            'title': "Dummy Title",
-            'description': "Dummy Description",
-            'author_email': "Dummy_email@gmail.com",
-            'date_posted': "10/06/2020",
-            'date_deadline': "10/07/2020",
-            'status': 'OPEN'
+            'post_id': query.post_id,
+            'title': query.title,
+            'description': query.description,
+            'author_email': query.author_email,
+            'date_posted': query.date_posted,
+            'date_deadline': query.date_deadline,
+            'status': query.status.name
         }
         return {"Post retrieved ": post_info }, 200
     elif request.method == 'PUT':
         updated_post_info = request.get_json()
         # add db call in here to update information in the db
+        query = Post.query.get(post_id)
+        for key,value in updated_post_info.items():
+            query[key] = updated_post_info[key]
+
+        # for e in updated_post_info:
+        #     query[e] = updated_post_info[e]
         return {'Post updated ': updated_post_info}, 200
     elif request.method == 'DELETE':
         post_to_delete = request.get_json()
         # add db call to delete post from db
+        try:
+            Post.query.filter_by(post_id = post_id).delete()
+            db.session.commit()
+        except:
+
+        #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
