@@ -1,72 +1,107 @@
-from benefactors import app, db
-from flask import Flask, request, jsonify, render_template
+import os
+import uuid
+from PIL import Image
+from flask import render_template, url_for, flash, redirect, request, abort
+from flask_login import login_user, current_user, logout_user, login_required
+from benefactors import app, db, bcrypt
 from benefactors.models import User, Post
-# from flask_restful import abort
+from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, PostForm
 
-# to do:
-# figure out if we want to authenticate/authorize on each endpoint
-# organize project into multiple files
-# add error handling/validation once db has been added
-# add password reset API
-# all non-admins are now called consumers
+#-------------------------------------------Login/Logout-------------------------------------------
 
-@app.route("/login", methods=['POST'])
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    login_info = request.get_json()
-    # will change drastically when we implement login properly, this is just a dummy implementation
-    # return success/failure accordingly
-    return {"Message": "Successfully logged in as " + login_info['email']}, 200
+    form = LoginForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
+            return redirect(url_for('home'))
+        else:
+            flash('Incorrect email or password. Please try again!', 'danger')
+    return render_template('login.html', title='Login', form=form)
 
-def signup():
-    sign_up_info = request.get_json()
-    # will change drastically when we implement login properly, this is just a dummy implementation
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
-    return {"Message": "Successfully signed up as " + sign_up_info['email']}, 201
+#----------------------------------------------SignUp----------------------------------------------
 
-# Get all posts
-@app.route("/posts", methods=['GET'])
-def get_all_posts():
-    # dummy data for now, replace with db call
-        query = Post.query.all();
-        # for p in query:
-        #     print(p)
-        return render_template("posts.html", posts=query),200
-        # client_post_1_info = {
-        #     'post_id': "128976",
-        #     'title': "Dummy Title 1",
-        #     'description': "Dummy Description 1",
-        #     'author_email': "Dummy_email1@gmail.com",
-        #     'date_posted': "10/06/2020",
-        #     'date_deadline': "10/07/2020",
-        #     'status': 'OPEN'
-        # }
-        # client_post_2_info = {
-        #     'post_id': "987654",
-        #     'title': "Dummy Title 2",
-        #     'description': "Dummy Description 2",
-        #     'author_email': "Dummy_email2@gmail.com",
-        #     'date_posted': "10/06/2020",
-        #     'date_deadline': "10/07/2020",
-        #     'status': 'IN_PROGRESS'
-        # }
-        # client_post_3_info = {
-        #     'post_id': "876543",
-        #     'title': "Dummy Title 3",
-        #     'description': "Dummy Description 3",
-        #     'author_email': "Dummy_email3@gmail.com",
-        #     'date_posted': "10/06/2020",
-        #     'date_deadline': "25/06/2020",
-        #     'status': 'CLOSED'
-        # }
-        #return jsonify(client_post_1_info, client_post_2_info, client_post_3_info), 200
+@app.route("/signup", methods=['GET', 'POST'])
+def sign_up():
+    form = SignUpForm()
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    if form.validate_on_submit():
+        hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, gender=form.gender.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data, password=hash)
+        db.session.add(user)
+        db.session.commit()
+        user = User.query.filter_by(email=form.email.data).first()
+        login_user(user)
+        flash('Account created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('register.html', title='Register', form=form)
+
+#-----------------------------------------------Home-----------------------------------------------
+
+@app.route("/")
+@app.route("/home")
+def home():
+    posts = Post.query.order_by(Post.date_posted.desc())
+    return render_template('home.html', posts=posts)
+
+#-----------------------------------------------Posts----------------------------------------------
 
 # Create new post
-@app.route("/post/new", methods=['POST'])
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
 def create_new_post():
-    post_info = request.get_json()
-    # add db call in here to post information to the db
-    return {'Post saved! ': post_info}, 201
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, description=form.description.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Post created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', title=post.title, post=post)
+
+@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    form = PostForm()
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.description = form.description.data
+        db.session.commit()
+        flash('Post updated!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    if request.method == 'GET':
+       form.title.data = post.title
+       form.description.data = post.description
+    return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
+
+@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted!', 'success')
+    return redirect(url_for('home'))
 
 # Get/Edit/Delete a single post
 @app.route("/posts/<int:post_id>", methods=['GET', 'PUT', 'DELETE'])
@@ -104,3 +139,43 @@ def single_post(post_id):
 
         #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
+
+
+#--------------------------------------Account----------------------------------------
+
+def save_image(picture):
+    picture_name = uuid.uuid4().hex + '.jpg'
+    picture_path = os.path.join(app.root_path, 'static/account_pics', picture_name)
+    reduced_size = (125, 125)
+    user_image = Image.open(picture_name)
+    user_image.thumbnail(reduced_size)
+    user_image.save(picture_path)
+    return picture_name
+
+
+@app.route("/account", methods=['GET', 'POST'])
+@login_required
+def account():
+    form = AccountUpdateForm()
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_name = save_picture(form.picture.data)
+            current_user.user_image = picture_name
+        current_user.username = form.username.data
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        current_user.email = form.email.data
+        current_user.phone_number = form.phone_number.data
+        current_user.postal_code = form.postal_code.data
+        db.session.commit()
+        flash('Account updated!', 'success')
+        return redirect(url_for('account'))
+    if request.method == 'GET':
+        form.username.data = current_user.username
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.email.data = current_user.email
+        form.phone_number.data = current_user.user_image
+        form.postal_code.data = current_user.postal_code
+    user_image = url_for('static', filename='profile_pics/' + current_user.user_image)
+    return render_template('account.html', title='Account', image_file=user_image, form=form)

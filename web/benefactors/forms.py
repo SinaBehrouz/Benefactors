@@ -2,8 +2,16 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+# from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from benefactors.models import User, genderEnum
+
+
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember = BooleanField('Remember Me')
+    submit = SubmitField('Login')
 
 
 class SignUpForm(FlaskForm):
@@ -21,44 +29,39 @@ class SignUpForm(FlaskForm):
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user:
-            raise ValidationError('That username is taken. Please choose a different one.')
+            raise ValidationError('This username is taken.')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
-            raise ValidationError('That email is taken. Please choose a different one.')
+            raise ValidationError('There is an existing account associated with this email.')
 
 
-class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember = BooleanField('Remember Me')
-    submit = SubmitField('Login')
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    # deadline = DateField('Deadline', format="%Y-%m-%d")
+    submit = SubmitField('Post')
 
 
-class UpdateAccountForm(FlaskForm):
+class AccountUpdateForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
     last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone_number = StringField('Phone ', validators=[DataRequired()])
-    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    postal_code = StringField('Postal Code ', validators=[DataRequired()])
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg'])])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
         if username.data != current_user.username:
             user = User.query.filter_by(username=username.data).first()
             if user:
-                raise ValidationError('That username is taken. Please choose a different one.')
+                raise ValidationError('This username is taken.')
 
     def validate_email(self, email):
         if email.data != current_user.email:
             user = User.query.filter_by(email=email.data).first()
             if user:
-                raise ValidationError('That email is taken. Please choose a different one.')
-
-
-class PostForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    content = TextAreaField('Content', validators=[DataRequired()])
-    submit = SubmitField('Post')
+                raise ValidationError('There is an existing account associated with this email.')
