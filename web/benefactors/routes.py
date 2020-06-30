@@ -1,6 +1,6 @@
-from notepad import app, db
+from benefactors import app, db
 from flask import Flask, request, jsonify, render_template
-from notepad.models import User, Post
+from benefactors.models import User, Post
 # from flask_restful import abort
 
 # to do:

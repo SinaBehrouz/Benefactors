@@ -1,4 +1,4 @@
-from notepad import db
+from benefactors import db
 from datetime import datetime
 from enum import Enum
 
