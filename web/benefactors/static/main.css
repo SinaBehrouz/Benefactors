@@ -1,5 +1,5 @@
 body {
-  background: url("background.jpg") no-repeat center fixed;
+  background: url("user_images/background.jpg") no-repeat center fixed;
   margin-top: 5rem;
 }
 
@@ -8,7 +8,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bg-header {
-  background-color: #ecb90a;
+  background-color: #106edc;
 }
 
 .site-header .navbar-brand {
@@ -57,4 +57,21 @@ a.article-title:hover {
 .article-metadata a:hover {
   color: #333;
   text-decoration: none;
+}
+
+.article-svg {
+  width: 25px;
+  height: 25px;
+  vertical-align: middle;
+}
+
+.account-img {
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.account-heading {
+  font-size: 2.5rem;
 }

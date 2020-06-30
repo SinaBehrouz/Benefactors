@@ -44,7 +44,7 @@ def sign_up():
         login_user(user)
         flash('Account created!', 'success')
         return redirect(url_for('home'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('signup.html', title='Register', form=form)
 
 #-----------------------------------------------Home-----------------------------------------------
 
@@ -145,7 +145,7 @@ def single_post(post_id):
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
-    picture_path = os.path.join(app.root_path, 'static/account_pics', picture_name)
+    picture_path = os.path.join(app.root_path, 'static/user_images', picture_name)
     reduced_size = (125, 125)
     user_image = Image.open(picture_name)
     user_image.thumbnail(reduced_size)
@@ -177,5 +177,5 @@ def account():
         form.email.data = current_user.email
         form.phone_number.data = current_user.user_image
         form.postal_code.data = current_user.postal_code
-    user_image = url_for('static', filename='profile_pics/' + current_user.user_image)
-    return render_template('account.html', title='Account', image_file=user_image, form=form)
+    user_image = url_for('static', filename='user_images/' + current_user.user_image)
+    return render_template('profile.html', title='Account', user_image=user_image, form=form)
