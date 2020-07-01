@@ -35,7 +35,7 @@ class User(db.Model, UserMixin):
     # gender = db.Column( db.Enum(genderEnum), default = genderEnum.others)
     phone_number = db.Column(db.String(16), nullable = False)
     postal_code = db.Column(db.String(10), nullable = False)
-    password = db.Column(db.String(20), nullable = False)
+    password = db.Column(db.String(60), nullable = False)
     # role = db.Column( db.Enum(roleEnum), nullable = False)
     user_image = db.Column(db.String(40), default='default.jpg')
     posts = db.relationship('Post', backref='author', lazy=True)
