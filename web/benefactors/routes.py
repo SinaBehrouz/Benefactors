@@ -37,7 +37,7 @@ def sign_up():
         return redirect(url_for('home'))
     if form.validate_on_submit():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, gender=form.gender.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data, password=hash)
+        user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data, password=hash)
         db.session.add(user)
         db.session.commit()
         user = User.query.filter_by(email=form.email.data).first()
@@ -136,6 +136,7 @@ def single_post(post_id):
             Post.query.filter_by(post_id = post_id).delete()
             db.session.commit()
         except:
+            print("")
 
         #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
@@ -145,9 +146,10 @@ def single_post(post_id):
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
-    picture_path = os.path.join(app.root_path, 'static/user_images', picture_name)
+    picture_path = os.path.join(app.root_path, 'static', 'user_images', picture_name)
+    print(picture_path)
     reduced_size = (125, 125)
-    user_image = Image.open(picture_name)
+    user_image = Image.open(picture)
     user_image.thumbnail(reduced_size)
     user_image.save(picture_path)
     return picture_name
@@ -159,7 +161,7 @@ def account():
     form = AccountUpdateForm()
     if form.validate_on_submit():
         if form.picture.data:
-            picture_name = save_picture(form.picture.data)
+            picture_name = save_image(form.picture.data)
             current_user.user_image = picture_name
         current_user.username = form.username.data
         current_user.first_name = form.first_name.data
@@ -175,7 +177,7 @@ def account():
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
         form.email.data = current_user.email
-        form.phone_number.data = current_user.user_image
+        form.phone_number.data = current_user.phone_number
         form.postal_code.data = current_user.postal_code
     user_image = url_for('static', filename='user_images/' + current_user.user_image)
     return render_template('profile.html', title='Account', user_image=user_image, form=form)

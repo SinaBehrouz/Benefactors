@@ -1,5 +1,13 @@
-from benefactors import db, app
+from flask.cli import FlaskGroup
+from benefactors import app, db
 
-if __name__ == '__main__':
+cli = FlaskGroup(app)
+
+@cli.command("create_db")
+def create_db():
+    db.drop_all()
     db.create_all()
-    app.run()
+    db.session.commit()
+
+if __name__ == "__main__":
+    cli()

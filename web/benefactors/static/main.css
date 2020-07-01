@@ -1,5 +1,5 @@
 body {
-  background: url("user_images/background.jpg") no-repeat center fixed;
+  background: url("body-bg.png") no-repeat center fixed;
   margin-top: 5rem;
 }
 
@@ -8,15 +8,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bg-header {
-  background-color: #106edc;
+  background: url("header-bg.jpg")
 }
 
 .site-header .navbar-brand {
-  color: #020101;
+  color: #000000;
 }
 
 .site-header .navbar-nav .nav-link {
-  color: #020101;
+  color: #000000;
 }
 
 .site-header .navbar-nav .nav-link:hover {
