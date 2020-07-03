@@ -1,6 +1,10 @@
 body {
   background: url("body-bg.png") no-repeat center fixed;
-  margin-top: 5rem;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  margin-top: 5em;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -74,4 +78,10 @@ a.article-title:hover {
 
 .account-heading {
   font-size: 2.5rem;
+}
+
+.form-group.required .form-control-label:after { 
+  color: #d00;
+  content: "*";
+  margin-left: 4px;
 }
