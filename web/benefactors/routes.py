@@ -95,9 +95,7 @@ def reset_token(token):
 @app.route("/")
 @app.route("/home")
 def home():
-    posts = []
-    if current_user.is_authenticated:
-        posts = Post.query.order_by(Post.date_posted.desc())
+    posts = Post.query.order_by(Post.date_posted.desc())
     return render_template('home.html', posts=posts)
 
 #-----------------------------------------------Posts----------------------------------------------
