@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+  # Gunicorn web server
+  web:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+    command: gunicorn --bind 0.0.0.0:8080 app:app
+    ports:
+      - 8080:8080
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+
+  # database server
+  db:
+    image: postgres:12-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.db
+
+volumes:
+  postgres_data:
