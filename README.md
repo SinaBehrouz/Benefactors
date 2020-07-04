@@ -7,8 +7,9 @@ Benefactors is a platform which allows people to contact and help each other out
 Assuming user already has python3 and python3-pip installed.
 
 #### To Run:
-1. docker-compose build && docker-compose up
-2. Go to http://localhost:8080/
+1. cd deployment
+2. docker-compose build && docker-compose up
+3. Go to http://localhost:8080/
 
 #### To Terminate:
 1. docker-compose down -v
