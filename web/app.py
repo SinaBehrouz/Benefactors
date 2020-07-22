@@ -9,8 +9,9 @@ def create_db():
     db.create_all()
     from benefactors.models import User, Post
     users = []
-    users.append(User(id=1, username="sina", first_name="si", last_name="na", email="1@1.com", phone_number="1111", postal_code="111", password="111"))
-    users.append(User(id=2, username="Arian", first_name="Ari", last_name="an", email="2@2.com", phone_number="1111", postal_code="111", password="111"))
+    #the password is 123123123 ,use that to login
+    users.append(User(username="sina", first_name="si", last_name="na", email="1@1.com", phone_number="1111", postal_code="111", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
+    users.append(User(username="Arian", first_name="Ari", last_name="an", email="2@2.com", phone_number="1111", postal_code="111", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     posts = []
     posts.append(Post(title="Gond with the Windds", description="A shitty book", user_id=1))
     posts.append(Post(title="CMPT-470 textbook", description="A ok book", user_id=1))
