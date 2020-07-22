@@ -6,7 +6,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
 from benefactors.models import User, Post
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
-                                PostForm, RequestResetForm, ResetPasswordForm)
+                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm)
 from flask_mail import Message
 #-------------------------------------------Login/Logout-------------------------------------------
 
@@ -95,8 +95,9 @@ def reset_token(token):
 @app.route("/")
 @app.route("/home")
 def home():
+    form = SearchForm()
     posts = Post.query.order_by(Post.date_posted.desc())
-    return render_template('home.html', posts=posts)
+    return render_template('home.html', posts=posts, form=form)
 
 #-----------------------------------------------Posts----------------------------------------------
 

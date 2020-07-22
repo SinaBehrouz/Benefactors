@@ -1,5 +1,22 @@
 {% extends "layout.html" %}
 {% block content %}
+<div class="search-section">
+<form method="POST" action="" class="search-bar">
+    {{ form.hidden_tag() }}
+      <div>
+            {% if form.searchString.errors %}
+                {{ form.searchString(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.searchString.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="Search by Username, Title, Description...") }}
+            {% endif %}
+        </div>
+  </div>
+
     {% for post in posts %}
         <article class="media content-section">
             <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
