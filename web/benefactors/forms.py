@@ -80,5 +80,3 @@ class AccountUpdateForm(FlaskForm):
 
 class SearchForm(FlaskForm):
     searchString = StringField('Search Title', validators=[Length(max=100)])
-    # deadline = DateField('Deadline', format="%Y-%m-%d")
-    submit = SubmitField('Search')

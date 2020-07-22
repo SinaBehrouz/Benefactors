@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 
+
 secret_key = secrets.token_hex(16)
 
 app = Flask(__name__)
