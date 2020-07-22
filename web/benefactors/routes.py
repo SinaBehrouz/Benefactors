@@ -39,7 +39,6 @@ def sign_up():
         return redirect(url_for('home'))
     if form.validate_on_submit():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        print(hash)
         user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data, password=hash)
         db.session.add(user)
         db.session.commit()
