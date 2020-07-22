@@ -6,8 +6,9 @@ from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
 from benefactors.models import User, Post
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
-                                PostForm, RequestResetForm, ResetPasswordForm)
+                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm)
 from flask_mail import Message
+from sqlalchemy import or_
 #-------------------------------------------Login/Logout-------------------------------------------
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -92,11 +93,19 @@ def reset_token(token):
 
 #-----------------------------------------------Home-------------------------------------------------
 
-@app.route("/")
-@app.route("/home")
+@app.route("/", methods=['GET', 'POST'])
+@app.route("/home", methods=['GET', 'POST'])
 def home():
-    posts = Post.query.order_by(Post.date_posted.desc())
-    return render_template('home.html', posts=posts)
+    form = SearchForm()
+    if form.validate_on_submit():
+        searchString = form.searchString.data
+        searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
+        posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
+                                                    Post.description.ilike(searchString),
+                                                    User.username.ilike(searchString))).all()
+    else:
+        posts = Post.query.order_by(Post.date_posted.desc()).all()
+    return render_template('home.html', posts=posts, form=form)
 
 #-----------------------------------------------Posts----------------------------------------------
 

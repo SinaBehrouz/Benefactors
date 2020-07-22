@@ -1,5 +1,22 @@
 {% extends "layout.html" %}
 {% block content %}
+<div class="search-section">
+<form method="POST" action="" class="search-bar">
+    {{ form.hidden_tag() }}
+      <div>
+            {% if form.searchString.errors %}
+                {{ form.searchString(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.searchString.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="Search by Username, Title, Description...") }}
+            {% endif %}
+        </div>
+  </div>
+
     {% for post in posts %}
         <article class="media content-section">
             <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
@@ -8,8 +25,8 @@
                     <a class="mr-2" href="#">{{ post.author.username }}</a>
                     <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
                 </div>
-                <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
-                <p class="article-content">{{ post.content }}</p>
+                <h3 style="margin-bottom:0;"><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                <p class="article-content">{{ post.description }}</p>
             </div>
         </article>
     {% endfor %}

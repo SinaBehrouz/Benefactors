@@ -37,21 +37,33 @@
     </nav>
 </header>
 <main role="main" class="container">
-    <div class="row">
-        <div class="col-md-8">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-                {{ message }}
-            </div>
-            {% endfor %}
-            {% endif %}
-            {% endwith %}
-            {% block content %}{% endblock %}
-        </div>
-    </div>
-</main>
+     <div class="row">
+       <div class="col-md-8">
+         {% with messages = get_flashed_messages(with_categories=true) %}
+           {% if messages %}
+             {% for category, message in messages %}
+               <div class="alert alert-{{ category }}">
+                 {{ message }}
+               </div>
+             {% endfor %}
+           {% endif %}
+         {% endwith %}
+         {% block content %}{% endblock %}
+       </div>
+       {% if current_user.is_authenticated %}
+       <div class="col-md-4">
+         <div class="content-section" style="position:fixed; transform: none;">
+           <h3>Information Center</h3>
+             <ul class="list-group">
+               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">To Do List</a> </li>
+               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">My Posts</a> </li>
+               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">Messages</a> </li>
+             </ul>
+         </div>
+       </div>
+       {%endif%}
+     </div>
+   </main>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>

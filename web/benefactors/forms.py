@@ -77,3 +77,6 @@ class AccountUpdateForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('There is an existing account associated with this email.')
+
+class SearchForm(FlaskForm):
+    searchString = StringField('Search Title', validators=[Length(max=100)])
