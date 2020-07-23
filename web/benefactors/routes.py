@@ -101,7 +101,7 @@ def home():
         posts = []
         searchString = form.searchString.data
         searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-        posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
+        posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
                                                      Post.description.ilike(searchString),
                                                      User.username.ilike(searchString))).all()
     else:
