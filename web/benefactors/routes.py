@@ -101,9 +101,9 @@ def home():
         posts = []
         searchString = form.searchString.data
         searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-        # posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
-        #                                             Post.description.ilike(searchString),
-        #                                             User.username.ilike(searchString))).all()
+        posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
+                                                     Post.description.ilike(searchString),
+                                                     User.username.ilike(searchString))).all()
     else:
         posts = Post.query.order_by(Post.date_posted.desc()).all()
     return render_template('home.html', posts=posts, form=form)
