@@ -5,14 +5,36 @@
     <div class="media-body">
       <div class="article-metadata">
         <a class="mr-2" href="#">{{ post.author.username }}</a>
-        <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+        <div>
+          <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+          <small class="text-muted">  |  </small>
+          {% if post.status.name == "open" %}
+          <small class="text-muted" style="color:#9cd28a!important;">{{ post.status.name }}</small>
+          {% elif post.status.name == "taken" %}
+          <small class="text-muted" style="color:#ffa601!important;">{{ post.status.name }}</small>
+          {% elif post.status.name == "cancelled" %}
+          <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+          {% elif post.status.name == "closed"%}
+          <small class="text-muted" style="color:black!important;">{{ post.status.name }}</small>
+          {% endif %}
+        </div>
       </div>
-      <h2 class="article-title">{{ post.title }}</h2>
-      <p class="article-content">{{ post.content }}</p>
+      <h3><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+      <p class="article-content">{{ post.description }}</p>
       {% if post.author == current_user %}
         <div>
           <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_post', post_id=post.id) }}">Update</a>
           <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
+        </div>
+      {% else %}
+        <div>
+          <form action="" method="POST">
+            {% if curr_user_volunteering %}
+              <input class="btn btn-primary" type="submit" value="Volunteer" disabled>
+            {% else %}
+              <input class="btn btn-primary" type="submit" value="Volunteer">
+            {%endif%}
+          </form>
         </div>
       {% endif %}
     </div>

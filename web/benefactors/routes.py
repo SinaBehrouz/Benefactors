@@ -4,7 +4,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
-from benefactors.models import User, Post
+from benefactors.models import User, Post, statusEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
                                 PostForm, RequestResetForm, ResetPasswordForm, SearchForm)
 from flask_mail import Message
@@ -98,11 +98,12 @@ def reset_token(token):
 def home():
     form = SearchForm()
     if form.validate_on_submit():
+        posts = []
         searchString = form.searchString.data
         searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-        posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
-                                                    Post.description.ilike(searchString),
-                                                    User.username.ilike(searchString))).all()
+        posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
+                                                     Post.description.ilike(searchString),
+                                                     User.username.ilike(searchString))).all()
     else:
         posts = Post.query.order_by(Post.date_posted.desc()).all()
     return render_template('home.html', posts=posts, form=form)
@@ -122,10 +123,25 @@ def create_new_post():
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post.html', title=post.title, post=post)
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            post.volunteer = current_user.id
+            post.status = statusEnum.taken
+            db.session.commit()
+            flash('You Are now volunteering for the post!', 'success')
+            #it should redirect to a chat screen or message screen
+            return redirect(url_for('home'))
+        else:
+            flash('You must be logged in to volunteer for a post!', 'warning')
+            return redirect(url_for('login'))
+    else:
+        curr_user_volunteering = False
+        if post.volunteer == current_user.id:
+            curr_user_volunteering = True
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
