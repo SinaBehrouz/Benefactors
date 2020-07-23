@@ -4,7 +4,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
-from benefactors.models import User, Post
+from benefactors.models import User, Post, statusEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
                                 PostForm, RequestResetForm, ResetPasswordForm, SearchForm)
 from flask_mail import Message
@@ -129,7 +129,7 @@ def post(post_id):
     if request.method == 'POST':
         if current_user.is_authenticated:
             post.volunteer = current_user.id
-            print("post.volunteer=", post.volunteer )
+            post.status = statusEnum.taken
             db.session.commit()
             flash('You Are now volunteering for the post!', 'success')
             #it should redirect to a chat screen or message screen
@@ -138,7 +138,10 @@ def post(post_id):
             flash('You must be logged in to volunteer for a post!', 'warning')
             return redirect(url_for('login'))
     else:
-        return render_template('post.html', title=post.title, post=post)
+        curr_user_volunteering = False
+        if post.volunteer == current_user.id:
+            curr_user_volunteering = True
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required

@@ -18,7 +18,7 @@ class roleEnum(Enum):
 
 class statusEnum(Enum):
     open = 1
-    in_progress = 2
+    taken = 2
     cancelled = 3
     closed = 4
 
