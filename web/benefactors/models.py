@@ -38,7 +38,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable = False)
     # role = db.Column( db.Enum(roleEnum), nullable = False)
     user_image = db.Column(db.String(40), default='default.jpg')
-    posts = db.relationship('Post', backref='author', lazy=True)
+
+    posts = db.relationship('Post', backref='author', lazy=True, foreign_keys ='Post.user_id')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -64,6 +65,7 @@ class Post(db.Model):
     # deadline = db.Column(db.DateTime, nullable = False)
     status= db.Column(db.Enum(statusEnum), default=statusEnum.open)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    volunteer = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, default=0)
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"

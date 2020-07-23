@@ -81,7 +81,7 @@ def reset_token(token):
         return redirect(url_for('home'))
     user = User.verify_reset_token(token)
     if not user:
-        flash("That is an invalid or expired toekn", 'warning')
+        flash("That is an invalid or expired toekn", 'danger')
         return redirect(url_for('reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
@@ -99,11 +99,12 @@ def reset_token(token):
 def home():
     form = SearchForm()
     if form.validate_on_submit():
+        posts = []
         searchString = form.searchString.data
         searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-        posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
-                                                    Post.description.ilike(searchString),
-                                                    User.username.ilike(searchString))).all()
+        # posts = db.session.query(Post).join(User).filter( or_( Post.title.ilike(searchString),
+        #                                             Post.description.ilike(searchString),
+        #                                             User.username.ilike(searchString))).all()
     else:
         posts = Post.query.order_by(Post.date_posted.desc()).all()
     return render_template('home.html', posts=posts, form=form)
@@ -123,10 +124,22 @@ def create_new_post():
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post.html', title=post.title, post=post)
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            post.volunteer = current_user.id
+            print("post.volunteer=", post.volunteer )
+            db.session.commit()
+            flash('You Are now volunteering for the post!', 'success')
+            #it should redirect to a chat screen or message screen
+            return redirect(url_for('home'))
+        else:
+            flash('You must be logged in to volunteer for a post!', 'warning')
+            return redirect(url_for('login'))
+    else:
+        return render_template('post.html', title=post.title, post=post)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required

@@ -36,10 +36,10 @@ h1, h2, h3, h4, h5, h6 {
   padding: 10px 20px;
   border: 1px solid #dddddd;
   border-radius: 3px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-.content-section:hover {
+#post-display.content-section:hover {
   background: #ffffff;
   padding: 10px 20px;
   border: 1px solid #dddddd;
@@ -103,8 +103,8 @@ input.search-bar{
   font-size: 1rem;
   width: 350px;
   -webkit-transition: width 0.4s ease-in-out;
-  transition: width 0.7s ease-in-out;
-  margin: 0 0 20px 0;
+  transition: width 0.3s ease-in-out;
+  margin: 0 0 10px 0;
 }
 input:focus.search-bar{
   width: 100%;
