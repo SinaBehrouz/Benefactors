@@ -80,7 +80,7 @@ def reset_token(token):
         return redirect(url_for('home'))
     user = User.verify_reset_token(token)
     if not user:
-        flash("That is an invalid or expired toekn", 'danger')
+        flash("That is an invalid or expired toekn", 'warning')
         return redirect(url_for('reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
