@@ -156,7 +156,7 @@ def post(post_id):
         comments = db.session.query(PostComment).filter_by(post_id = post_id)
         if current_user.is_authenticated and post.volunteer == current_user.id:
             curr_user_volunteering = True
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments)
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -235,25 +235,26 @@ def create_post_comment(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id = post_id)
     curr_user_volunteering = False
+    form = PostCommentForm()
+    
     if post.volunteer == current_user.id:
         curr_user_volunteering = True
 
     if request.method == 'POST':
         if current_user.is_authenticated:
-            form = PostCommentForm()
-            # post = Post.query.get_or_404(post_id)
+            print("Test entering authenticated")
             if form.validate_on_submit():
-                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, user_id = current_user.id, post_id = post_id)
+                print("Test entering the validation")
+                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, post_id = post_id)
                 db.session.add(created_comment)
                 db.session.commit()
                 flash('Comment Submitted!', 'success')
-                return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments)
+                return redirect(url_for('post', post_id=post.id))
         else:
             flash('You must be logged in to volunteer for a post!', 'warning')
             return redirect(url_for('login'))
 
-    else:
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments)
+    return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments=comments, form=form)
 
 
 
@@ -262,7 +263,7 @@ def create_post_comment(post_id):
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
     picture_path = os.path.join(app.root_path, 'static', 'user_images', picture_name)
-    print(picture_path)
+    print(picture_path) 
     reduced_size = (125, 125)
     user_image = Image.open(picture)
     user_image.thumbnail(reduced_size)
