@@ -151,8 +151,8 @@ def post(post_id):
             return redirect(url_for('login'))
     else:
         curr_user_volunteering = False
-        if post.volunteer == current_user.id:
-            curr_user_volunteering = True
+        if current_user.is_authenticated and post.volunteer == current_user.id:
+             curr_user_volunteering = True
         return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
