@@ -154,6 +154,7 @@ def post(post_id):
     else:
         curr_user_volunteering = False
         comments = db.session.query(PostComment).filter_by(post_id = post_id)
+        form = PostCommentForm()
         if current_user.is_authenticated and post.volunteer == current_user.id:
             curr_user_volunteering = True
         return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form)
@@ -225,7 +226,6 @@ def single_post(post_id):
         #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
 
-
 #-------------------------------Post's Comment----------------------------------------
 
 # Create a new post comment on a Post
@@ -242,9 +242,9 @@ def create_post_comment(post_id):
 
     if request.method == 'POST':
         if current_user.is_authenticated:
-            print("Test entering authenticated")
+            # print("Test entering authenticated")
             if form.validate_on_submit():
-                print("Test entering the validation")
+                # print("Test entering the validation")
                 created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, post_id = post_id)
                 db.session.add(created_comment)
                 db.session.commit()
@@ -255,8 +255,6 @@ def create_post_comment(post_id):
             return redirect(url_for('login'))
 
     return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments=comments, form=form)
-
-
 
 #--------------------------------------Account----------------------------------------
 
