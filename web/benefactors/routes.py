@@ -4,7 +4,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
-from benefactors.models import User, Post, statusEnum
+from benefactors.models import User, Post, PostComment, statusEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
                                 PostForm, RequestResetForm, ResetPasswordForm, SearchForm)
 from flask_mail import Message
@@ -151,9 +151,10 @@ def post(post_id):
             return redirect(url_for('login'))
     else:
         curr_user_volunteering = False
+        comments = db.session.query(PostComment).filter_by(post_id = post_id)
         if current_user.is_authenticated and post.volunteer == current_user.id:
-             curr_user_volunteering = True
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering)
+            curr_user_volunteering = True
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -221,6 +222,13 @@ def single_post(post_id):
 
         #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
+
+#-------------------------------Post's Comment----------------------------------------
+
+# Create a new post cmment on a Post
+# @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
+# @login_required
+# def create_post_comment(post_id):
 
 
 #--------------------------------------Account----------------------------------------

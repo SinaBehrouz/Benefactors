@@ -48,6 +48,18 @@
       {% endif %}
     </div>
   </article>
+    <article class="media content-section">
+      <div class="comment-form"> 
+          <h4> Post Comments </h4>
+          {% for comment in comments %}
+          <div class="form-group form-inline">
+              <p> {{ comment.user_id.username }}</p>
+              <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+              <h4> {{ comment.comment_desc }} </h4>
+          </div>
+          {% endfor %}
+      </div>
+    </article>
   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
