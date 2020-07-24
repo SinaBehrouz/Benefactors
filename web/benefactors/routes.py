@@ -128,19 +128,31 @@ def post(post_id):
     post = Post.query.get_or_404(post_id)
     if request.method == 'POST':
         if current_user.is_authenticated:
-            post.volunteer = current_user.id
-            post.status = statusEnum.taken
+            if 'volunteer_btn' in request.form and request.form['volunteer_btn'] == 'Volunteer':
+                post.volunteer = current_user.id
+                post.status = statusEnum.taken
+                flash('You are now volunteering for the post!', 'success')
+            elif 'unvolunteer_btn' in request.form and request.form['unvolunteer_btn'] == 'Unvolunteer':
+                post.volunteer = 0 #0 referes to NULL User which means no volunteers yet!
+                post.status = statusEnum.open
+                flash('You are no longer are volunteering for the post!', 'success')
+            elif 'closePost_btn' in request.form and request.form['closePost_btn'] == 'Close':
+                post.status = statusEnum.closed
+                flash('Your post is closed!', 'success')
+            elif 'openPost_btn' in request.form and request.form['openPost_btn'] == 'Open':
+                post.status = statusEnum.open
+                flash('Your post is opened!', 'success')
+            else:
+                abort(404)
             db.session.commit()
-            flash('You Are now volunteering for the post!', 'success')
-            #it should redirect to a chat screen or message screen
             return redirect(url_for('home'))
         else:
-            flash('You must be logged in to volunteer for a post!', 'warning')
+            flash('You must be logged in first!', 'warning')
             return redirect(url_for('login'))
     else:
         curr_user_volunteering = False
-        if post.volunteer == current_user.id:
-            curr_user_volunteering = True
+        if current_user.is_authenticated and post.volunteer == current_user.id:
+             curr_user_volunteering = True
         return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
