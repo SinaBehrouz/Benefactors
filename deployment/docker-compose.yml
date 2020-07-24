@@ -1,26 +1,39 @@
 version: '3.7'
 
 services:
-  # Gunicorn web server
+  # Gunicorn application server
   web:
     build:
       context: ../web
       dockerfile: Dockerfile
-    command: gunicorn --bind 0.0.0.0:8080 app:app
-    ports:
-      - 8080:8080
+    command: gunicorn --bind 0.0.0.0:5000 app:app
+    volumes:
+      - static_volume:/home/app/web/benefactors/static
+    expose:
+      - 5000
     env_file:
       - ./.env
     depends_on:
       - db
 
-  # database server
+  # Postgres DB
   db:
-    image: postgres:12-alpine
+    image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.env.db
 
+  # Nginx as reverse proxy and serves static files.
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/benefactors/static
+    ports:
+      - 8080:80
+    depends_on:
+      - web
+
 volumes:
   postgres_data:
+  static_volume:
