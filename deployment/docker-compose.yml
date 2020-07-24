@@ -6,7 +6,7 @@ services:
     build:
       context: ../web
       dockerfile: Dockerfile
-    command: gunicorn --bind 0.0.0.0:8080 app:app
+    command: gunicorn --bind 0.0.0.0:5000 app:app
     volumes:
       - static_volume:/home/app/web/benefactors/static
     expose:
@@ -36,3 +36,4 @@ services:
 
 volumes:
   postgres_data:
+  static_volume:
