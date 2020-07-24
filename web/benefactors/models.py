@@ -40,6 +40,7 @@ class User(db.Model, UserMixin):
     user_image = db.Column(db.String(40), default='default.jpg')
 
     posts = db.relationship('Post', backref='author', lazy=True, foreign_keys ='Post.user_id')
+    comments = db.relationship('PostComment', backref='cmt_author', lazy=True, foreign_keys ='PostComment.user_id')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)

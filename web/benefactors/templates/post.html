@@ -48,18 +48,31 @@
       {% endif %}
     </div>
   </article>
-    <article class="media content-section">
-      <div class="comment-form"> 
-          <h4> Post Comments </h4>
-          {% for comment in comments %}
-          <div class="form-group form-inline">
-              <p> {{ comment.user_id.username }}</p>
-              <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
-              <h4> {{ comment.comment_desc }} </h4>
+  <article class="media content-section">
+    <div class="comments-area"> 
+        <h4> Comments </h4>
+        <div class="comment-list">
+        {% for comment in comments %}
+          <div class="single-comment justify-content-between d-flex">
+            <p class="article-title"> {{ comment.cmt_author.username }}</p>
+            <small class="text-muted date">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+            <h2 class = "article-content"> {{ comment.comment_desc }} </h2>
           </div>
-          {% endfor %}
-      </div>
-    </article>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="article-metadata">
+      <h4> Leave a Comment </h4> 
+      <form method = "POST">
+        <div class="form-group form-inline">
+            <textarea name="message" class="form-control" rows="7" name="message" placeholder="Write your comments here" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Message'" required=""></textarea>
+            <input class="btn btn-primary" type="submit" value="Submit Comment">
+        </div>
+      </form>
+    </div>
+  </article>
+
   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
