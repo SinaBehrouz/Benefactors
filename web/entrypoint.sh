@@ -11,6 +11,10 @@ then
     echo "PostgreSQL started"
 fi
 
+echo "Creating Database!"
 python app.py create_db
+
+echo "Seeding Database!"
+python app.py seed_db
 
 exec "$@"
