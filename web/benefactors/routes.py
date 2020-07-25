@@ -4,10 +4,11 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
-from benefactors.models import User, Post
+from benefactors.models import User, Post, PostComment, statusEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
-                                PostForm, RequestResetForm, ResetPasswordForm)
+                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
 from flask_mail import Message
+from sqlalchemy import or_
 #-------------------------------------------Login/Logout-------------------------------------------
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -92,11 +93,20 @@ def reset_token(token):
 
 #-----------------------------------------------Home-------------------------------------------------
 
-@app.route("/")
-@app.route("/home")
+@app.route("/", methods=['GET', 'POST'])
+@app.route("/home", methods=['GET', 'POST'])
 def home():
-    posts = Post.query.order_by(Post.date_posted.desc())
-    return render_template('home.html', posts=posts)
+    form = SearchForm()
+    if form.validate_on_submit():
+        posts = []
+        searchString = form.searchString.data
+        searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
+        posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
+                                                     Post.description.ilike(searchString),
+                                                     User.username.ilike(searchString))).all()
+    else:
+        posts = Post.query.order_by(Post.date_posted.desc()).all()
+    return render_template('home.html', posts=posts, form=form)
 
 #-----------------------------------------------Posts----------------------------------------------
 
@@ -113,10 +123,41 @@ def create_new_post():
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('post.html', title=post.title, post=post)
+    comments = db.session.query(PostComment).filter_by(post_id = post_id)
+
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            if 'volunteer_btn' in request.form and request.form['volunteer_btn'] == 'Volunteer':
+                post.volunteer = current_user.id
+                post.status = statusEnum.taken
+                flash('You are now volunteering for the post!', 'success')
+            elif 'unvolunteer_btn' in request.form and request.form['unvolunteer_btn'] == 'Unvolunteer':
+                post.volunteer = 0 #0 referes to NULL User which means no volunteers yet!
+                post.status = statusEnum.open
+                flash('You are no longer are volunteering for the post!', 'success')
+            elif 'closePost_btn' in request.form and request.form['closePost_btn'] == 'Close':
+                post.status = statusEnum.closed
+                flash('Your post is closed!', 'success')
+            elif 'openPost_btn' in request.form and request.form['openPost_btn'] == 'Open':
+                post.status = statusEnum.open
+                flash('Your post is opened!', 'success')
+            else:
+                abort(404)
+            db.session.commit()
+            return redirect(url_for('home'))
+        else:
+            flash('You must be logged in first!', 'warning')
+            return redirect(url_for('login'))
+    else:
+        curr_user_volunteering = False
+        comments = db.session.query(PostComment).filter_by(post_id = post_id)
+        form = PostCommentForm()
+        if current_user.is_authenticated and post.volunteer == current_user.id:
+            curr_user_volunteering = True
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -185,13 +226,42 @@ def single_post(post_id):
         #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
 
+#-------------------------------Post's Comment----------------------------------------
+
+# Create a new post comment on a Post
+@app.route("/post/<int:post_id>/comment/", methods=['GET', 'POST'])
+@login_required
+def create_post_comment(post_id):
+    post = Post.query.get_or_404(post_id)
+    comments = db.session.query(PostComment).filter_by(post_id = post_id)
+    curr_user_volunteering = False
+    form = PostCommentForm()
+    
+    if post.volunteer == current_user.id:
+        curr_user_volunteering = True
+
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            # print("Test entering authenticated")
+            if form.validate_on_submit():
+                # print("Test entering the validation")
+                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, post_id = post_id)
+                db.session.add(created_comment)
+                db.session.commit()
+                flash('Comment Submitted!', 'success')
+                return redirect(url_for('post', post_id=post.id))
+        else:
+            flash('You must be logged in to volunteer for a post!', 'warning')
+            return redirect(url_for('login'))
+
+    return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments=comments, form=form)
 
 #--------------------------------------Account----------------------------------------
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
     picture_path = os.path.join(app.root_path, 'static', 'user_images', picture_name)
-    print(picture_path)
+    print(picture_path) 
     reduced_size = (125, 125)
     user_image = Image.open(picture)
     user_image.thumbnail(reduced_size)
@@ -199,9 +269,9 @@ def save_image(picture):
     return picture_name
 
 
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/account/edit", methods=['GET', 'POST'])
 @login_required
-def account():
+def edit_account():
     form = AccountUpdateForm()
     if form.validate_on_submit():
         if form.picture.data:
@@ -215,7 +285,7 @@ def account():
         current_user.postal_code = form.postal_code.data
         db.session.commit()
         flash('Account updated!', 'success')
-        return redirect(url_for('account'))
+        return redirect(url_for('edit_account'))
     if request.method == 'GET':
         form.username.data = current_user.username
         form.first_name.data = current_user.first_name
@@ -224,4 +294,12 @@ def account():
         form.phone_number.data = current_user.phone_number
         form.postal_code.data = current_user.postal_code
     user_image = url_for('static', filename='user_images/' + current_user.user_image)
-    return render_template('profile.html', title='Account', user_image=user_image, form=form)
+    return render_template('edit_account.html', title='Edit Account', user_image=user_image, form=form)
+
+@app.route("/account", methods=['GET'])
+@login_required
+def get_account():
+    user = User.query.filter_by(email = current_user.email).first()
+    to_do = Post.query.filter_by(volunteer = current_user.id)
+    # to-do make sure only account owner can access this
+    return render_template('account.html', user=user,to_do=to_do)

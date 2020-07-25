@@ -1,15 +1,44 @@
 {% extends "layout.html" %}
 {% block content %}
+<div class="search-section">
+<form method="POST" action="" class="search-bar">
+    {{ form.hidden_tag() }}
+      <div>
+            {% if form.searchString.errors %}
+                {{ form.searchString(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.searchString.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="Search by Username, Title, Description...") }}
+            {% endif %}
+        </div>
+  </div>
+
     {% for post in posts %}
-        <article class="media content-section">
+        <article class="media content-section" id="post-display">
             <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
             <div class="media-body">
                 <div class="article-metadata">
                     <a class="mr-2" href="#">{{ post.author.username }}</a>
-                    <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+                    <div>
+                      <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+                      <small class="text-muted">  |  </small>
+                      {% if post.status.name == "open" %}
+                      <small class="text-muted" style="color:#9cd28a!important;">{{ post.status.name }}</small>
+                      {% elif post.status.name == "taken" %}
+                      <small class="text-muted" style="color:#ffa601!important;">{{ post.status.name }}</small>
+                      {% elif post.status.name == "cancelled" %}
+                      <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+                      {% elif post.status.name == "closed"%}
+                      <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+                      {% endif %}
+                    </div>
                 </div>
-                <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
-                <p class="article-content">{{ post.content }}</p>
+                <h3><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+                <p class="article-content">{{ post.description[:[300,post.description|length]|min] }}</p>
             </div>
         </article>
     {% endfor %}

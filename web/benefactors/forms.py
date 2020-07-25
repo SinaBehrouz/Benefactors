@@ -20,6 +20,7 @@ class RequestResetForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is None:
             raise ValidationError('There is no account associated with the email.')
+
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=60)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -51,7 +52,6 @@ class SignUpForm(FlaskForm):
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=100)])
     description = TextAreaField('Description', validators=[DataRequired()])
-    # deadline = DateField('Deadline', format="%Y-%m-%d")
     submit = SubmitField('Post')
 
 
@@ -77,3 +77,14 @@ class AccountUpdateForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('There is an existing account associated with this email.')
+
+class SearchForm(FlaskForm):
+    searchString = StringField('Search Title', validators=[Length(max=100)])
+
+class PostCommentForm(FlaskForm):
+    comment_desc = TextAreaField('Comment', validators=[DataRequired()])
+    submit_comment = SubmitField('Submit Comment')
+
+    def validate_commentdesc(self, comment_desc):
+        if comment_desc.strip() == "":
+            raise ValidationError('Comment cannot be empty')

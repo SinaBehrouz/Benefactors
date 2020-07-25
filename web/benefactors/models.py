@@ -18,7 +18,7 @@ class roleEnum(Enum):
 
 class statusEnum(Enum):
     open = 1
-    in_progress = 2
+    taken = 2
     cancelled = 3
     closed = 4
 
@@ -38,7 +38,9 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable = False)
     # role = db.Column( db.Enum(roleEnum), nullable = False)
     user_image = db.Column(db.String(40), default='default.jpg')
-    posts = db.relationship('Post', backref='author', lazy=True)
+
+    posts = db.relationship('Post', backref='author', lazy=True, foreign_keys ='Post.user_id')
+    comments = db.relationship('PostComment', backref='cmt_author', lazy=True, foreign_keys ='PostComment.user_id')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -64,6 +66,17 @@ class Post(db.Model):
     # deadline = db.Column(db.DateTime, nullable = False)
     status= db.Column(db.Enum(statusEnum), default=statusEnum.open)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    volunteer = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, default=0)
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
+
+class PostComment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    comment_desc = db.Column(db.Text)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+
+    # def __repr__(self):
+    #     return f"Post('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"

@@ -5,18 +5,92 @@
     <div class="media-body">
       <div class="article-metadata">
         <a class="mr-2" href="#">{{ post.author.username }}</a>
-        <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+        <div>
+          <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+          <small class="text-muted">  |  </small>
+          {% if post.status.name == "open" %}
+          <small class="text-muted" style="color:#9cd28a!important;">{{ post.status.name }}</small>
+          {% elif post.status.name == "taken" %}
+          <small class="text-muted" style="color:#ffa601!important;">{{ post.status.name }}</small>
+          {% elif post.status.name == "cancelled" %}
+          <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+          {% elif post.status.name == "closed"%}
+          <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+          {% endif %}
+        </div>
       </div>
-      <h2 class="article-title">{{ post.title }}</h2>
-      <p class="article-content">{{ post.content }}</p>
+      <div style = "display: flex; justify-content: space-between;">
+          <h3><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h3>
+          <form action="" method="POST">
+            {% if post.status.name == 'open' %}
+            <input class="btn btn-danger btn-sm mt-1 mb-1" type="submit" name="closePost_btn" value='Close'>
+            {% elif post.status.name == 'closed' %}
+            <input class="btn btn-success btn-sm mt-1 mb-1" type="submit" name="openPost_btn" value="Open">
+            {% endif %}
+          </form>
+      </div>
+      <p class="article-content">{{ post.description }}</p>
       {% if post.author == current_user %}
         <div>
           <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_post', post_id=post.id) }}">Update</a>
           <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
         </div>
+      {% else %}
+        <div>
+          <form action="" method="POST">
+            {% if curr_user_volunteering %}
+              <input class="btn btn-primary btn-sm mt-1 mb-1" type="submit" name="unvolunteer_btn" value="Unvolunteer">
+            {% else %}
+              <input class="btn btn-primary btn-sm mt-1 mb-1" type="submit" name="volunteer_btn" value="Volunteer">
+            {%endif%}
+          </form>
+        </div>
       {% endif %}
     </div>
   </article>
+
+  <div class="content-section">
+    <h3 class="comments-title">Comments</h3>
+    {% for comment in comments %}
+    <article class="media content-section" id="comment-display">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-20" href="#">{{ comment.cmt_author.username }}</a>
+                    <div>
+                      <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                  </div>
+                <p class="article-content" id="comment-desc-display">{{ comment.comment_desc }}</p>
+            </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="content-section">
+    <h4> Leave a Comment </h4> 
+    <form action="{{ url_for('create_post_comment', post_id=post.id) }}" method="POST">
+      {{ form.hidden_tag() }}
+      <fieldset class="form-group">
+        <div class ="form-group required">
+              {{ form.comment_desc.label(class="form-control-label") }}
+              {% if form.comment_desc.errors %}
+                  {{ form.comment_desc(class="form-control form-control-lg is-invalid") }}
+                  <div class="invalid-feedback">
+                      {% for error in form.comment_desc.errors %}
+                          <span>{{ error }}</span>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  {{ form.comment_desc(class="form-control form-control-lg") }}
+              {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.submit_comment(class="btn btn-outline-info") }}
+        </div>
+      </fieldset>
+    </form>
+  </div>
+
   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
