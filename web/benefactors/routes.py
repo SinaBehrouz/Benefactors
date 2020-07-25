@@ -4,9 +4,9 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
-from benefactors.models import User, Post, statusEnum
+from benefactors.models import User, Post, PostComment, statusEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
-                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm)
+                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
 from flask_mail import Message
 from sqlalchemy import or_
 #-------------------------------------------Login/Logout-------------------------------------------
@@ -126,6 +126,8 @@ def create_new_post():
 @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
+    comments = db.session.query(PostComment).filter_by(post_id = post_id)
+
     if request.method == 'POST':
         if current_user.is_authenticated:
             if 'volunteer_btn' in request.form and request.form['volunteer_btn'] == 'Volunteer':
@@ -151,9 +153,11 @@ def post(post_id):
             return redirect(url_for('login'))
     else:
         curr_user_volunteering = False
+        comments = db.session.query(PostComment).filter_by(post_id = post_id)
+        form = PostCommentForm()
         if current_user.is_authenticated and post.volunteer == current_user.id:
-             curr_user_volunteering = True
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering)
+            curr_user_volunteering = True
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form)
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -222,13 +226,42 @@ def single_post(post_id):
         #@todo: are we actually deleting the post or changing the status to closed or deleted?
         return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
 
+#-------------------------------Post's Comment----------------------------------------
+
+# Create a new post comment on a Post
+@app.route("/post/<int:post_id>/comment/", methods=['GET', 'POST'])
+@login_required
+def create_post_comment(post_id):
+    post = Post.query.get_or_404(post_id)
+    comments = db.session.query(PostComment).filter_by(post_id = post_id)
+    curr_user_volunteering = False
+    form = PostCommentForm()
+    
+    if post.volunteer == current_user.id:
+        curr_user_volunteering = True
+
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            # print("Test entering authenticated")
+            if form.validate_on_submit():
+                # print("Test entering the validation")
+                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, post_id = post_id)
+                db.session.add(created_comment)
+                db.session.commit()
+                flash('Comment Submitted!', 'success')
+                return redirect(url_for('post', post_id=post.id))
+        else:
+            flash('You must be logged in to volunteer for a post!', 'warning')
+            return redirect(url_for('login'))
+
+    return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments=comments, form=form)
 
 #--------------------------------------Account----------------------------------------
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
     picture_path = os.path.join(app.root_path, 'static', 'user_images', picture_name)
-    print(picture_path)
+    print(picture_path) 
     reduced_size = (125, 125)
     user_image = Image.open(picture)
     user_image.thumbnail(reduced_size)

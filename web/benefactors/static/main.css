@@ -112,3 +112,12 @@ input:focus.search-bar{
 input:hover.search-bar{
   width: 100%;
 }
+
+#comment-display {
+  border: none;
+}
+
+#comment-desc-display{
+  padding-top: 8px;
+  font-weight: 500;
+}

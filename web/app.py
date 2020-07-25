@@ -1,6 +1,6 @@
 from flask.cli import FlaskGroup
 from benefactors import app, db
-from benefactors.models import User, Post
+from benefactors.models import User, Post, PostComment
 
 cli = FlaskGroup(app)
 
@@ -24,6 +24,11 @@ def seed_db():
     db.session.add(Post(title="Please Help Get My Groceires", description="Would really appreciate someone picking up some essential groceries. Eggs, bread, milk, that kind of thing.", user_id=2, volunteer=1))
     db.session.add(Post(title="Need to Get My Medications", description="I'm a little scared to step out to get meds from my local pharmacy, would really appreciate if someone could pick them up for me", user_id=2, volunteer=1))
     db.session.add(Post(title="SpaceX, Hire me", description="Elon, if you see this, hire me.", user_id=1))
+
+    db.session.commit()
+
+    db.session.add(PostComment(comment_desc = "This is a hello test comment from create DB", user_id=1, post_id = 2))
+    db.session.add(PostComment(comment_desc = "This is the second comment", user_id=1, post_id = 2))
 
     db.session.commit()
 

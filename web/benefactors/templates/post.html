@@ -48,6 +48,49 @@
       {% endif %}
     </div>
   </article>
+
+  <div class="content-section">
+    <h3 class="comments-title">Comments</h3>
+    {% for comment in comments %}
+    <article class="media content-section" id="comment-display">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-20" href="#">{{ comment.cmt_author.username }}</a>
+                    <div>
+                      <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                  </div>
+                <p class="article-content" id="comment-desc-display">{{ comment.comment_desc }}</p>
+            </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="content-section">
+    <h4> Leave a Comment </h4> 
+    <form action="{{ url_for('create_post_comment', post_id=post.id) }}" method="POST">
+      {{ form.hidden_tag() }}
+      <fieldset class="form-group">
+        <div class ="form-group required">
+              {{ form.comment_desc.label(class="form-control-label") }}
+              {% if form.comment_desc.errors %}
+                  {{ form.comment_desc(class="form-control form-control-lg is-invalid") }}
+                  <div class="invalid-feedback">
+                      {% for error in form.comment_desc.errors %}
+                          <span>{{ error }}</span>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  {{ form.comment_desc(class="form-control form-control-lg") }}
+              {% endif %}
+        </div>
+        <div class="form-group">
+          {{ form.submit_comment(class="btn btn-outline-info") }}
+        </div>
+      </fieldset>
+    </form>
+  </div>
+
   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
