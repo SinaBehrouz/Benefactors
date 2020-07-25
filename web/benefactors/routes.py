@@ -269,8 +269,4 @@ def get_account():
     user = User.query.filter_by(email = current_user.email).first()
     to_do = Post.query.filter_by(volunteer = current_user.id)
     # to-do make sure only account owner can access this
-    # get all user basic information 
-    # get all user posts (also link them)
-    # get all posts a user volunteered for - to do after sina stuff merged in
-    # add edit profile link 
     return render_template('account.html', user=user,to_do=to_do)
