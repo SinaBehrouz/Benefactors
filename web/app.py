@@ -21,8 +21,8 @@ def seed_db():
 
     db.session.add(Post(title="Tesla", description="A car company", user_id=1))
     db.session.add(Post(title="CMPT-470 textbook", description="John Leak (c. 1892 – 1972) was an Australian recipient of the Victoria Cross, the highest award for gallantry in battle that could be awarded at that time to a member of the Australian armed forces. Leak enlisted in early 1915, and served with the 9th Battalion during the Gallipoli campaign. Along with his unit, he transferred to the Western Front, where he participated in the Battle of Pozières in July 1916. For his actions on 23 July during this battle he was awarded the Victoria Cross. He was seriously wounded at the Battle of Mouquet Farm in August. Suffering from the effects of his service, Leak was convicted of desertion in November 1917, but his sentence was ultimately suspended. In early March 1918 he was gassed, and saw no further combat before the Armistice of 11 November 1918. He returned to Australia and was discharged in 1919. After various jobs, Leak settled in South Australia in 1937 and died in 1972", user_id=1))
-    db.session.add(Post(title="CMPT-454 textbook", description="A CMPT book", user_id=2))
-    db.session.add(Post(title="Physics", description="A Book", user_id=2))
+    db.session.add(Post(title="CMPT-454 textbook", description="A CMPT book", user_id=2, volunteer=1))
+    db.session.add(Post(title="Physics", description="A Book", user_id=2, volunteer=1))
     db.session.add(Post(title="SpaceX", description="A space exploration company", user_id=1))
 
     db.session.commit()
