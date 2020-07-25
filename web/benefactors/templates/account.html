@@ -1,0 +1,29 @@
+<!--Note to self, to-do: Need to format and clean up. This is only functional, not clean and does not have proper styling-->
+{% extends "layout.html" %}
+{% block content %}
+<article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + user.user_image) }}">
+    <div class="media-body">
+        <h2 class="account-heading">{{ user.first_name }} {{ user.last_name }} </h2>
+        <p class="user-info"><b>Username: </b>{{ user.username }}</p>
+        <p class="user-info"><b>Email: </b> {{ user.email }}</p>
+        <p class="user-info"><b>Phone Number: </b>{{ user.phone_number }}</p>
+        <p class="user-info"><b>Postal Code: </b>{{ user.postal_code }}</p>
+        <!--<a class="nav-item nav-link" href="{{ url_for('edit_account') }}"><button type="button" class="btn btn-danger btn-sm m-1">Edit Profile</button></a>-->
+        <a class="nav-item nav-link" href="{{ url_for('edit_account') }}"><button> Edit Profile </button>
+
+        <div class="user-posts">
+            <h4 class="Posts Title"> My Posts </h4>
+            {% for post in user.posts %}
+            <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
+            {% endfor %}
+        </div>
+        <div class="user-volunteer-posts">
+            <h4 class="Volunteer Posts Title"> My To-Do List </h4>
+            {% for post in to_do %}
+            <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
+            {% endfor %}
+        </div>
+    </div>
+</article>
+{% endblock content %}
