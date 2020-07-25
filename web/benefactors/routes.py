@@ -236,9 +236,9 @@ def save_image(picture):
     return picture_name
 
 
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/account/edit", methods=['GET', 'POST'])
 @login_required
-def account():
+def edit_account():
     form = AccountUpdateForm()
     if form.validate_on_submit():
         if form.picture.data:
@@ -252,7 +252,7 @@ def account():
         current_user.postal_code = form.postal_code.data
         db.session.commit()
         flash('Account updated!', 'success')
-        return redirect(url_for('account'))
+        return redirect(url_for('edit_account'))
     if request.method == 'GET':
         form.username.data = current_user.username
         form.first_name.data = current_user.first_name
@@ -261,4 +261,12 @@ def account():
         form.phone_number.data = current_user.phone_number
         form.postal_code.data = current_user.postal_code
     user_image = url_for('static', filename='user_images/' + current_user.user_image)
-    return render_template('profile.html', title='Account', user_image=user_image, form=form)
+    return render_template('edit_account.html', title='Edit Account', user_image=user_image, form=form)
+
+@app.route("/account", methods=['GET'])
+@login_required
+def get_account():
+    user = User.query.filter_by(email = current_user.email).first()
+    to_do = Post.query.filter_by(volunteer = current_user.id)
+    # to-do make sure only account owner can access this
+    return render_template('account.html', user=user,to_do=to_do)
