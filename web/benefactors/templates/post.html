@@ -67,7 +67,7 @@
   </div>
 
   <div class="content-section">
-    <h4> Leave a Comment </h4> 
+    <h4> Leave a Comment </h4>
     <form action="{{ url_for('create_post_comment', post_id=post.id) }}" method="POST">
       {{ form.hidden_tag() }}
       <fieldset class="form-group">
@@ -90,6 +90,30 @@
       </fieldset>
     </form>
   </div>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&libraries=places&callback=initAutocomplete" async defer></script>
+  <script>
+    let autocomplete;
+    function initAutocomplete(){
+      autocomplete = new google.maps.places.Autocomplete(
+      document.getElementById('autocomplete'), {
+        types: ['establishment'],
+        fields: ['place_id', 'geometry', 'name']
+      });
+    autocomplete.addListener('place_changed', onPlaceChanged);
+    }
+    function onPlaceChanged(){
+      alert("Yeah Hoei")
+    }
+  </script>
+    <h3 class="comments-title" style = "grid-row: 1;"> Relevant locations have been displayed</h3>
+    <input
+      id="autocomplete"
+      class="controls"
+      type="text"
+      placeholder="Search Items based on Locations"
+    />
+    <!-- <div id="map"></div> -->
+
 
   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
