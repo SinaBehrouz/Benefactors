@@ -126,8 +126,10 @@ def create_new_post():
 @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    comments = db.session.query(PostComment).filter_by(post_id = post_id)
-
+    comments = db.session.query(PostComment).filter_by(post_id=post_id)
+    postal_code = post.author.postal_code
+    tag = "pharmacy" #@todo get this from database
+    a= f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{tag}'+near" + postal_code
     if request.method == 'POST':
         if current_user.is_authenticated:
             if 'volunteer_btn' in request.form and request.form['volunteer_btn'] == 'Volunteer':
@@ -157,7 +159,7 @@ def post(post_id):
         form = PostCommentForm()
         if current_user.is_authenticated and post.volunteer == current_user.id:
             curr_user_volunteering = True
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form)
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form, a=a )
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -236,7 +238,7 @@ def create_post_comment(post_id):
     comments = db.session.query(PostComment).filter_by(post_id = post_id)
     curr_user_volunteering = False
     form = PostCommentForm()
-    
+
     if post.volunteer == current_user.id:
         curr_user_volunteering = True
 
@@ -261,7 +263,7 @@ def create_post_comment(post_id):
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
     picture_path = os.path.join(app.root_path, 'static', 'user_images', picture_name)
-    print(picture_path) 
+    print(picture_path)
     reduced_size = (125, 125)
     user_image = Image.open(picture)
     user_image.thumbnail(reduced_size)
