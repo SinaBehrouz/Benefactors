@@ -106,6 +106,7 @@ def reset_token(token):
 def home():
     form = SearchForm()
     if form.validate_on_submit():
+        posts = []
         searchString = form.searchString.data
         searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
         posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
@@ -132,46 +133,29 @@ def create_new_post():
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
 
+# Function to get nearby location on Google map based on post author's postal code and post category
+def get_nearby_locations(post):
+    # TODO: Add Google Maps logic here!
+
+    postal_code = post.author.postal_code
+    # TODO: Add categories to Post model
+    # category = post.category
+    category = "pharmacy"  # Hard coded for testing
+    google_map = f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{category}'+near" + postal_code
+    return google_map
+
+
+# Get specific post
 @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id=post_id)
-    postal_code = post.author.postal_code
-    tag = "pharmacy"  # @todo get this from database
-    a = f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{tag}'+near" + postal_code
-    if request.method == 'POST':
-        if current_user.is_authenticated:
-            if 'volunteer_btn' in request.form and request.form['volunteer_btn'] == 'Volunteer':
-                post.volunteer = current_user.id
-                post.status = statusEnum.taken
-                flash('You are now volunteering for the post!', 'success')
-            elif 'unvolunteer_btn' in request.form and request.form['unvolunteer_btn'] == 'Unvolunteer':
-                post.volunteer = 0  # 0 referes to NULL User which means no volunteers yet!
-                post.status = statusEnum.open
-                flash('You are no longer are volunteering for the post!', 'success')
-            elif 'closePost_btn' in request.form and request.form['closePost_btn'] == 'Close':
-                post.status = statusEnum.closed
-                flash('Your post is closed!', 'success')
-            elif 'openPost_btn' in request.form and request.form['openPost_btn'] == 'Open':
-                post.status = statusEnum.open
-                flash('Your post is opened!', 'success')
-            else:
-                abort(404)
-            db.session.commit()
-            return redirect(url_for('home'))
-        else:
-            flash('You must be logged in first!', 'warning')
-            return redirect(url_for('login'))
-    else:
-        curr_user_volunteering = False
-        comments = db.session.query(PostComment).filter_by(post_id=post_id)
-        form = PostCommentForm()
-        if current_user.is_authenticated and post.volunteer == current_user.id:
-            curr_user_volunteering = True
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering,
-                               comments=comments, form=form, a=a)
+    form = PostCommentForm()
+    nearby_locations = get_nearby_locations(post)
+    return render_template('post.html', post=post, comments=comments, form=form, a=nearby_locations)
 
 
+# Update title/content of a specific post.
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_post(post_id):
@@ -191,6 +175,70 @@ def update_post(post_id):
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
 
 
+# Update post status to open
+@app.route("/post/<int:post_id>/status/open", methods=['GET', 'POST'])
+@login_required
+def open_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+
+    post.status = statusEnum.OPEN
+    db.session.commit()
+    flash('Your post is now open!', 'success')
+    return redirect(url_for('post', post_id=post.id))
+
+
+# Update post status to close
+@app.route("/post/<int:post_id>/status/close", methods=['GET', 'POST'])
+@login_required
+def close_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+
+    post.status = statusEnum.CLOSED
+    db.session.commit()
+    flash('Your post is closed!', 'success')
+    return redirect(url_for('post', post_id=post.id))
+
+
+# Assign volunteer
+@app.route("/post/<int:post_id>/volunteer", methods=['GET', 'POST'])
+@login_required
+def volunteer(post_id):
+    post = Post.query.get_or_404(post_id)
+    # This check is precautionary, we are already checking user in post.html.
+    if post.author == current_user:
+        flash("You can't volunteer for your own post!", 'warning')
+    elif post.status != statusEnum.OPEN:
+        flash('Post must be open to volunteer!', 'warning')
+    else:
+        post.volunteer = current_user.id
+        post.status = statusEnum.TAKEN
+        db.session.commit()
+        flash('You are now volunteering for the post!', 'success')
+    return redirect(url_for('post', post_id=post.id))
+
+
+# Remove volunteer
+@app.route("/post/<int:post_id>/unvolunteer", methods=['GET', 'POST'])
+@login_required
+def unvolunteer(post_id):
+    post = Post.query.get_or_404(post_id)
+    # This check is precautionary, we are already checking user in post.html.
+    if post.volunteer != current_user.id:
+        flash('You never volunteered for this post!', 'danger')
+    else:
+        post.volunteer = 0
+        post.status = statusEnum.OPEN
+        db.session.commit()
+        flash('You are no longer volunteering for the post!', 'success')
+
+    return redirect(url_for('post', post_id=post.id))
+
+
+# Delete post
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
 def delete_post(post_id):
@@ -203,35 +251,60 @@ def delete_post(post_id):
     return redirect(url_for('home'))
 
 
-# -------------------------------Post's Comment----------------------------------------
+# -----------------------------------------------Comments----------------------------------------------
 
-# Create a new post comment on a Post
-@app.route("/post/<int:post_id>/comment/", methods=['GET', 'POST'])
+# Create a new comment on a post
+@app.route("/post/<int:post_id>/comments/new", methods=['GET', 'POST'])
 @login_required
-def create_post_comment(post_id):
+def create_new_comment(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id=post_id)
-    curr_user_volunteering = False
     form = PostCommentForm()
 
-    if post.volunteer == current_user.id:
-        curr_user_volunteering = True
-
     if request.method == 'POST':
-        if current_user.is_authenticated:
-            if form.validate_on_submit():
-                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user,
-                                              post_id=post_id)
-                db.session.add(created_comment)
-                db.session.commit()
-                flash('Comment Submitted!', 'success')
-                return redirect(url_for('post', post_id=post.id))
-        else:
-            flash('You must be logged in to volunteer for a post!', 'warning')
-            return redirect(url_for('login'))
+        if form.validate_on_submit():
+            created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, post_id=post_id)
+            db.session.add(created_comment)
+            db.session.commit()
+            flash('Comment added!', 'success')
+            return redirect(url_for('post', post_id=post.id))
 
-    return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering,
-                           comments=comments, form=form)
+    return render_template('post.html', post=post, comments=comments, form=form)
+
+
+# Update comment
+# NOTE: Backend logic is complete but front end needs work in post.html.
+# Feel free to make changes in update_comment if you are working in frontend.
+@app.route("/post/<int:post_id>/comments/<int:comment_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_comment(post_id, comment_id):
+    form = PostCommentForm()
+    post = Post.query.get_or_404(post_id)
+    comment = PostComment.query.get_or_404(comment_id)
+
+    if comment.cmt_author != current_user:
+        abort(403)
+    if form.validate_on_submit():
+        comment.comment_desc = form.comment_desc.data
+        db.session.commit()
+        flash('Comment updated!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    if request.method == 'GET':
+        form.comment_desc.data = comment.comment_desc
+    return render_template('post.html', title=post.title, post=post, comments=comment, form=form)
+
+
+# Delete comment
+@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete", methods=['GET', 'POST'])
+@login_required
+def delete_comment(post_id, comment_id):
+    comment = PostComment.query.get_or_404(comment_id)
+    if comment.cmt_author != current_user:
+        abort(403)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted!', 'success')
+    return redirect(url_for('post', post_id=post_id))
 
 
 # --------------------------------------Account----------------------------------------

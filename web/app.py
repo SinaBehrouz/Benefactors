@@ -14,8 +14,8 @@ def create_db():
 
 @cli.command("seed_db")
 def seed_db():
-    #user: 1@1.com
-    #password: 123123123
+    # user: 1@1.com
+    # password: 123123123
 
     db.session.add(User(id =0, username="NULL", first_name="NULL", last_name="NULL", email="NULL", phone_number="NULL", postal_code="NULL", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     db.session.add(User(username="sina123", first_name="Sina", last_name="Smith", email="1@1.com", phone_number="1111", postal_code="v3e3b5", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
@@ -29,8 +29,8 @@ def seed_db():
 
     db.session.commit()
 
-    db.session.add(PostComment(comment_desc = "This is a hello test comment from create DB", user_id=1, post_id = 2))
-    db.session.add(PostComment(comment_desc = "This is the second comment", user_id=1, post_id = 2))
+    db.session.add(PostComment(comment_desc="Thappis is a hello test comment from create DB", user_id=1, post_id=2))
+    db.session.add(PostComment(comment_desc="This is the second comment", user_id=1, post_id=2))
 
     db.session.commit()
 
