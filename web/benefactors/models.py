@@ -12,10 +12,10 @@ class genderEnum(Enum):
 
 
 class statusEnum(Enum):
-    open = 1
-    taken = 2
-    cancelled = 3
-    closed = 4
+    OPEN = 1
+    TAKEN = 2
+    CANCELLED = 3
+    CLOSED = 4
 
 
 @login_manager.user_loader
@@ -60,7 +60,7 @@ class Post(db.Model):
     description = db.Column(db.Text)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     # deadline = db.Column(db.DateTime, nullable = False)
-    status = db.Column(db.Enum(statusEnum), default=statusEnum.open)
+    status = db.Column(db.Enum(statusEnum), default=statusEnum.OPEN)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     volunteer = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, default=0)
 
