@@ -70,7 +70,7 @@ class Post(db.Model):
 
 class PostComment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    comment_desc = db.Column(db.Text)
+    comment_desc = db.Column(db.Text(500), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
