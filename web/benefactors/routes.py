@@ -6,10 +6,12 @@ from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
 from benefactors.models import User, Post, PostComment, statusEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
-                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
+                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
 from flask_mail import Message
 from sqlalchemy import or_
-#-------------------------------------------Login/Logout-------------------------------------------
+
+
+# -------------------------------------------Login/Logout-------------------------------------------
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -25,12 +27,14 @@ def login():
             flash('Incorrect email or password. Please try again!', 'danger')
     return render_template('login.html', title='Login', form=form)
 
+
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
-#----------------------------------------------SignUp----------------------------------------------
+
+# ----------------------------------------------SignUp----------------------------------------------
 
 @app.route("/signup", methods=['GET', 'POST'])
 def sign_up():
@@ -39,7 +43,9 @@ def sign_up():
         return redirect(url_for('home'))
     if form.validate_on_submit():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data, password=hash)
+        user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data,
+                    email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data,
+                    password=hash)
         db.session.add(user)
         db.session.commit()
         user = User.query.filter_by(email=form.email.data).first()
@@ -47,18 +53,19 @@ def sign_up():
         flash('Account created!', 'success')
         return redirect(url_for('home'))
     return render_template('signup.html', title='Register', form=form)
-#-----------------------------------------------Forgot Pass------------------------------------------
+
+
+# -----------------------------------------------Forgot Pass------------------------------------------
 
 def send_reset_email(user):
     token = user.get_reset_token()
-    msg = Message('Password Reset Request', sender ='noreply@demo.com',
-                    recipients=[user.email])
+    msg = Message('Password Reset Request', sender='noreply@demo.com',
+                  recipients=[user.email])
     msg.body = f''' To Reset your password visit the following link:
-    {url_for('reset_token', token=token, _external =True)}
+    {url_for('reset_token', token=token, _external=True)}
 If you did not make this request, simply ignore this email and no changes will be made.
     '''
     mail.send(msg)
-
 
 
 @app.route("/reset_password", methods=['GET', 'POST'])
@@ -67,11 +74,11 @@ def reset_request():
         return redirect(url_for('home'))
     form = RequestResetForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email = form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         send_reset_email(user)
         flash('An email with instruction has been sent to your email', 'info')
         return redirect(url_for('login'))
-    return render_template('reset_request.html', title = 'Reset Password', form = form)
+    return render_template('reset_request.html', title='Reset Password', form=form)
 
 
 @app.route("/reset_password/<token>", methods=['GET', 'POST'])
@@ -89,16 +96,16 @@ def reset_token(token):
         db.session.commit()
         flash('Your password has been updated!', 'success')
         return redirect(url_for('login'))
-    return render_template('reset_token.html', title = 'Reset Password', form = form)
+    return render_template('reset_token.html', title='Reset Password', form=form)
 
-#-----------------------------------------------Home-------------------------------------------------
+
+# -----------------------------------------------Home-------------------------------------------------
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
 def home():
     form = SearchForm()
     if form.validate_on_submit():
-        posts = []
         searchString = form.searchString.data
         searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
         posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
@@ -108,7 +115,8 @@ def home():
         posts = Post.query.order_by(Post.date_posted.desc()).all()
     return render_template('home.html', posts=posts, form=form)
 
-#-----------------------------------------------Posts----------------------------------------------
+
+# -----------------------------------------------Posts----------------------------------------------
 
 # Create new post
 @app.route("/post/new", methods=['GET', 'POST'])
@@ -123,13 +131,14 @@ def create_new_post():
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
+
 @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id=post_id)
     postal_code = post.author.postal_code
-    tag = "pharmacy" #@todo get this from database
-    a= f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{tag}'+near" + postal_code
+    tag = "pharmacy"  # @todo get this from database
+    a = f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{tag}'+near" + postal_code
     if request.method == 'POST':
         if current_user.is_authenticated:
             if 'volunteer_btn' in request.form and request.form['volunteer_btn'] == 'Volunteer':
@@ -137,7 +146,7 @@ def post(post_id):
                 post.status = statusEnum.taken
                 flash('You are now volunteering for the post!', 'success')
             elif 'unvolunteer_btn' in request.form and request.form['unvolunteer_btn'] == 'Unvolunteer':
-                post.volunteer = 0 #0 referes to NULL User which means no volunteers yet!
+                post.volunteer = 0  # 0 referes to NULL User which means no volunteers yet!
                 post.status = statusEnum.open
                 flash('You are no longer are volunteering for the post!', 'success')
             elif 'closePost_btn' in request.form and request.form['closePost_btn'] == 'Close':
@@ -155,11 +164,13 @@ def post(post_id):
             return redirect(url_for('login'))
     else:
         curr_user_volunteering = False
-        comments = db.session.query(PostComment).filter_by(post_id = post_id)
+        comments = db.session.query(PostComment).filter_by(post_id=post_id)
         form = PostCommentForm()
         if current_user.is_authenticated and post.volunteer == current_user.id:
             curr_user_volunteering = True
-        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments = comments, form=form, a=a )
+        return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering,
+                               comments=comments, form=form, a=a)
+
 
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -175,9 +186,10 @@ def update_post(post_id):
         flash('Post updated!', 'success')
         return redirect(url_for('post', post_id=post.id))
     if request.method == 'GET':
-       form.title.data = post.title
-       form.description.data = post.description
+        form.title.data = post.title
+        form.description.data = post.description
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
+
 
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
@@ -190,52 +202,15 @@ def delete_post(post_id):
     flash('Post deleted!', 'success')
     return redirect(url_for('home'))
 
-# Get/Edit/Delete a single post
-@app.route("/posts/<int:post_id>", methods=['GET', 'PUT', 'DELETE'])
-def single_post(post_id):
-    if request.method == 'GET':
-        # replace with db call to get post info from db
-        query = Post.query.get(post_id)
-        post_info = {
-            'post_id': query.post_id,
-            'title': query.title,
-            'description': query.description,
-            'author_email': query.author_email,
-            'date_posted': query.date_posted,
-            'date_deadline': query.date_deadline,
-            'status': query.status.name
-        }
-        return {"Post retrieved ": post_info }, 200
-    elif request.method == 'PUT':
-        updated_post_info = request.get_json()
-        # add db call in here to update information in the db
-        query = Post.query.get(post_id)
-        for key,value in updated_post_info.items():
-            query[key] = updated_post_info[key]
 
-        # for e in updated_post_info:
-        #     query[e] = updated_post_info[e]
-        return {'Post updated ': updated_post_info}, 200
-    elif request.method == 'DELETE':
-        post_to_delete = request.get_json()
-        # add db call to delete post from db
-        try:
-            Post.query.filter_by(post_id = post_id).delete()
-            db.session.commit()
-        except:
-            print("")
-
-        #@todo: are we actually deleting the post or changing the status to closed or deleted?
-        return {"Message": 'post with id ' + str(post_id) + ' has been deleted'}, 200
-
-#-------------------------------Post's Comment----------------------------------------
+# -------------------------------Post's Comment----------------------------------------
 
 # Create a new post comment on a Post
 @app.route("/post/<int:post_id>/comment/", methods=['GET', 'POST'])
 @login_required
 def create_post_comment(post_id):
     post = Post.query.get_or_404(post_id)
-    comments = db.session.query(PostComment).filter_by(post_id = post_id)
+    comments = db.session.query(PostComment).filter_by(post_id=post_id)
     curr_user_volunteering = False
     form = PostCommentForm()
 
@@ -244,10 +219,9 @@ def create_post_comment(post_id):
 
     if request.method == 'POST':
         if current_user.is_authenticated:
-            # print("Test entering authenticated")
             if form.validate_on_submit():
-                # print("Test entering the validation")
-                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user, post_id = post_id)
+                created_comment = PostComment(comment_desc=form.comment_desc.data, cmt_author=current_user,
+                                              post_id=post_id)
                 db.session.add(created_comment)
                 db.session.commit()
                 flash('Comment Submitted!', 'success')
@@ -256,9 +230,11 @@ def create_post_comment(post_id):
             flash('You must be logged in to volunteer for a post!', 'warning')
             return redirect(url_for('login'))
 
-    return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering, comments=comments, form=form)
+    return render_template('post.html', title=post.title, post=post, curr_user_volunteering=curr_user_volunteering,
+                           comments=comments, form=form)
 
-#--------------------------------------Account----------------------------------------
+
+# --------------------------------------Account----------------------------------------
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
@@ -298,10 +274,11 @@ def edit_account():
     user_image = url_for('static', filename='user_images/' + current_user.user_image)
     return render_template('edit_account.html', title='Edit Account', user_image=user_image, form=form)
 
+
 @app.route("/account", methods=['GET'])
 @login_required
 def get_account():
-    user = User.query.filter_by(email = current_user.email).first()
-    to_do = Post.query.filter_by(volunteer = current_user.id)
+    user = User.query.filter_by(email=current_user.email).first()
+    to_do = Post.query.filter_by(volunteer=current_user.id)
     # to-do make sure only account owner can access this
-    return render_template('account.html', user=user,to_do=to_do)
+    return render_template('account.html', user=user, to_do=to_do)
