@@ -62,7 +62,7 @@ class AccountUpdateForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
     phone_number = StringField('Phone ', validators=[DataRequired(), Length(max=16)])
     postal_code = StringField('Postal Code ', validators=[DataRequired(), Length(max=10)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=60)])
+    # password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=60)])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg'])])
     submit = SubmitField('Update')
 
