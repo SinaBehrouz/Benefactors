@@ -4,12 +4,12 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail
-from benefactors.models import User, Post, PostComment, statusEnum
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
 from flask_mail import Message
-from sqlalchemy import or_
-
+from sqlalchemy import or_, desc
+from .postalCodeManager import postalCodeManager
 
 # -------------------------------------------Login/Logout-------------------------------------------
 
@@ -44,7 +44,7 @@ def sign_up():
     if form.validate_on_submit():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data,
-                    email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data,
+                    email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data.upper(),
                     password=hash)
         db.session.add(user)
         db.session.commit()
@@ -104,17 +104,38 @@ def reset_token(token):
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
 def home():
-    form = SearchForm()
+    form = SearchForm(status=0, tag='allCat', radius= 50)
+    choices = [("allCat", "All Categories")]
+    for c in categoryEnum:
+        choices.append( (c.name, c.name) )
+    form.category.choices = choices;
     if form.validate_on_submit():
         posts = []
         searchString = form.searchString.data
-        searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-        posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
-                                                     Post.description.ilike(searchString),
-                                                     User.username.ilike(searchString))).all()
+        if len(searchString) > 0:
+            searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
+            posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
+                                                         Post.description.ilike(searchString),
+                                                         User.username.ilike(searchString))).all()
+        else:
+            posts = db.session.query(Post).join(User, User.id==Post.user_id)
+        #filter based on staus
+        if (form.status.data != 'all'):
+            posts = posts.filter(Post.status==statusEnum._member_map_[form.status.data])
+        #filter based on category
+        if (form.category.data != 'allCat'):
+            posts = posts.filter(Post.category==categoryEnum._member_map_[form.category.data])
+        #filter based on close by posts
+        pcm = postalCodeManager()
+        pcm.getNearybyPassCodes(current_user.postal_code, form.radius.data)
+        nearby_postal_codes = pcm.getNearybyPassCodes(current_user.postal_code, form.radius.data)
+        # nearby_users = db.session.query(User).filter( User.postal_code.in_(nearby_postal_codes) ).all()
+        posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
+        posts = posts.order_by(desc(Post.date_posted)).all()
+        return render_template('home.html', posts=posts, form=form)
     else:
         posts = Post.query.order_by(Post.date_posted.desc()).all()
-    return render_template('home.html', posts=posts, form=form)
+        return render_template('home.html', posts=posts, form=form)
 
 
 # -----------------------------------------------Posts----------------------------------------------
@@ -124,8 +145,13 @@ def home():
 @login_required
 def create_new_post():
     form = PostForm()
+    choices = []
+    for c in categoryEnum:
+        choices.append( (c.name, c.name) )
+    form.category.choices = choices;
     if form.validate_on_submit():
-        post = Post(title=form.title.data, description=form.description.data, author=current_user)
+        post = Post(title=form.title.data, description=form.description.data,
+                    author=current_user, category=categoryEnum._member_map_[form.category.data] )
         db.session.add(post)
         db.session.commit()
         flash('Post created!', 'success')
@@ -138,9 +164,7 @@ def get_nearby_locations(post):
     # TODO: Add Google Maps logic here!
 
     postal_code = post.author.postal_code
-    # TODO: Add categories to Post model
-    # category = post.category
-    category = "pharmacy"  # Hard coded for testing
+    category = post.category.name
     google_map = f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{category}'+near" + postal_code
     return google_map
 
@@ -160,6 +184,10 @@ def post(post_id):
 @login_required
 def update_post(post_id):
     form = PostForm()
+    choices = []
+    for c in categoryEnum:
+        choices.append( (c.name, c.name) )
+    form.category.choices = choices;
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
@@ -333,7 +361,7 @@ def edit_account():
         current_user.last_name = form.last_name.data
         current_user.email = form.email.data
         current_user.phone_number = form.phone_number.data
-        current_user.postal_code = form.postal_code.data
+        current_user.postal_code = form.postal_code.data.upper()
         db.session.commit()
         flash('Account updated!', 'success')
         return redirect(url_for('edit_account'))

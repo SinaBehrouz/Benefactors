@@ -17,6 +17,16 @@ class statusEnum(Enum):
     CANCELLED = 3
     CLOSED = 4
 
+class categoryEnum(Enum):
+    cleaning = 1
+    delivery = 2
+    moving = 3
+    errands = 4
+    transporation = 5
+    genLabour = 6
+    grocery = 7
+    medication = 8
+    others = 9
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -30,7 +40,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(16), nullable=False)
-    postal_code = db.Column(db.String(10), nullable=False)
+    postal_code = db.Column(db.String(6), nullable=False)
     password = db.Column(db.String(60), nullable=False)
     user_image = db.Column(db.String(40), default='default.jpg')
 
@@ -59,7 +69,7 @@ class Post(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    # deadline = db.Column(db.DateTime, nullable = False)
+    category = db.Column(db.Enum(categoryEnum), nullable=False)
     status = db.Column(db.Enum(statusEnum), default=statusEnum.OPEN)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     volunteer = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, default=0)
@@ -70,7 +80,7 @@ class Post(db.Model):
 
 class PostComment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    comment_desc = db.Column(db.Text(500), nullable=False)
+    comment_desc = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
