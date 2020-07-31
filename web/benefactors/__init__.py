@@ -1,5 +1,6 @@
 import os
 import secrets
+import stripe
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -18,6 +19,13 @@ app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
 app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+
+stripe_keys = {
+  'secret_key': os.getenv("STRIPE_PUBLISHABLE_KEY", "sk_test_51HAlzwJxCod5ibwzuOmzGJwQ4AjYksOWNCVqlC9fLAvU2v0WuVm6Rv6Yxf0G2oMGFSqniqZ7ElblIq243kMbcO1l00TrMS8g62"),
+  'publishable_key': os.getenv("STRIPE_SECRET_KEY", "pk_test_51HAlzwJxCod5ibwz1qoTHZ6sNfXWBsKtjFwLgxsc0U5UUZmMUMmz8MsUM8ksbA8n57qVLLHlJKd4McTTh3fU4FLP00FnJrzKTr")
+}
+
+stripe.api_key = stripe_keys['secret_key']
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)

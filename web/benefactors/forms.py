@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange
 from benefactors.models import User, genderEnum
 
 
@@ -91,3 +91,8 @@ class PostCommentForm(FlaskForm):
     def validate_commentdesc(self, comment_desc):
         if comment_desc.strip() == "":
             raise ValidationError('Comment cannot be empty')
+
+
+class DonationForm(FlaskForm):
+    amount = IntegerField('Amount', validators=[DataRequired(), NumberRange(min=1)])
+    submit = SubmitField('Pay with Card')

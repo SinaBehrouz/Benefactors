@@ -1,11 +1,12 @@
 import os
 import uuid
+import stripe
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
-from benefactors import app, db, bcrypt, mail
+from benefactors import app, db, bcrypt, mail, stripe_keys
 from benefactors.models import User, Post, PostComment, statusEnum
-from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm,
+from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
 from flask_mail import Message
 from sqlalchemy import or_
@@ -355,3 +356,37 @@ def get_account():
     to_do = Post.query.filter_by(volunteer=current_user.id)
     # to-do make sure only account owner can access this
     return render_template('account.html', user=user, to_do=to_do)
+
+
+# ---------------------------------------About-----------------------------------------
+
+@app.route("/about")
+def about():
+    form = DonationForm()
+    return render_template('about.html', form=form, key=stripe_keys['publishable_key'])
+
+
+@app.route('/charge', methods=['POST'])
+def charge():
+    try:
+        form = DonationForm()
+        amount = form.amount.data
+        # convert amount into cents
+        amount *= 100
+
+        customer = stripe.Customer.create(
+            email=request.form['stripeEmail'],
+            source=request.form['stripeToken']
+        )
+
+        stripe.Charge.create(
+            customer=customer.id,
+            amount=amount,
+            currency='usd',
+            description='Donation'
+        )
+        flash('Thank you for your donation!', 'success')
+        return redirect(url_for('about'))
+    except:
+        flash('Something went wrong!', 'danger')
+        return redirect(url_for('about'))

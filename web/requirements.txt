@@ -16,3 +16,4 @@ psycopg2-binary==2.8.5
 Flask-Mail==0.9.1
 itsdangerous==0.24
 requests
+stripe==2.49.0
