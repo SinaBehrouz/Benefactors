@@ -17,3 +17,4 @@ Flask-Mail==0.9.1
 itsdangerous==0.24
 requests
 pypostalcode==0.3.4
+stripe==2.49.0
