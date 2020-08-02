@@ -109,3 +109,8 @@ class PostCommentForm(FlaskForm):
     def validate_commentdesc(self, comment_desc):
         if comment_desc.strip() == "":
             raise ValidationError('Comment cannot be empty')
+
+
+class DonationForm(FlaskForm):
+    amount = IntegerField('Amount', validators=[DataRequired(), NumberRange(min=1)])
+    submit = SubmitField('Pay with Card')
