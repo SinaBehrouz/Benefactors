@@ -18,15 +18,15 @@ class statusEnum(Enum):
     CLOSED = 4
 
 class categoryEnum(Enum):
-    cleaning = 1
-    delivery = 2
-    moving = 3
-    errands = 4
-    transporation = 5
-    genLabour = 6
-    grocery = 7
-    medication = 8
-    others = 9
+    CLEANING = 1
+    DELIVERY = 2
+    MOVING = 3
+    ERRANDS = 4
+    TRANSPORTATION = 5
+    LABOUR = 6
+    GROCERY = 7
+    MEDICATION = 8
+    OTHERS = 9
 
 @login_manager.user_loader
 def load_user(user_id):
