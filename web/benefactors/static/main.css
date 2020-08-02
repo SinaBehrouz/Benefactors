@@ -206,3 +206,13 @@ input:hover.search-bar{
   flex: 0 0 33.3333333333%;
   max-width: 33.3333333333%;
 }
+
+#chat-sidebar {
+  margin-top: 5em;
+  float: left; /* Make this div as wide as its contents */
+  min-height: 96vh;
+  padding-left: 1em;
+  padding-top: 2em;
+  padding-right:10em;
+  border-right: 0.5px solid #898c91;
+}

@@ -5,7 +5,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
 from flask_mail import Message
@@ -109,7 +109,7 @@ def home():
     choices = [("allCat", "All Categories")]
     for c in categoryEnum:
         choices.append( (c.name, c.name) )
-    form.category.choices = choices;
+    form.category.choices = choices
     if form.validate_on_submit():
         posts = []
         searchString = form.searchString.data
@@ -149,7 +149,7 @@ def create_new_post():
     choices = []
     for c in categoryEnum:
         choices.append( (c.name, c.name) )
-    form.category.choices = choices;
+    form.category.choices = choices
     if form.validate_on_submit():
         post = Post(title=form.title.data, description=form.description.data,
                     author=current_user, category=categoryEnum._member_map_[form.category.data] )
@@ -188,7 +188,7 @@ def update_post(post_id):
     choices = []
     for c in categoryEnum:
         choices.append( (c.name, c.name) )
-    form.category.choices = choices;
+    form.category.choices = choices
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
@@ -418,3 +418,77 @@ def charge():
     except:
         flash('Something went wrong!', 'danger')
         return redirect(url_for('about'))
+
+# -------------------------------------Messages-----------------------------------------
+
+@app.route("/messages", methods=['GET', 'POST'])
+def messages():
+    # channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc())
+    # channels = channels_1
+    
+    if request.method == 'GET':
+        # Get all the channels for this user every time it renders
+        channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+        channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+
+        size_1 = 0
+        size_2 = 0
+        for _ in channels_1:
+            size_1 += 1
+
+        for _ in channels_2:
+            size_2 += 1
+
+        channels = []
+        i = 0
+        j = 0
+
+        # Sort based on the most recent
+        while i < size_1 and j < size_2:
+            if channels_1[i].last_updated > channels_2[j].last_updated:
+                channels.append(channels_1[i])
+                i += 1
+            else: 
+                channels.append(channels_2[j])
+                j += 1
+
+        channels = channels + channels_1[i:] + channels_2[j:]
+
+        # if channels is not []:
+        #     flash("Channel is not empty")
+        # else:
+        #     flash("Channel is empty")
+
+        # Loop through channels 
+        return render_template('messages.html', owner = current_user, chatchannels=channels)
+    else:
+        return render_template('messages.html', owner = current_user, chatchannels=channels)
+
+
+
+
+# @app.route('/charge', methods=['POST'])
+# def charge():
+#     try:
+#         form = DonationForm()
+#         amount = form.amount.data
+#         # convert amount into cents
+#         amount *= 100
+
+#         customer = stripe.Customer.create(
+#             email=request.form['stripeEmail'],
+#             source=request.form['stripeToken']
+#         )
+
+#         stripe.Charge.create(
+#             customer=customer.id,
+#             amount=amount,
+#             currency='usd',
+#             description='Donation'
+#         )
+#         flash('Thank you for your donation!', 'success')
+#         return redirect(url_for('about'))
+#     except:
+#         flash('Something went wrong!', 'danger')
+#         return redirect(url_for('about'))
+

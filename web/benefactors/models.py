@@ -97,8 +97,6 @@ class ChatChannel(db.Model):
     user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # always lower than user2_id
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    
-    # chatmessages = db.relationship('chatmessages', backref='channel_owner', lazy=True, foreign_keys='chatmessages.channel_id')
 
 class ChatMessages(db.Model):
     __tablename__ = "chatmessages"

@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <!-- Messages Channel - This will always be populated if there are any messages, whenever the messages is opened-->
+    <div class = col-md-8>
+        <div id="chat-sidebar" style="position:fixed; transform: none;">
+        {% if chatchannels %}
+            {% for channel in chatchannels %}
+                <p id="channel-id"> The Channel ID is {{ channel.id }}</p>
+                <a id="channel-name" href="#"> This is a channel between {{ channel.user1_id }} and {{ channel.user2_id }}</a>
+            {% endfor %}
+        {% else %} 
+
+
+        {% endif %}
+        </div>
+    </div>
+
+
+    {% if comments %}
+    <!-- Messages Content - This will be empty at the beginning-->
+        {% for comment in comments %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        {% if owner != comment.user_sender %}
+                        <div id="message_sender">
+                            <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
+                            <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+                            <small class="text-muted" style="font-weight: bold;">{{ comment.message_content }}</small>
+                        </div>
+                        {% else %} 
+                        <div id="message_sender">
+                            <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
+                            <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+                            <small class="text-muted" style="font-weight: bold;">{{ comment.message_content }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    {% else %} 
+        <article class="media content-section">
+            <div class="media-body">
+                <h2 id="welcome-message">Welcome to your message inbox, {{ owner.username }}</h2>
+            </div>
+        </article>
+
+    {% endif %}
+    
+{% endblock content %}
