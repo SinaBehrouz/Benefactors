@@ -15,3 +15,6 @@ Werkzeug==0.14.1
 psycopg2-binary==2.8.5
 Flask-Mail==0.9.1
 itsdangerous==0.24
+requests
+pypostalcode==0.3.4
+stripe==2.49.0
