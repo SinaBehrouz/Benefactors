@@ -19,6 +19,20 @@
     }
   </script>
 
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&libraries=places&callback=initAutocomplete" async defer></script>
+  <script type="text/javascript">
+  let autocomplete;
+  function initAutocomplete(){
+    autocomplete = new google.maps.places.Autocomplete(
+    document.getElementById('autocomplete','locality','(cities)'), {
+      types: ['establishment'],
+      componentRestrictions:{'country': ['CA']},
+      fields: ['place_id', 'geometry', 'name', 'address_components', 'geometry', 'icon']
+    });
+  }
+
+</script>
+
   <form method="POST" action="" class="search-bar">
       {{ form.hidden_tag() }}
         {% if form.searchString.errors %}
@@ -29,12 +43,25 @@
                 {% endfor %}
             </div>
         {% else %}
-            {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="Search by Username, Title, Description...") }}
+            {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="e.g. Grocery Pick Up") }}
             <button type="button" onClick=expandSearchOpt() class="btn btn-primary btn-md mt-1 mb-1">Advanced Search</button>
             <div class="media content-section" id="content" style="visibility: hidden; opacity: 0; max-height:0; margin:0; padding:0; display:grid;"  >
                   {{ form.hidden_tag() }}
                   <fieldset class="form-group">
                       <legend class="border-bottom mb-4">Configure Your Search Setting</legend>
+                      <label class="form-control-label">Approximate Area</label>
+                      <div class="form-group">
+                          {% if form.postalCode.errors %}
+                              {{ form.postalCode(class="form-control form-control-lg is-invalid") }}
+                              <div class="invalid-feedback">
+                                  {% for error in form.postalCode.errors %}
+                                      <span>{{ error }}</span>
+                                  {% endfor %}
+                              </div>
+                          {% else %}
+                              {{ form.postalCode(class="form-control form-control-lg", placeholder="e.g. Coquitlam Center...", id="autocomplete", style="font-size: 1rem;") }}
+                          {% endif %}
+                      </div>
                       <div class="form-group">
                           {{ form.radius.label(class="form-control-label") }}
                           {% if form.radius.errors %}
@@ -45,7 +72,7 @@
                                   {% endfor %}
                               </div>
                           {% else %}
-                              {{ form.radius(class="form-control form-control-lg") }}
+                              {{ form.radius(class="form-control form-control-lg", style="font-size: 1rem;") }}
                               <small class="text-muted ml-2">Default search radius is 50 km. Pick a value between 1-100 km.</small>
                           {% endif %}
                       </div>
