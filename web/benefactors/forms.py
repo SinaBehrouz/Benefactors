@@ -8,10 +8,16 @@ from .postalCodeManager import postalCodeManager
 
 class SearchForm(FlaskForm):
     searchString = StringField('Search Title', validators=[Length(max=100)])
+    postalCode = StringField('Postal Code', validators=[Optional()])
     radius =IntegerField('Radius(Km)', validators=[Optional(), NumberRange(min=1,max=100)])
     status = SelectField('Status', choices=[('all','All'),(statusEnum.OPEN.name, 'Open'),(statusEnum.TAKEN.name, 'Taken'), (statusEnum.CLOSED.name, 'Closed'), ( 'pending', 'Pending')])
     category = SelectField('Category')
     updateSearch = SubmitField('Apply Filters')
+
+    def validate_postal_code(self,postalCode):
+        pcm = postalCodeManager()
+        if not pcm.verifyPostalCode(postal_code.data):
+            raise ValidationError('That is not a valid Postal Code.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
