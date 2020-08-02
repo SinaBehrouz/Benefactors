@@ -1,6 +1,6 @@
 from flask.cli import FlaskGroup
 from benefactors import app, db
-from benefactors.models import User, Post, PostComment
+from benefactors.models import User, Post, PostComment, ChatChannel, ChatMessages
 
 cli = FlaskGroup(app)
 
@@ -31,6 +31,16 @@ def seed_db():
 
     db.session.add(PostComment(comment_desc="Thappis is a hello test comment from create DB", user_id=1, post_id=2))
     db.session.add(PostComment(comment_desc="This is the second comment", user_id=1, post_id=2))
+
+    db.session.commit()
+
+    db.session.add(ChatChannel(user1_id=1, user2_id=2))
+    # db.session.add(ChatChannel(user1_id=2, user2_id=3))
+
+    db.session.commit()
+    
+    db.session.add(ChatMessages(user_sender=1, user_receiver=2, message_content="Test message bruh", channel_id=1))
+    db.session.add(ChatMessages(user_sender=2, user_receiver=1, message_content="Test message received bruh", channel_id=1))
 
     db.session.commit()
 
