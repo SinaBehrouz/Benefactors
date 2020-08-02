@@ -208,11 +208,21 @@ input:hover.search-bar{
 }
 
 #chat-sidebar {
-  margin-top: 5em;
+  margin-top: 2em;
   float: left; /* Make this div as wide as its contents */
   min-height: 96vh;
   padding-left: 1em;
-  padding-top: 2em;
-  padding-right:10em;
+  padding-right:1em;
   border-right: 0.5px solid #898c91;
+}
+
+#chat-content {
+  margin-top: 2em;
+  float: right; /* Make this div as wide as its contents */
+  min-height: 110vh;
+  padding-left: 2em;
+}
+
+#channel-list {
+  list-style-type: none
 }

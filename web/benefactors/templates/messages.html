@@ -1,52 +1,103 @@
-{% extends "layout.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en" style="overflow: scroll; overflow-x: hidden;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
+    <title>Benefactors</title>
+
+</head>
+
+<body>
+<header class="site-header">
+    <nav class="navbar navbar-expand-md navbar-dark bg-header fixed-top">
+        <div class="container">
+            <a class="navbar-brand mr-4" href="/">Benefactors</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarToggle">
+                <div class="navbar-nav mr-auto">
+                    <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
+                    <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
+                </div>
+                <!-- Navbar Right Side -->
+                <div class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <a class="nav-item nav-link" href="{{ url_for('create_new_post') }}">New Post</a>
+                    <a class="nav-item nav-link" href="{{ url_for('get_account') }}">Account</a>
+                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                    <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-item nav-link" href="{{ url_for('sign_up') }}">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
 
     <!-- Messages Channel - This will always be populated if there are any messages, whenever the messages is opened-->
-    <div class = col-md-8>
-        <div id="chat-sidebar" style="position:fixed; transform: none;">
-        {% if chatchannels %}
-            {% for channel in chatchannels %}
-                <p id="channel-id"> The Channel ID is {{ channel.id }}</p>
-                <a id="channel-name" href="#"> This is a channel between {{ channel.user1_id }} and {{ channel.user2_id }}</a>
-            {% endfor %}
-        {% else %} 
-
-
-        {% endif %}
-        </div>
-    </div>
-
-
-    {% if comments %}
-    <!-- Messages Content - This will be empty at the beginning-->
-        {% for comment in comments %}
+    <div class="container">
+        <div class = "row">
             <article class="media content-section">
                 <div class="media-body">
-                    <div class="article-metadata">
-                        {% if owner != comment.user_sender %}
-                        <div id="message_sender">
-                            <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
-                            <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
-                            <small class="text-muted" style="font-weight: bold;">{{ comment.message_content }}</small>
-                        </div>
-                        {% else %} 
-                        <div id="message_sender">
-                            <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
-                            <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
-                            <small class="text-muted" style="font-weight: bold;">{{ comment.message_content }}</small>
-                        </div>
-                        {% endif %}
-                    </div>
+                    <h2 id="welcome-message">Welcome to your message inbox, {{ owner.username }}</h2>
                 </div>
             </article>
-        {% endfor %}
-    {% else %} 
-        <article class="media content-section">
-            <div class="media-body">
-                <h2 id="welcome-message">Welcome to your message inbox, {{ owner.username }}</h2>
+        </div>
+        <div class="row">
+            {% if chatchannels %}
+            <div class="col" id="chat-sidebar" style="transform: none;">
+                {% for channel in chatchannels %}
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;" id="channel-list"><a id="channel-name" href="#">
+                    {% if channel.user_1.id == current_user.id %}
+                         {{ channel.user_2.username }}
+                    {% else %}
+                        {{ channel.user_1.username }}
+                    {% endif %}
+                    </a></li>
+                </ul>
+                {% endfor %}
+            {% else %} 
+            {% endif %}
             </div>
-        </article>
-
-    {% endif %}
-    
-{% endblock content %}
+            <div class="col-10" id="chat-content">
+                {% if comments %}
+                <!-- Messages Content - This will be empty at the beginning-->
+                    {% for comment in comments %}
+                        <article class="media content-section">
+                            <div class="media-body">
+                                <div class="article-metadata">
+                                    {% if owner != comment.user_sender %}
+                                    <div id="message_sender">
+                                        <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
+                                        <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+                                        <small class="text-muted" style="font-weight: bold">{{ comment.message_content }}</small>
+                                    </div>
+                                    {% else %} 
+                                    <div id="message_sender">
+                                        <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
+                                        <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
+                                        <small class="text-muted" style="font-weight: bold">{{ comment.message_content }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                {% else %} 
+                    <p id="placeholder-message"> Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

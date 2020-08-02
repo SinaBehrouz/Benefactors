@@ -3,6 +3,7 @@ from benefactors import db, login_manager, app
 from datetime import datetime
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from sqlalchemy.orm import backref
 
 
 class genderEnum(Enum):
@@ -97,6 +98,9 @@ class ChatChannel(db.Model):
     user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # always lower than user2_id
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+    user_1 = db.relationship("User", backref=backref("usr_1", uselist=False), foreign_keys=[user1_id])
+    user_2 = db.relationship("User", backref=backref("usr_2", uselist=False), foreign_keys=[user2_id])
 
 class ChatMessages(db.Model):
     __tablename__ = "chatmessages"

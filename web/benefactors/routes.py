@@ -443,7 +443,7 @@ def messages():
         i = 0
         j = 0
 
-        # Sort based on the most recent
+        # Sort based on the most recent, loop through two channels 
         while i < size_1 and j < size_2:
             if channels_1[i].last_updated > channels_2[j].last_updated:
                 channels.append(channels_1[i])
@@ -453,42 +453,6 @@ def messages():
                 j += 1
 
         channels = channels + channels_1[i:] + channels_2[j:]
-
-        # if channels is not []:
-        #     flash("Channel is not empty")
-        # else:
-        #     flash("Channel is empty")
-
-        # Loop through channels 
         return render_template('messages.html', owner = current_user, chatchannels=channels)
     else:
         return render_template('messages.html', owner = current_user, chatchannels=channels)
-
-
-
-
-# @app.route('/charge', methods=['POST'])
-# def charge():
-#     try:
-#         form = DonationForm()
-#         amount = form.amount.data
-#         # convert amount into cents
-#         amount *= 100
-
-#         customer = stripe.Customer.create(
-#             email=request.form['stripeEmail'],
-#             source=request.form['stripeToken']
-#         )
-
-#         stripe.Charge.create(
-#             customer=customer.id,
-#             amount=amount,
-#             currency='usd',
-#             description='Donation'
-#         )
-#         flash('Thank you for your donation!', 'success')
-#         return redirect(url_for('about'))
-#     except:
-#         flash('Something went wrong!', 'danger')
-#         return redirect(url_for('about'))
-
