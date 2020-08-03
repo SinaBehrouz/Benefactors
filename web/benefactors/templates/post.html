@@ -83,6 +83,10 @@
                      <a class="dropdown-item" href=#>Edit</a>
                     <a class="dropdown-item" href="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}">Delete</a>
                   </div>
+                {% else %}
+                  <small>|</small>
+                  <!-- Change to POST instead of a href-->
+                  <a class="" href="{{ url_for('create_new_chat_channel', cmt_auth_id=comment.cmt_author.id) }}"><small>MESSAGE</small></a>
                 {% endif %}
               </div>
 
