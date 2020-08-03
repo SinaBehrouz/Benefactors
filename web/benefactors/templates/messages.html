@@ -54,44 +54,90 @@
             <div class="col" id="chat-sidebar" style="transform: none;">
                 {% for channel in chatchannels %}
                 <ul class="list-group">
-                    <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;" id="channel-list"><a id="channel-name" href="#">
-                    {% if channel.user_1.id == current_user.id %}
-                         {{ channel.user_2.username }}
-                    {% else %}
-                        {{ channel.user_1.username }}
-                    {% endif %}
-                    </a></li>
+                    <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;" id="channel-list">
+                        <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
+                            {% if channel.user_1.id == current_user.id %}
+                                {{ channel.user_2.username }}
+                            {% else %}
+                                {{ channel.user_1.username }}
+                            {% endif %}
+                        </a>
+                        <small id="message-last-upd"> {{ channel.last_updated }} </small>
+                    </li>
                 </ul>
                 {% endfor %}
             {% else %} 
             {% endif %}
             </div>
             <div class="col-10" id="chat-content">
+                <div class="container" id="inside-chat-container">
                 {% if comments %}
                 <!-- Messages Content - This will be empty at the beginning-->
                     {% for comment in comments %}
-                        <article class="media content-section">
-                            <div class="media-body">
-                                <div class="article-metadata">
-                                    {% if owner != comment.user_sender %}
-                                    <div id="message_sender">
-                                        <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
-                                        <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
-                                        <small class="text-muted" style="font-weight: bold">{{ comment.message_content }}</small>
-                                    </div>
-                                    {% else %} 
-                                    <div id="message_sender">
-                                        <a class="mr-2">{{ current_user.username }}</a> <!-- This will be the messages content-->>
-                                        <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
-                                        <small class="text-muted" style="font-weight: bold">{{ comment.message_content }}</small>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </article>
+                        {% if owner != comment.user_sender %}
+                        <div class="row" id="message_sender_left">
+                            <a class="mr-2">This Sender: {{ comment.user_sender.username }}</a> <!-- This will be the messages content-->
+                            <small>{{ comment.message_sent.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                            <small style="font-weight: bold">{{ comment.message_content }}</small>
+                        </div>
+                        {% else %} 
+                        <div class="row" id="message_sender_right">
+                            <a class="mr-2">Other Sender: {{ comment.user_sender.username }}</a> <!-- This will be the messages content-->
+                            <small>{{ comment.message_sent.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                            <small style="font-weight: bold">{{ comment.message_content }}</small>
+                        </div>
+                        {% endif %}
                     {% endfor %}
+                    <!-- add a textbox and a button to chat -->
+                    <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
+                    {{ form.hidden_tag() }}
+                    <fieldset class="form-group">
+                        <div class ="form-group">
+                            {{ form.chat_message_desc.label }}
+                            {% if form.chat_message_desc.errors %}
+                                {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.chat_message_desc.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.chat_message_desc(class="form-control form-control-lg") }}
+                            {% endif %}
+                            <!-- Send message button -->
+                            {{ form.submit_chatmsg(class="btn btn-outline-info") }}
+                        </div>
+                    </fieldset>
+                    </form>
                 {% else %} 
-                    <p id="placeholder-message"> Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well</p>
+                    {% if channel_id %}
+                        <p id="placeholder-message">Your chat is empty</p>
+                        <!-- add a textbox and a button to chat -->
+                        <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
+                            {{ form.hidden_tag() }}
+                            <fieldset class="form-group">
+                                <div class ="form-group">
+                                    {{ form.chat_message_desc.label }}
+                                    {% if form.chat_message_desc.errors %}
+                                        {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.chat_message_desc.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.chat_message_desc(class="form-control form-control-lg") }}
+                                    {% endif %}
+                                    <!-- Send message button -->
+                                    {{ form.submit_chatmsg(class="btn btn-outline-info") }}
+                                </div>
+                            </fieldset>
+                        </form>
+
+                    {% else %}
+                        <p id="placeholder-message"> Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well</p>
+                    {% endif %}
+
                 {% endif %}
             </div>
         </div>

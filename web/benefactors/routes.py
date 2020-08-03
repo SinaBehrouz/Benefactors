@@ -7,9 +7,11 @@ from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
 from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
-                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
+                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, 
+                               PostCommentForm, SendMessageForm)
 from flask_mail import Message
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, asc
+from datetime import datetime
 from .postalCodeManager import postalCodeManager
 
 # -------------------------------------------Login/Logout-------------------------------------------
@@ -422,37 +424,97 @@ def charge():
 # -------------------------------------Messages-----------------------------------------
 
 @app.route("/messages", methods=['GET', 'POST'])
+@login_required
 def messages():
-    # channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc())
-    # channels = channels_1
+    channels = getChannelForUser(current_user)
     
     if request.method == 'GET':
-        # Get all the channels for this user every time it renders
-        channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
-        channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
-
-        size_1 = 0
-        size_2 = 0
-        for _ in channels_1:
-            size_1 += 1
-
-        for _ in channels_2:
-            size_2 += 1
-
-        channels = []
-        i = 0
-        j = 0
-
-        # Sort based on the most recent, loop through two channels 
-        while i < size_1 and j < size_2:
-            if channels_1[i].last_updated > channels_2[j].last_updated:
-                channels.append(channels_1[i])
-                i += 1
-            else: 
-                channels.append(channels_2[j])
-                j += 1
-
-        channels = channels + channels_1[i:] + channels_2[j:]
         return render_template('messages.html', owner = current_user, chatchannels=channels)
     else:
         return render_template('messages.html', owner = current_user, chatchannels=channels)
+
+        
+@app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
+@login_required
+def messages_chat(channel_id):
+    channels = getChannelForUser(current_user)
+    comments = getConversationForChannel(channel_id)
+    form = SendMessageForm()
+    current_channel = ChatChannel.query.get_or_404(channel_id)
+
+    # it might need the other user id and current user id
+    # we will need to create a new channel here, depending on which user we choose to chat
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            # Get the time
+            curr_time = datetime.utcnow()
+            
+            # Parse the form
+            chatmessage = ChatMessages(user_sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
+            db.session.add(chatmessage)
+            db.session.commit()
+
+            # Update the channel last_updated field
+            current_channel.last_updated = curr_time
+            db.session.commit()
+
+            comments = getConversationForChannel(channel_id)
+
+            return redirect(url_for('messages_chat', channel_id=channel_id))
+    elif request.method == 'GET':
+        return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments, channel_id = channel_id)
+
+@app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
+@login_required
+def create_new_chat_channel(cmt_auth_id):
+    channels = getChannelForUser(current_user)
+    comments = []
+    form = SendMessageForm()
+
+    if request.method == 'POST':
+        # Check whether channel already exists
+        # If already exists retrieve comments
+
+        # If not, create a new channel
+
+        return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments)
+    elif request.method == 'GET':
+        return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments)
+
+# ----------------------------------Messages Helper-------------------------------------
+
+# Get the channel from the current_user
+def getChannelForUser(user):
+    channels = []
+
+    # Initialize two channels
+    channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+    channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+
+    # Get the size of the channels
+    size_1 = 0
+    size_2 = 0
+    for _ in channels_1:
+        size_1 += 1
+
+    for _ in channels_2:
+        size_2 += 1
+    
+    i = 0
+    j = 0
+
+    # Sort the channel based on the most recent, loop through two channels and merge them 
+    while i < size_1 and j < size_2:
+        if channels_1[i].last_updated > channels_2[j].last_updated:
+            channels.append(channels_1[i])
+            i += 1
+        else: 
+            channels.append(channels_2[j])
+            j += 1
+
+    channels = channels + channels_1[i:] + channels_2[j:]
+    return channels
+
+def getConversationForChannel(id):
+    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_sent.asc()).all()
+    return conversations

@@ -46,8 +46,14 @@ def seed_db():
 
     db.session.commit()
     
-    db.session.add(ChatMessages(user_sender=1, user_receiver=2, message_content="Test message bruh", channel_id=1))
-    db.session.add(ChatMessages(user_sender=2, user_receiver=1, message_content="Test message received bruh", channel_id=1))
+    db.session.add(ChatMessages(user_sender_id=1, message_content="Test message bruh", channel_id=1, message_sent = datetime.datetime(2020, 7, 20, 12, 5, 30)))
+    db.session.add(ChatMessages(user_sender_id=3, message_content="Test message received bruh", channel_id=1, message_sent = datetime.datetime(2020, 7, 20, 13, 6, 30)))
+    
+    db.session.add(ChatMessages(user_sender_id=1, message_content="Test message bruh 2", channel_id=1, message_sent = datetime.datetime(2020, 7, 20, 14, 5, 30)))
+    db.session.add(ChatMessages(user_sender_id=3, message_content="Test message received bruh 2", channel_id=1, message_sent = datetime.datetime(2020, 7, 20, 15, 5, 30)))
+    
+    db.session.add(ChatMessages(user_sender_id=1, message_content="Test message bruh 3", channel_id=1, message_sent = datetime.datetime(2020, 7, 20, 16, 5, 30)))
+    db.session.add(ChatMessages(user_sender_id=3, message_content="Test message received bruh 3" , channel_id=1, message_sent = datetime.datetime(2020, 7, 20, 17, 5, 30)))
 
     db.session.commit()
 

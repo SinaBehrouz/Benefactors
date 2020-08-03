@@ -102,12 +102,21 @@ class ChatChannel(db.Model):
     user_1 = db.relationship("User", backref=backref("usr_1", uselist=False), foreign_keys=[user1_id])
     user_2 = db.relationship("User", backref=backref("usr_2", uselist=False), foreign_keys=[user2_id])
 
+    def __repr__(self):
+        return f"ChatChannel('{self.user1_id}', '{self.user2_id}', '{self.user_1.username}', '{self.user_2.username}', '{self.last_updated}')"
+
 class ChatMessages(db.Model):
     __tablename__ = "chatmessages"
 
     id = db.Column(db.Integer, primary_key = True)
-    user_sender = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user_receiver = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # user_receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
     message_sent = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
     channel_id = db.Column(db.Integer, db.ForeignKey('chatchannel.id'), nullable=False)
+    user_sender = db.relationship("User", backref=backref("usr_snd", uselist=False), foreign_keys=[user_sender_id])
+    # user_receiver = db.relationship("User", backref=backref("usr_rcv", uselist=False), foreign_keys=[user_receiver_id])
+
+    def __repr__(self):
+        return f"ChatMessages('{self.user_sender}', '{self.user_receiver}', '{self.message_content}', '{self.message_sent}', '{self.channel_id}')"
