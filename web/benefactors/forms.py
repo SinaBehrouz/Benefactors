@@ -111,7 +111,7 @@ class DonationForm(FlaskForm):
 
 
 class SendMessageForm(FlaskForm):
-    chat_message_desc = TextAreaField('', validators=[DataRequired(), Length(min=1, max=200)])
+    chat_message_desc = TextAreaField('', validators=[DataRequired(), Length(min=1, max=1024)])
     submit_chatmsg = SubmitField('Send Message')
 
     def validate_chat_message_desc(self, chat_message_desc):
