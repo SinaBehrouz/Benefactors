@@ -461,6 +461,9 @@ def messages_chat(channel_id):
             comments = getConversationForChannel(channel_id)
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
+        # In case the user submits an empty message
+        else:
+            return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments, channel_id = channel_id)
     elif request.method == 'GET':
         return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments, channel_id = channel_id)
 

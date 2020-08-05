@@ -89,7 +89,7 @@ class PostComment(db.Model):
     def __repr__(self):
         return f"Post('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"
 
-# user1 and user2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1. 
+# User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1. 
 # You cannot have two channels between two same users twice, unless the channel is closed
 class ChatChannel(db.Model):
     __tablename__ = "chatchannel"
@@ -110,13 +110,11 @@ class ChatMessages(db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
     user_sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    # user_receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
     message_sent = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     channel_id = db.Column(db.Integer, db.ForeignKey('chatchannel.id'), nullable=False)
     user_sender = db.relationship("User", backref=backref("usr_snd", uselist=False), foreign_keys=[user_sender_id])
-    # user_receiver = db.relationship("User", backref=backref("usr_rcv", uselist=False), foreign_keys=[user_receiver_id])
 
     def __repr__(self):
         return f"ChatMessages('{self.user_sender}', '{self.user_receiver}', '{self.message_content}', '{self.message_sent}', '{self.channel_id}')"

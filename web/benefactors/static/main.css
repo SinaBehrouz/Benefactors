@@ -223,6 +223,14 @@ input:hover.search-bar{
   border-right: 0.5px solid #898c91;
 }
 
+.article-content #post_title {
+  margin-top: 0.5em;
+}
+
+.article-content #post_content {
+  margin-top: 1em;
+}
+
 #chat-content {
   margin-top: 2em;
   float: right; /* Make this div as wide as its contents */
@@ -234,22 +242,97 @@ input:hover.search-bar{
   list-style-type: none;
 }
 
-#message_sender_left {
+.container .row #inside-chat-container {
+  height: 55%;
+  overflow-y: auto;
+}
+
+.container .row #inside-chat-container::-webkit-scrollbar {
+  width: 14px;               /* width of the entire scrollbar */
+}
+.container .row #inside-chat-container::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 14px 14px transparent;
+  border: solid 4px transparent;
+}
+.container .row #inside-chat-container::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 14px 14px #bbbbbe;
+  border: solid 4px transparent;
+  border-radius: 14px;
+}
+
+.container .row #inside-chat-container::-webkit-scrollbar-button {
+  display: none;
+}
+
+#send-msg-btn {
+  color: #17a2b8;
+  background-color: white;
+  margin-top: 0.5em;
+  background-image: none;
+}
+
+.row .message_sender {
   border: 0.5px solid #000000;
-  border-radius: 3px;
-  margin-top: 2em;
+  border-radius: 12px;
+  margin-top: 1.5em;
+  display: flex;
+  justify-content: space-between;
+  width: fit-content;
+}
+
+.msg_content {
+  margin-left: 1.2em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-right: 1.2em;
+  overflow-wrap: anywhere
+}
+
+#message_sender_left {
+  max-width: 40%;
+  background-color: #cceeff;
+  border-color: transparent;
 }
 
 #message_sender_right {
-  border: 0.5px solid #000000;
-  border-radius: 3px;
-  margin-top: 2em;
+  margin-left: auto; 
+  max-width: 40%;
+  background-color: #71bcd1;
+  border-color: transparent;
 }
 
-#message_sender_right.a {
-  text-align: right;
+.left_content {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.3em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  justify-content: space-between;
 }
 
-#message_sender_right.small {
+.right_content {
+  display: flex;
+  flex-direction: column;
+  padding-right: 0.7em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  justify-content: space-between;
+}
+
+#name_left {
+  font-size: small;
+}
+
+#name_right {
+  font-size: small;
+}
+
+#time_left {
+  text-align: left;
+  font-size: small;
+}
+
+#time_right {
   text-align: right;
+  font-size: small;
 }

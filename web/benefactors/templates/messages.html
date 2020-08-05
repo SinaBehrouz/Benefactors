@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="overflow: scroll; overflow-x: hidden;">
+<html lang="en" style="overflow-y:hidden">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -72,43 +72,50 @@
             <div class="col-10" id="chat-content">
                 <div class="container" id="inside-chat-container">
                 {% if comments %}
-                <!-- Messages Content - This will be empty at the beginning-->
+                <!-- Messages Content - This will be empty at the beginning-->                
                     {% for comment in comments %}
                         {% if owner != comment.user_sender %}
-                        <div class="row" id="message_sender_left">
-                            <a class="mr-2">This Sender: {{ comment.user_sender.username }}</a> <!-- This will be the messages content-->
-                            <small>{{ comment.message_sent.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                            <small style="font-weight: bold">{{ comment.message_content }}</small>
+                        <div class="message_sender" id="message_sender_left">
+                            <div class="left_content" id="left_name">
+                                <span class="msg_sender_name" id="name_left">{{ comment.user_sender.username }}</span> <!-- This will be the messages content-->
+                                <span class="message_time" id="time_left">{{ comment.message_sent.strftime('%H:%M') }}</span>
+                            </div>
+                            <p class="msg_content" id="msg_content_left">{{ comment.message_content }}</p>
                         </div>
                         {% else %} 
-                        <div class="row" id="message_sender_right">
-                            <a class="mr-2">Other Sender: {{ comment.user_sender.username }}</a> <!-- This will be the messages content-->
-                            <small>{{ comment.message_sent.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                            <small style="font-weight: bold">{{ comment.message_content }}</small>
+                        <div class="message_sender" id="message_sender_right">
+                            <p class="msg_content" id="msg_content_right">{{ comment.message_content }}</p>
+                            <div class="right_content" id="right_name">
+                                <span class="msg_sender_name" id="name_right">{{ comment.user_sender.username }}</span> <!-- This will be the messages content-->
+                                <span class="message_time" id="time_right">{{ comment.message_sent.strftime('%H:%M') }}</span>
+                            </div>
                         </div>
                         {% endif %}
                     {% endfor %}
+                </div>
+                <div id="form_send_message_box">
                     <!-- add a textbox and a button to chat -->
                     <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
                     {{ form.hidden_tag() }}
                     <fieldset class="form-group">
                         <div class ="form-group">
                             {{ form.chat_message_desc.label }}
-                            {% if form.chat_message_desc.errors %}
-                                {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.chat_message_desc.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.chat_message_desc(class="form-control form-control-lg") }}
-                            {% endif %}
+                                {% if form.chat_message_desc.errors %}
+                                    {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.chat_message_desc.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.chat_message_desc(class="form-control form-control-lg") }}
+                                {% endif %}
                             <!-- Send message button -->
-                            {{ form.submit_chatmsg(class="btn btn-outline-info") }}
+                            {{ form.submit_chatmsg(class="btn btn-outline-info", id="send-msg-btn") }}
                         </div>
                     </fieldset>
                     </form>
+                </div>
                 {% else %} 
                     {% if channel_id %}
                         <p id="placeholder-message">Your chat is empty</p>
@@ -145,5 +152,10 @@
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<!-- <script type="text/javascript">
+    window.scrollTo(0,document.querySelector("#inside-chat-container").scrollHeight)
+</script> -->
+
 </body>
 </html>

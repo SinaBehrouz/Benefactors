@@ -45,16 +45,19 @@
         </div>
       </div>
 
-      <!--Volunteer Button-->
-      <h5 class="article-content"><b>{{ post.title }}</b></h5>
-      <p class="article-content">{{ post.description }}</p>
+      <h5 class="article-content" id="post_title"><b>{{ post.title }}</b></h5>
+      <p class="article-content" id="post_content">{{ post.description }}</p>
         {% if post.author != current_user %}
           <div>
-            {% if post.status.name == 'OPEN' %}
+            <!--Volunteer Button-->
+            {% if post.status.name == 'OPEN' %} 
               <a class="btn btn-success btn-sm mt-1 mb-1"  href="{{ url_for('volunteer', post_id=post.id) }}">Volunteer</a>
+            <!--Unvolunteer Button-->
             {% elif post.volunteer == current_user.id %}
               <a class="btn btn-danger btn-sm mt-1 mb-1" href="{{ url_for('unvolunteer', post_id=post.id) }}">Unvolunteer</a>
-            {%endif%}
+            {% endif %}
+            <!-- Create a new Button for Message -->
+            <a class="btn btn-info btn-sm mt-1 mb-1" href="{{ url_for('create_new_chat_channel', cmt_auth_id=post.user_id) }}">Comment</a>
           </div>
         {% endif %}
     </div>
