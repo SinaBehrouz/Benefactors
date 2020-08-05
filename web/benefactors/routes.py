@@ -15,7 +15,6 @@ from datetime import datetime
 from .postalCodeManager import postalCodeManager
 
 # -------------------------------------------Login/Logout-------------------------------------------
-
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -130,10 +129,26 @@ def home():
             posts = posts.filter(Post.category==categoryEnum._member_map_[form.category.data])
         #filter based on close by posts
         pcm = postalCodeManager()
-        pcm.getNearybyPassCodes(current_user.postal_code, form.radius.data)
-        nearby_postal_codes = pcm.getNearybyPassCodes(current_user.postal_code, form.radius.data)
+        parsed_location = form.postalCode.data.split(',')
+        if(len(parsed_location) < 3):
+            flash("could not find the location, please choose one of the suggessted locations!", 'warning')
+            return render_template('home.html', posts=[], form=form)
+        else:
+            pc = pcm.getPCfromCity(parsed_location[-3])
+            if not pc:
+                if current_user.is_authenticated:
+                    flash('Unable to find the location - will use the postal code on the account', 'warning')
+                    pc = current_user.postal_code
+                else:
+                    flash('Unable to find the location - will use return search based on Vancouver Area', 'warning')
+                    pc = "V5H3Z7"
+        pcm.getNearybyPassCodes(pc, form.radius.data)
+        nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
         # nearby_users = db.session.query(User).filter( User.postal_code.in_(nearby_postal_codes) ).all()
-        posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
+        try:
+            posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
+        except:
+            pass #rare case - a random bug w sqlalchemy
         posts = posts.order_by(desc(Post.date_posted)).all()
         return render_template('home.html', posts=posts, form=form)
     else:
