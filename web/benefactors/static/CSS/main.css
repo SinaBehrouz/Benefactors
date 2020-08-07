@@ -1,5 +1,5 @@
 body {
-  background: url("body-bg.png") no-repeat center fixed;
+  background: url("../Backgrounds/body-bg.png") no-repeat center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -12,7 +12,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bg-header {
-  background: url("header-bg.jpg")
+  background: url("../Backgrounds/header-bg.jpg")
 }
 
 .site-header .navbar-brand {
@@ -205,4 +205,61 @@ input:hover.search-bar{
   padding-left: 0.75rem;
   flex: 0 0 33.3333333333%;
   max-width: 33.3333333333%;
+}
+.adv-search-hidden{
+  visibility: hidden;
+  opacity: 0;
+  max-height:0;
+  margin:0;
+  padding:0;
+  display: grid;
+}
+.adv-search-visible{
+  visibility: visible;
+  opacity: 1;
+  max-height:1000px;
+  margin:0 0 5px 0;
+  padding:10px 20px;
+  display: grid;
+}
+.adv-search-bar{
+  font-size: 1rem;
+}
+
+.grid{
+  display: grid;
+}
+.grid-r-1{
+  grid-row: 1;
+}
+.grid-r-2{
+  grid-row: 2;
+}
+.grid-c-1{
+  grid-column: 1;
+}
+.grid-c-2-5{
+  grid-column: 2;
+  grid-column-end: 5;
+  margin-left: 10px;
+}
+
+#map{
+  border:0;
+  -webkit-filter: grayscale(50%);
+  filter: grayscale(50%);
+}
+small#openStatus{
+  color:#9cd28a!important;
+}
+
+small#takenStatus{
+color:#ffa601!important;
+}
+
+small#CanclledStatus{
+  color:red!important;
+}
+small#ClosedStatus{
+color:red!important;
 }

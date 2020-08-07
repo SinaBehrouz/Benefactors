@@ -146,7 +146,8 @@ def home():
         try:
             posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
         except:
-            pass #rare case - a random bug w sqlalchemy
+            pc = pcm.getPCfromCity(parsed_location[-3])#rare case - a random bug w sqlalchemy
+        flash("Search Updated!", "success")
         posts = posts.order_by(desc(Post.date_posted)).all()
         return render_template('home.html', posts=posts, form=form)
     else:
