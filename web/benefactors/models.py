@@ -109,12 +109,12 @@ class ChatMessages(db.Model):
     __tablename__ = "chatmessages"
 
     id = db.Column(db.Integer, primary_key = True)
-    user_sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
-    message_sent = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    message_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     channel_id = db.Column(db.Integer, db.ForeignKey('chatchannel.id'), nullable=False)
-    user_sender = db.relationship("User", backref=backref("usr_snd", uselist=False), foreign_keys=[user_sender_id])
+    sender = db.relationship("User", backref=backref("usr_snd", uselist=False), foreign_keys=[sender_id])
 
     def __repr__(self):
-        return f"ChatMessages('{self.user_sender}', '{self.user_receiver}', '{self.message_content}', '{self.message_sent}', '{self.channel_id}')"
+        return f"ChatMessages('{self.sender}', '{self.message_content}', '{self.message_sent}', '{self.message_time}, {self.channel_id}')"

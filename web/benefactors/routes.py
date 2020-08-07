@@ -441,19 +441,15 @@ def charge():
 @app.route("/messages", methods=['GET', 'POST'])
 @login_required
 def messages():
-    channels = getChannelForUser(current_user)
-    
-    if request.method == 'GET':
-        return render_template('messages.html', owner = current_user, chatchannels=channels)
-    else:
-        return render_template('messages.html', owner = current_user, chatchannels=channels)
+    channels = getAllChannelsForUser(current_user)
+    return render_template('messages.html', owner = current_user, chatchannels=channels)
 
         
 @app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
 @login_required
 def messages_chat(channel_id):
-    channels = getChannelForUser(current_user)
-    comments = getConversationForChannel(channel_id)
+    channels = getAllChannelsForUser(current_user)
+    messages = getConversationForChannel(channel_id)
     form = SendMessageForm()
     current_channel = ChatChannel.query.get_or_404(channel_id)
 
@@ -465,31 +461,30 @@ def messages_chat(channel_id):
             curr_time = datetime.utcnow()
             
             # Parse the form
-            chatmessage = ChatMessages(user_sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
+            chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
             db.session.add(chatmessage)
             db.session.commit()
 
-            # Update the channel last_updated field
+            # Update the channel last_updated field because of new comments are made
             current_channel.last_updated = curr_time
+            # DB update is caused by channel last_update
             db.session.commit()
 
-            comments = getConversationForChannel(channel_id)
+            messages = getConversationForChannel(channel_id)
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
-        # In case the user submits an empty message
-        else:
-            return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments, channel_id = channel_id)
-    elif request.method == 'GET':
-        return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, comments=comments, channel_id = channel_id)
+    
+    # In case the user submits an empty message or the request.method is GET
+    return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, messages=messages, channel_id = channel_id)
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
 def create_new_chat_channel(cmt_auth_id):
     if request.method == 'GET':
         # Check whether channel already exists
-        channel_id = findChannel(current_user.id, cmt_auth_id)
+        channel_id = findSpecificChannel(current_user.id, cmt_auth_id)
 
-        # If already exists retrieve comments
+        # If already exists retrieve messages
         if channel_id != -1:
             return redirect(url_for('messages_chat', channel_id=channel_id))
         # If not, create a new channel
@@ -506,6 +501,7 @@ def create_new_chat_channel(cmt_auth_id):
             
             newChannel = ChatChannel(user1_id=user1, user2_id=user2)
             db.session.add(newChannel)
+            # DB update is caused by creating a new channel
             db.session.commit()
 
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
@@ -513,12 +509,12 @@ def create_new_chat_channel(cmt_auth_id):
 # ----------------------------------Messages Helper-------------------------------------
 
 # Find whether the channel already exists
-def findChannel(user1_id, user2_id):
+def findSpecificChannel(user1_id, user2_id):
     # initialize channel
-    channel = ChatChannel.query.filter_by(user1_id = user1_id, user2_id = user2_id).order_by(ChatChannel.last_updated.desc()).first()
+    channel = ChatChannel.query.filter_by(user1_id = user1_id, user2_id = user2_id).first()
 
     if user1_id > user2_id:
-        channel = ChatChannel.query.filter_by(user1_id = user2_id, user2_id = user1_id).order_by(ChatChannel.last_updated.desc()).first()
+        channel = ChatChannel.query.filter_by(user1_id = user2_id, user2_id = user1_id).first()
 
     if channel == None:
         return -1
@@ -526,7 +522,7 @@ def findChannel(user1_id, user2_id):
     return channel.id
 
 # Get the channel from the current_user
-def getChannelForUser(user):
+def getAllChannelsForUser(user):
     channels = []
 
     # Initialize two channels
@@ -558,5 +554,5 @@ def getChannelForUser(user):
     return channels
 
 def getConversationForChannel(id):
-    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_sent.asc()).all()
+    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.asc()).all()
     return conversations

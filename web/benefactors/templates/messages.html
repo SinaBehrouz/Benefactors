@@ -51,10 +51,10 @@
         </div>
         <div class="row">
             {% if chatchannels %}
-            <div class="col" id="chat-sidebar" style="transform: none;">
+            <div class="col" id="chat-sidebar">
                 {% for channel in chatchannels %}
                 <ul class="list-group">
-                    <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;" id="channel-list">
+                    <li class="list-group-item list-group-item-light" id="channel-list">
                         <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
                             {% if channel.user_1.id == current_user.id %}
                                 {{ channel.user_2.username }}
@@ -62,7 +62,7 @@
                                 {{ channel.user_1.username }}
                             {% endif %}
                         </a>
-                        <small id="message-last-upd"> {{ channel.last_updated }} </small>
+                        <small id="message-last-upd">{{ channel.last_updated.strftime('%Y-%m-%D %H:%M') }}</small>
                     </li>
                 </ul>
                 {% endfor %}
@@ -71,23 +71,23 @@
             </div>
             <div class="col-10" id="chat-content">
                 <div class="container" id="inside-chat-container">
-                {% if comments %}
+                {% if messages %}
                 <!-- Messages Content - This will be empty at the beginning-->                
-                    {% for comment in comments %}
-                        {% if owner != comment.user_sender %}
+                    {% for message in messages %}
+                        {% if owner != message.sender %}
                         <div class="message_sender" id="message_sender_left">
                             <div class="left_content" id="left_name">
-                                <span class="msg_sender_name" id="name_left">{{ comment.user_sender.username }}</span> <!-- This will be the messages content-->
-                                <span class="message_time" id="time_left">{{ comment.message_sent.strftime('%H:%M') }}</span>
+                                <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span> <!-- This will be the messages content-->
+                                <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
                             </div>
-                            <p class="msg_content" id="msg_content_left">{{ comment.message_content }}</p>
+                            <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>
                         </div>
                         {% else %} 
                         <div class="message_sender" id="message_sender_right">
-                            <p class="msg_content" id="msg_content_right">{{ comment.message_content }}</p>
+                            <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p>
                             <div class="right_content" id="right_name">
-                                <span class="msg_sender_name" id="name_right">{{ comment.user_sender.username }}</span> <!-- This will be the messages content-->
-                                <span class="message_time" id="time_right">{{ comment.message_sent.strftime('%H:%M') }}</span>
+                                <span class="msg_sender_name" id="name_right">{{ message.sender.username }}</span> <!-- This will be the messages content-->
+                                <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
                             </div>
                         </div>
                         {% endif %}
