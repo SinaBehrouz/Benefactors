@@ -29,6 +29,15 @@ class categoryEnum(Enum):
     MEDICATION = 8
     OTHERS = 9
 
+class channelStatusEnum(Enum):
+    ISREAD = 1
+    ISDELIVERED = 2
+
+class messageStatusEnum(Enum):
+    SENT = 1
+    EDITED = 2
+    DELETED = 3
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -98,6 +107,8 @@ class ChatChannel(db.Model):
     user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # always lower than user2_id
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user1_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.ISREAD)
+    user2_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.ISREAD)
     
     user_1 = db.relationship("User", backref=backref("usr_1", uselist=False), foreign_keys=[user1_id])
     user_2 = db.relationship("User", backref=backref("usr_2", uselist=False), foreign_keys=[user2_id])
@@ -112,6 +123,7 @@ class ChatMessages(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
     message_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    message_status = db.Column(db.Enum(messageStatusEnum), default=messageStatusEnum.SENT)
 
     channel_id = db.Column(db.Integer, db.ForeignKey('chatchannel.id'), nullable=False)
     sender = db.relationship("User", backref=backref("usr_snd", uselist=False), foreign_keys=[sender_id])

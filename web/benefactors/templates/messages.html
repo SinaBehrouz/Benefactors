@@ -62,7 +62,7 @@
                                 {{ channel.user_1.username }}
                             {% endif %}
                         </a>
-                        <small id="message-last-upd">{{ channel.last_updated.strftime('%Y-%m-%D %H:%M') }}</small>
+                        <small id="message-last-upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
                     </li>
                 </ul>
                 {% endfor %}
@@ -77,16 +77,22 @@
                         {% if owner != message.sender %}
                         <div class="message_sender" id="message_sender_left">
                             <div class="left_content" id="left_name">
-                                <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span> <!-- This will be the messages content-->
+                                <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
                                 <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
                             </div>
-                            <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>
+                            <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
                         </div>
                         {% else %} 
                         <div class="message_sender" id="message_sender_right">
-                            <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p>
+                            <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
                             <div class="right_content" id="right_name">
-                                <span class="msg_sender_name" id="name_right">{{ message.sender.username }}</span> <!-- This will be the messages content-->
+                                <span class="msg_sender_name" id="name_right">{{ message.sender.username }} | 
+                                <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>V</small></a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" href=#>Edit</a>
+                                    <a class="dropdown-item" href=#>Delete</a>
+                                </div>
+                                </span> 
                                 <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
                             </div>
                         </div>

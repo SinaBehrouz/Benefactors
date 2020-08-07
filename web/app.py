@@ -37,12 +37,12 @@ def seed_db():
     db.session.add(PostComment(comment_desc="Thappis is a hello test comment from create DB", user_id=1, post_id=2))
     db.session.add(PostComment(comment_desc="This is the second comment", user_id=1, post_id=2))
 
-    db.session.commit()
-
     db.session.add(ChatChannel(user1_id=1, user2_id=3, last_updated = datetime.datetime(2020, 7, 19, 12, 5, 30)))
     db.session.add(ChatChannel(user1_id=2, user2_id=3, last_updated = datetime.datetime(2020, 7, 25, 12, 5, 30)))
     db.session.add(ChatChannel(user1_id=3, user2_id=4, last_updated = datetime.datetime(2020, 7, 21, 12, 5, 30)))
     db.session.add(ChatChannel(user1_id=3, user2_id=5, last_updated = datetime.datetime(2020, 7, 20, 12, 5, 30)))
+    
+    db.session.commit()
     
     db.session.add(ChatMessages(sender_id=1, message_content="Test message bruh", channel_id=1, message_time = datetime.datetime(2020, 7, 20, 12, 5, 30)))
     db.session.add(ChatMessages(sender_id=3, message_content="Test message received bruh", channel_id=1, message_time = datetime.datetime(2020, 7, 20, 13, 6, 30)))
