@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from benefactors.models import User, genderEnum, statusEnum, categoryEnum
 from .postalCodeManager import postalCodeManager
 
+
 class SearchForm(FlaskForm):
     searchString = StringField('Search Title', validators=[Length(max=100)])
     postalCode = StringField('Postal Code', validators=[Optional()])
@@ -19,6 +20,7 @@ class SearchForm(FlaskForm):
         pcm = postalCodeManager()
         if not pcm.verifyPostalCode(postal_code.data):
             raise ValidationError('That is not a valid Postal Code.')
+
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -64,10 +66,11 @@ class SignUpForm(FlaskForm):
         if user:
             raise ValidationError('There is an existing account associated with this email.')
 
-    def validate_postal_code(self,postal_code):
+    def validate_postal_code(self, postal_code):
         pcm = postalCodeManager()
         if not pcm.verifyPostalCode(postal_code.data):
             raise ValidationError('That is not a valid Postal Code.')
+
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(max=100)])
@@ -98,18 +101,15 @@ class AccountUpdateForm(FlaskForm):
             if user:
                 raise ValidationError('There is an existing account associated with this email.')
 
-    def validate_postal_code(self,postal_code):
+    def validate_postal_code(self, postal_code):
         pcm = postalCodeManager()
         if not pcm.verifyPostalCode(postal_code.data):
             raise ValidationError('That is not a valid Postal Code.')
 
+
 class PostCommentForm(FlaskForm):
     comment_desc = TextAreaField('Comment', validators=[DataRequired()])
     submit_comment = SubmitField('Submit Comment')
-
-    def validate_commentdesc(self, comment_desc):
-        if comment_desc.data.strip() == "":
-            raise ValidationError('Comment cannot be empty')
 
 
 class DonationForm(FlaskForm):
@@ -121,6 +121,9 @@ class SendMessageForm(FlaskForm):
     chat_message_desc = TextAreaField('', validators=[DataRequired(), Length(min=1, max=1024)])
     submit_chatmsg = SubmitField('Send Message')
 
-    def validate_chat_message_desc(self, chat_message_desc):
-        if chat_message_desc.data.strip() == "":
-            raise ValidationError('Message cannot be empty')
+
+class ReviewForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Review', validators=[DataRequired()])
+    score = IntegerField('Score - (1 to 10) ', validators=[DataRequired(), NumberRange(min=1, max=10)])
+    submit = SubmitField('Submit')

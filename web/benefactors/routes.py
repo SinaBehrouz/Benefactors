@@ -5,15 +5,16 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages
-from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
-                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, 
-                               PostCommentForm, SendMessageForm)
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages, UserReview
+from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, DonationForm, PostForm, RequestResetForm, \
+    ResetPasswordForm, SearchForm, PostCommentForm, SendMessageForm, ReviewForm
 from flask_mail import Message
 from sqlalchemy import or_, desc, asc
 from datetime import datetime
 from .postalCodeManager import postalCodeManager
 from .search import SearchUtil
+
+
 # -------------------------------------------Login/Logout-------------------------------------------
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -46,7 +47,8 @@ def sign_up():
     if form.validate_on_submit():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data,
-                    email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data.upper(),
+                    email=form.email.data, phone_number=form.phone_number.data,
+                    postal_code=form.postal_code.data.upper(),
                     password=hash)
         db.session.add(user)
         db.session.commit()
@@ -106,33 +108,34 @@ def reset_token(token):
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
 def home():
-    form = SearchForm(status=0, tag='allCat', radius= 50)
+    form = SearchForm(status=0, tag='allCat', radius=50)
     choices = [("allCat", "All Categories")]
     for c in categoryEnum:
-        choices.append( (c.name, c.name) )
+        choices.append((c.name, c.name))
     form.category.choices = choices
     if form.validate_on_submit():
         posts = []
         searchString = form.searchString.data
         if len(searchString) > 0:
-            searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-            posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
-                                                         Post.description.ilike(searchString),
-                                                         User.username.ilike(searchString)))
+            searchString = "%{}%".format(searchString)  # Post.author.username.like(searchString)
+            posts = db.session.query(Post).join(User, User.id == Post.user_id).filter(
+                or_(Post.title.ilike(searchString),
+                    Post.description.ilike(searchString),
+                    User.username.ilike(searchString)))
         else:
-            posts = db.session.query(Post).join(User, User.id==Post.user_id)
-        #filter based on staus
+            posts = db.session.query(Post).join(User, User.id == Post.user_id)
+        # filter based on staus
         if (form.status.data != 'all'):
-            posts = posts.filter(Post.status==statusEnum._member_map_[form.status.data])
-        #filter based on category
+            posts = posts.filter(Post.status == statusEnum._member_map_[form.status.data])
+        # filter based on category
         if (form.category.data != 'allCat'):
-            posts = posts.filter(Post.category==categoryEnum._member_map_[form.category.data])
-        #filter based on close by posts
+            posts = posts.filter(Post.category == categoryEnum._member_map_[form.category.data])
+        # filter based on close by posts
 
         if form.postalCode.data:
             pcm = postalCodeManager()
             searchUtil = SearchUtil()
-            searchRes =searchUtil.get_adv_pc_from_location(form)
+            searchRes = searchUtil.get_adv_pc_from_location(form)
             if len(searchRes[1]) > 0:
                 flash(searchRes[1], 'warning')
                 if searchRes[0] < 0:
@@ -141,10 +144,10 @@ def home():
             pcm.getNearybyPassCodes(pc, form.radius.data)
             nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
             try:
-                posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
+                posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes]))
             except:
                 flash("WTF HAPPE$NED")
-                pc = pcm.getPCfromCity(parsed_location[-3])#rare case - a random bug w sqlalchemy
+                pc = pcm.getPCfromCity(parsed_location[-3])  # rare case - a random bug w sqlalchemy
 
         flash("Search Updated!", "success")
         posts = posts.order_by(desc(Post.date_posted)).all()
@@ -163,11 +166,11 @@ def create_new_post():
     form = PostForm()
     choices = []
     for c in categoryEnum:
-        choices.append( (c.name, c.name) )
+        choices.append((c.name, c.name))
     form.category.choices = choices
     if form.validate_on_submit():
         post = Post(title=form.title.data, description=form.description.data,
-                    author=current_user, category=categoryEnum._member_map_[form.category.data] )
+                    author=current_user, category=categoryEnum._member_map_[form.category.data])
         db.session.add(post)
         db.session.commit()
         flash('Post created!', 'success')
@@ -193,7 +196,7 @@ def update_post(post_id):
     form = PostForm()
     choices = []
     for c in categoryEnum:
-        choices.append( (c.name, c.name) )
+        choices.append((c.name, c.name))
     form.category.choices = choices
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
@@ -392,6 +395,62 @@ def get_account():
     return render_template('account.html', user=user, to_do=to_do)
 
 
+# -----------------------------------Other Account----------------------------------------
+
+
+def get_avg_rating(reviews):
+    ratings = [review.score for review in reviews]
+    average = sum(ratings) / len(ratings)
+    return average
+
+
+@app.route("/account/<int:user_id>", methods=['GET', 'POST'])
+@login_required
+def other_account(user_id):
+    account = User.query.get_or_404(user_id)
+    if account == current_user:
+        return redirect(url_for('get_account'))
+
+    form = ReviewForm()
+    reviews = db.session.query(UserReview).filter_by(profile=user_id)
+    avg_rating = get_avg_rating(reviews)
+    return render_template('other_account.html', account=account, reviews=reviews, avg_rating=avg_rating, form=form)
+
+
+# -----------------------------------------------Reviews----------------------------------------------
+
+
+@app.route("/account/<int:user_id>/reviews/new", methods=['POST'])
+@login_required
+def add_review(user_id):
+    form = ReviewForm()
+    if request.method == 'POST':
+        if user_id == current_user.id:
+            flash('You cannot review yourself!', 'danger')
+            return redirect(url_for('other_account', user_id=user_id))
+
+        if form.validate_on_submit():
+            review = UserReview(title=form.title.data, description=form.description.data, score=form.score.data,
+                                profile=user_id, author=current_user.id)
+            db.session.add(review)
+            db.session.commit()
+            flash('Review added!', 'success')
+
+    return redirect(url_for('other_account', user_id=user_id))
+
+
+@app.route("/account/<int:user_id>/reviews/<int:review_id>/delete", methods=['POST'])
+@login_required
+def delete_review(user_id, review_id):
+    review = UserReview.query.get_or_404(review_id)
+    if review.rev_author != current_user:
+        abort(403)
+    db.session.delete(review)
+    db.session.commit()
+    flash('Your review has been deleted!', 'success')
+    return redirect(url_for('other_account', user_id=user_id))
+
+
 # ---------------------------------------About-----------------------------------------
 
 @app.route("/about")
@@ -425,15 +484,16 @@ def charge():
         flash('Something went wrong!', 'danger')
         return redirect(url_for('about'))
 
+
 # -------------------------------------Messages-----------------------------------------
 
 @app.route("/messages", methods=['GET', 'POST'])
 @login_required
 def messages():
     channels = getAllChannelsForUser(current_user)
-    return render_template('messages.html', owner = current_user, chatchannels=channels)
+    return render_template('messages.html', owner=current_user, chatchannels=channels)
 
-        
+
 @app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
 @login_required
 def messages_chat(channel_id):
@@ -448,9 +508,10 @@ def messages_chat(channel_id):
         if form.validate_on_submit():
             # Get the time
             curr_time = datetime.utcnow()
-            
+
             # Parse the form
-            chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
+            chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data,
+                                       channel_id=channel_id)
             db.session.add(chatmessage)
 
             # Update the channel last_updated field because of new comments are made
@@ -461,9 +522,11 @@ def messages_chat(channel_id):
             messages = getConversationForChannel(channel_id)
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
-    
+
     # In case the user submits an empty message or the request.method is GET
-    return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, messages=messages, channel_id = channel_id)
+    return render_template('messages.html', owner=current_user, chatchannels=channels, form=form, messages=messages,
+                           channel_id=channel_id)
+
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -477,7 +540,7 @@ def create_new_chat_channel(cmt_auth_id):
             return redirect(url_for('messages_chat', channel_id=channel_id))
         # If not, create a new channel
         else:
-            user1 = -1 
+            user1 = -1
             user2 = -1
 
             if current_user.id < cmt_auth_id:
@@ -486,7 +549,7 @@ def create_new_chat_channel(cmt_auth_id):
             else:
                 user1 = cmt_auth_id
                 user2 = current_user.id
-            
+
             newChannel = ChatChannel(user1_id=user1, user2_id=user2)
             db.session.add(newChannel)
             # DB update is caused by creating a new channel
@@ -494,47 +557,50 @@ def create_new_chat_channel(cmt_auth_id):
 
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
+
 # ----------------------------------Messages Helper-------------------------------------
 
 # Find whether the channel already exists
 def findSpecificChannel(user1_id, user2_id):
     # initialize channel
-    channel = ChatChannel.query.filter_by(user1_id = user1_id, user2_id = user2_id).first()
+    channel = ChatChannel.query.filter_by(user1_id=user1_id, user2_id=user2_id).first()
 
     if user1_id > user2_id:
-        channel = ChatChannel.query.filter_by(user1_id = user2_id, user2_id = user1_id).first()
+        channel = ChatChannel.query.filter_by(user1_id=user2_id, user2_id=user1_id).first()
 
     if channel == None:
         return -1
-    
+
     return channel.id
+
 
 # Get the channel from the current_user
 def getAllChannelsForUser(user):
     channels = []
 
     # Initialize two channels
-    channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
-    channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+    channels_1 = ChatChannel.query.filter_by(user1_id=current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+    channels_2 = ChatChannel.query.filter_by(user2_id=current_user.id).order_by(ChatChannel.last_updated.desc()).all()
 
     # Get the size of the channels
     size_1 = len(channels_1)
     size_2 = len(channels_2)
-    
+
     i = 0
     j = 0
-    # Sort the channel based on the most recent, loop through two channels and merge them 
+    # Sort the channel based on the most recent, loop through two channels and merge them
     while i < size_1 and j < size_2:
         if channels_1[i].last_updated > channels_2[j].last_updated:
             channels.append(channels_1[i])
             i += 1
-        else: 
+        else:
             channels.append(channels_2[j])
             j += 1
 
     channels = channels + channels_1[i:] + channels_2[j:]
     return channels
 
+
 def getConversationForChannel(id):
-    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.asc()).all()
+    conversations = ChatMessages.query.filter_by(channel_id=id).order_by(ChatMessages.message_time.asc()).all()
     return conversations
