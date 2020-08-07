@@ -463,7 +463,6 @@ def messages_chat(channel_id):
             # Parse the form
             chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
             db.session.add(chatmessage)
-            db.session.commit()
 
             # Update the channel last_updated field because of new comments are made
             current_channel.last_updated = curr_time
@@ -530,17 +529,11 @@ def getAllChannelsForUser(user):
     channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
 
     # Get the size of the channels
-    size_1 = 0
-    size_2 = 0
-    for _ in channels_1:
-        size_1 += 1
-
-    for _ in channels_2:
-        size_2 += 1
+    size_1 = len(channels_1)
+    size_2 = len(channels_2)
     
     i = 0
     j = 0
-
     # Sort the channel based on the most recent, loop through two channels and merge them 
     while i < size_1 and j < size_2:
         if channels_1[i].last_updated > channels_2[j].last_updated:
