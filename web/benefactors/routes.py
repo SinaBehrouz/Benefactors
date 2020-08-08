@@ -536,7 +536,7 @@ def messages_chat(channel_id):
             return render_template('messages.html', owner=current_user, chatchannels=channels, form=form, messages=messages, 
                                     channel_id=channel_id)
         flash("You are not authorized to access that page", 'danger')
-        return redirect(url_for('home'))
+        return redirect(url_for('home')), 403
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -639,4 +639,6 @@ def UpdateReadMessageStatusForChannel(channel_id):
     # If current user equals user 2
     else:
         channel.user2_status = channelStatusEnum.READ
+    # Update the DB with the status.
+    db.session.commit()
 
