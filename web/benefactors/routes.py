@@ -139,7 +139,7 @@ def home():
             if len(searchRes[1]) > 0:
                 flash(searchRes[1], 'warning')
                 if searchRes[0] < 0:
-                    return render_template('home.html', posts=[], form=form), 400
+                    return render_template('home.html', posts=[], form=form)
             pc = searchRes[0]
             pcm.getNearybyPassCodes(pc, form.radius.data)
             nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
