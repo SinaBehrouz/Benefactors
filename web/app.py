@@ -1,6 +1,6 @@
 from flask.cli import FlaskGroup
 from benefactors import app, db
-from benefactors.models import User, Post, PostComment, ChatChannel, ChatMessages
+from benefactors.models import User, Post, PostComment, ChatChannel, ChatMessages,  Notification
 
 import datetime
 
@@ -19,8 +19,12 @@ def seed_db():
     # user: 1@1.com
     # password: 123123123
 
+    #user: 2@1.com
+    #password: 123123123
+
     db.session.add(User(id =0, username="NULL", first_name="NULL", last_name="NULL", email="NULL", phone_number="NULL", postal_code="NULL", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     db.session.add(User(username="sina123", first_name="Sina", last_name="Smith", email="1@1.com", phone_number="1111", postal_code="V3E3B5", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
+    db.session.add(User(username="Tammy123", first_name="Tammy", last_name="Weller", email="2@1.com", phone_number="1111", postal_code="v3e3b5", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     db.session.add(User(username="Arian123", first_name="Arian", last_name="Smith", email="2@2.com", phone_number="1111", postal_code="V5Z0G7", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     db.session.add(User(username="Martin777", first_name="Martin", last_name="Jo", email="3@3.com", phone_number="12345", postal_code="V5Z0G7", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     db.session.add(User(username="Simran122", first_name="Simran", last_name="Gulati", email="4@4.com", phone_number="54231", postal_code="V3Z4B2", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
@@ -34,8 +38,16 @@ def seed_db():
 
     db.session.commit()
 
-    db.session.add(PostComment(comment_desc="Thappis is a hello test comment from create DB", user_id=1, post_id=2))
-    db.session.add(PostComment(comment_desc="This is the second comment", user_id=1, post_id=2))
+    # make sure to take comments out of here otherwise will cause problems with logic, or make sure corresponding notifications have been craeted
+    # db.session.add(PostComment(comment_desc="Thappis is a hello test comment from create DB", user_id=3, post_id=1))
+    # db.session.add(PostComment(comment_desc="This is the second comment", user_id=3, post_id=2))
+
+    # sina's account should have notifications, since he postd post with id 1 and 2 
+    #db.session.add(Notification(recipient=1, notifier=3, post_id=1, notification_message="Arian123 commented on your post about teslas", is_read=0))
+    #db.session.add(Notification(recipient=1, notifier=3, post_id=2, notification_message="Arian123 commented on your post about books", is_read=0))
+
+    # to do: might want to remove the additional commit, is there a reason it's here?
+    db.session.commit()
 
     db.session.add(ChatChannel(user1_id=1, user2_id=3, last_updated = datetime.datetime(2020, 7, 19, 12, 5, 30)))
     db.session.add(ChatChannel(user1_id=2, user2_id=3, last_updated = datetime.datetime(2020, 7, 25, 12, 5, 30)))
@@ -54,6 +66,7 @@ def seed_db():
     db.session.add(ChatMessages(sender_id=3, message_content="Test message received bruh 3" , channel_id=1, message_time = datetime.datetime(2020, 7, 20, 17, 5, 30)))
 
     db.session.commit()
+
 
 
 if __name__ == "__main__":

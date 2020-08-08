@@ -11,6 +11,18 @@ class genderEnum(Enum):
     female = 2
     others = 3
 
+class notificationTypeEnum(Enum):
+    VOLUNTEER = 1
+    UN_VOLUNTEER = 2
+    COMMENT = 3
+    STATUS = 4
+    COM_VOLUNTEER = 5
+    STATUS_CLOSED = 6
+    STATUS_OPEN = 7
+    DELETED = 8
+    POST_DELETED_VOLUNTEER
+    POST_DELETED_COM
+
 
 class statusEnum(Enum):
     OPEN = 1
@@ -71,7 +83,7 @@ class User(db.Model, UserMixin):
         return User.query.get(user_id)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.user_image}')"
+        return f"User('{self.username}', '{self.email}', '{self.id}', '{self.user_image}')"
 
 
 class Post(db.Model):
@@ -96,6 +108,7 @@ class PostComment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
     def __repr__(self):
+        
         return f"Post('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"
 
 # User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1. 
@@ -130,3 +143,21 @@ class ChatMessages(db.Model):
 
     def __repr__(self):
         return f"ChatMessages('{self.sender}', '{self.message_content}', '{self.message_sent}', '{self.message_time}, {self.channel_id}')"
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    recipient = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    notifier = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    notification_message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, nullable=False, default=0)
+    type = db.Column(db.Enum(notificationTypeEnum), nullable=False)
+    # __table_args__ = (db.UniqueConstraint('recipient', 'notifier', 'post_id', 'is_read', 'type'), )
+
+
+def __repr__(self):
+        return f"Notification('{self.notification_message}', '{self.user_id}', '{self.post_id}')"
+    # to do: probably want to edit what we want to return here
+
