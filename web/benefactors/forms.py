@@ -111,6 +111,10 @@ class PostCommentForm(FlaskForm):
     comment_desc = TextAreaField('Comment', validators=[DataRequired()])
     submit_comment = SubmitField('Submit Comment')
 
+    def validate_commentdesc(self, comment_desc):
+        if comment_desc.data.strip() == "":
+            raise ValidationError('Comment cannot be empty')
+
 
 class DonationForm(FlaskForm):
     amount = IntegerField('Amount', validators=[DataRequired(), NumberRange(min=1)])
@@ -121,9 +125,20 @@ class SendMessageForm(FlaskForm):
     chat_message_desc = TextAreaField('', validators=[DataRequired(), Length(min=1, max=1024)])
     submit_chatmsg = SubmitField('Send Message')
 
+    def validate_chat_message_desc(self, chat_message_desc):
+        if chat_message_desc.data.strip() == "":
+            raise ValidationError('Message cannot be empty')
+
 
 class ReviewForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired(), Length(max=100)])
     description = TextAreaField('Review', validators=[DataRequired()])
-    score = IntegerField('Score - (1 to 10) ', validators=[DataRequired(), NumberRange(min=1, max=10)])
+    score = IntegerField('Rate - (1 to 10) ', validators=[DataRequired(), NumberRange(min=1, max=10)])
     submit = SubmitField('Submit')
+
+    def validate_score(self, score):
+        if not 0 <= score.data <= 10:
+            raise ValidationError('Invalid score! Score must be between 0 and 10.')
+
+    def validate_description(self, description):
+        if not description:
+            raise ValidationError('Description is missing!')
