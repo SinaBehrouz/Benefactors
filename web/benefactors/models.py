@@ -20,8 +20,8 @@ class notificationTypeEnum(Enum):
     STATUS_CLOSED = 6
     STATUS_OPEN = 7
     DELETED = 8
-    POST_DELETED_VOLUNTEER
-    POST_DELETED_COM
+    POST_DELETED_VOLUNTEER = 9
+    POST_DELETED_COM = 10
 
 
 class statusEnum(Enum):
