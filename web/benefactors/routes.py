@@ -5,7 +5,8 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, messageStatusEnum, channelStatusEnum, ChatChannel, ChatMessages, UserReview
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, messageStatusEnum, channelStatusEnum, \
+    ChatChannel, ChatMessages, UserReview
 from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, DonationForm, PostForm, RequestResetForm, \
     ResetPasswordForm, SearchForm, PostCommentForm, SendMessageForm, ReviewForm
 from flask_mail import Message
@@ -15,7 +16,8 @@ from .postalCodeManager import postalCodeManager
 from .search import SearchUtil
 
 
-# -------------------------------------------Login/Logout-------------------------------------------
+# -------------------------------------------------Login/Logout---------------------------------------------------------
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -37,7 +39,7 @@ def logout():
     return redirect(url_for('home'))
 
 
-# ----------------------------------------------SignUp----------------------------------------------
+# ----------------------------------------------------SignUp------------------------------------------------------------
 
 @app.route("/signup", methods=['GET', 'POST'])
 def sign_up():
@@ -59,7 +61,7 @@ def sign_up():
     return render_template('signup.html', title='Register', form=form)
 
 
-# -----------------------------------------------Forgot Pass------------------------------------------
+# ---------------------------------------------------Forgot Pass--------------------------------------------------------
 
 def send_reset_email(user):
     token = user.get_reset_token()
@@ -103,7 +105,7 @@ def reset_token(token):
     return render_template('reset_token.html', title='Reset Password', form=form)
 
 
-# -----------------------------------------------Home-------------------------------------------------
+# -----------------------------------------------------Home-------------------------------------------------------------
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
@@ -157,7 +159,7 @@ def home():
         return render_template('home.html', posts=posts, form=form)
 
 
-# -----------------------------------------------Posts----------------------------------------------
+# ----------------------------------------------------Posts-------------------------------------------------------------
 
 # Create new post
 @app.route("/post/new", methods=['GET', 'POST'])
@@ -289,7 +291,7 @@ def delete_post(post_id):
     return redirect(url_for('home'))
 
 
-# -----------------------------------------------Comments----------------------------------------------
+# ----------------------------------------------------Comments----------------------------------------------------------
 
 # Create a new comment on a post
 @app.route("/post/<int:post_id>/comments/new", methods=['GET', 'POST'])
@@ -310,9 +312,6 @@ def create_new_comment(post_id):
     return render_template('post.html', post=post, comments=comments, form=form)
 
 
-# Update comment (NOT IMPLMENTED CURRENTLY)
-# NOTE: Backend logic is complete but front end needs work in post.html.
-# Feel free to make changes in update_comment if you are working in frontend.
 @app.route("/post/<int:post_id>/comments/<int:comment_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_comment(post_id, comment_id):
@@ -345,7 +344,7 @@ def delete_comment(post_id, comment_id):
     return redirect(url_for('post', post_id=post_id))
 
 
-# --------------------------------------Account----------------------------------------
+# -----------------------------------------------------Account----------------------------------------------------------
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
@@ -395,14 +394,14 @@ def get_account():
     return render_template('account.html', user=user, to_do=to_do)
 
 
-# -----------------------------------Other Account----------------------------------------
+# -------------------------------------------------Other Account--------------------------------------------------------
 
 
 def get_avg_rating(reviews):
     ratings = [review.score for review in reviews]
     if ratings:
         average = sum(ratings) / len(ratings)
-        return average
+        return round(average, 1)
     return "No reviews available"
 
 
@@ -419,25 +418,26 @@ def other_account(user_id):
     return render_template('other_account.html', account=account, reviews=reviews, avg_rating=avg_rating, form=form)
 
 
-# -----------------------------------------------Reviews----------------------------------------------
+# ----------------------------------------------------Reviews-----------------------------------------------------------
 
 
 @app.route("/account/<int:user_id>/reviews/new", methods=['POST'])
 @login_required
 def add_review(user_id):
     form = ReviewForm()
-    if request.method == 'POST':
+    if form.validate_on_submit():
         if user_id == current_user.id:
             flash('You cannot review yourself!', 'danger')
             return redirect(url_for('other_account', user_id=user_id))
 
-        if form.validate_on_submit():
-            review = UserReview(description=form.description.data, score=form.score.data,
-                                profile=user_id, author=current_user.id)
-            db.session.add(review)
-            db.session.commit()
-            flash('Review added!', 'success')
+        review = UserReview(description=form.description.data, score=form.score.data, profile=user_id,
+                            author=current_user.id)
+        db.session.add(review)
+        db.session.commit()
+        flash('Review added!', 'success')
+        return redirect(url_for('other_account', user_id=user_id))
 
+    flash('Invalid value! Score must be between 1 and 10!', 'danger')
     return redirect(url_for('other_account', user_id=user_id))
 
 
@@ -453,7 +453,7 @@ def delete_review(user_id, review_id):
     return redirect(url_for('other_account', user_id=user_id))
 
 
-# ---------------------------------------About-----------------------------------------
+# ------------------------------------------------------About-----------------------------------------------------------
 
 @app.route("/about")
 def about():
@@ -487,7 +487,7 @@ def charge():
         return redirect(url_for('about'))
 
 
-# -------------------------------------Messages-----------------------------------------
+# ------------------------------------------------------Messages--------------------------------------------------------
 
 @app.route("/messages", methods=['GET', 'POST'])
 @login_required
@@ -532,11 +532,13 @@ def messages_chat(channel_id):
     # In case the user submits an empty message or the request.method is GET
     else:
         # Add authorization security, if authorized
-        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:   
-            return render_template('messages.html', owner=current_user, chatchannels=channels, form=form, messages=messages, 
-                                    channel_id=channel_id)
+        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:
+            return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
+                                   messages=messages,
+                                   channel_id=channel_id)
         flash("You are not authorized to access that page", 'danger')
         return redirect(url_for('home')), 403
+
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -567,6 +569,7 @@ def create_new_chat_channel(cmt_auth_id):
 
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
+
 @app.route("/messages/<int:channel_id>/<int:message_id>/delete", methods=['GET'])
 @login_required
 def delete_message(channel_id, message_id):
@@ -582,7 +585,8 @@ def delete_message(channel_id, message_id):
     flash("You are not authorized to access that page", 'danger')
     return redirect(url_for('home'))
 
-# ----------------------------------Messages Helper-------------------------------------
+
+# -------------------------------------------------Messages Helper------------------------------------------------------
 
 # Find whether the channel already exists
 def findSpecificChannel(user1_id, user2_id):
@@ -624,15 +628,17 @@ def getAllChannelsForUser(user):
     channels = channels + channels_1[i:] + channels_2[j:]
     return channels
 
+
 # Get all messages for the Chat Channel
 def getConversationForChannel(channel_id):
-    messages = ChatMessages.query.filter_by(channel_id = channel_id).order_by(ChatMessages.message_time.desc()).all()
+    messages = ChatMessages.query.filter_by(channel_id=channel_id).order_by(ChatMessages.message_time.desc()).all()
     # Read all the messages and update the status
     UpdateReadMessageStatusForChannel(channel_id)
     return messages
 
+
 def UpdateReadMessageStatusForChannel(channel_id):
-    channel = ChatChannel.query.filter_by(id = channel_id).first()
+    channel = ChatChannel.query.filter_by(id=channel_id).first()
     # If current user equals user 1
     if current_user.id == channel.user1_id:
         channel.user1_status = channelStatusEnum.READ
@@ -641,4 +647,3 @@ def UpdateReadMessageStatusForChannel(channel_id):
         channel.user2_status = channelStatusEnum.READ
     # Update the DB with the status.
     db.session.commit()
-
