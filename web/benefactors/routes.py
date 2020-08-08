@@ -400,8 +400,10 @@ def get_account():
 
 def get_avg_rating(reviews):
     ratings = [review.score for review in reviews]
-    average = sum(ratings) / len(ratings)
-    return average
+    if ratings:
+        average = sum(ratings) / len(ratings)
+        return average
+    return "No reviews available"
 
 
 @app.route("/account/<int:user_id>", methods=['GET', 'POST'])
@@ -430,7 +432,7 @@ def add_review(user_id):
             return redirect(url_for('other_account', user_id=user_id))
 
         if form.validate_on_submit():
-            review = UserReview(title=form.title.data, description=form.description.data, score=form.score.data,
+            review = UserReview(description=form.description.data, score=form.score.data,
                                 profile=user_id, author=current_user.id)
             db.session.add(review)
             db.session.commit()
@@ -439,7 +441,7 @@ def add_review(user_id):
     return redirect(url_for('other_account', user_id=user_id))
 
 
-@app.route("/account/<int:user_id>/reviews/<int:review_id>/delete", methods=['POST'])
+@app.route("/account/<int:user_id>/reviews/<int:review_id>/delete", methods=['POST', 'GET'])
 @login_required
 def delete_review(user_id, review_id):
     review = UserReview.query.get_or_404(review_id)
