@@ -344,3 +344,7 @@ input:hover.search-bar{
 #dropdownMenuLink_messages {
   margin-left: 0.5em;
 }
+
+#placeholder-empty-message{
+  height: 100%;
+}

@@ -50,8 +50,8 @@
             </article>
         </div>
         <div class="row">
-            {% if chatchannels %}
             <div class="col" id="chat-sidebar">
+            {% if chatchannels %}
                 {% for channel in chatchannels %}
                 <ul class="list-group">
                     <li class="list-group-item list-group-item-light" id="channel-list">
@@ -67,6 +67,7 @@
                 </ul>
                 {% endfor %}
             {% else %} 
+                <p id="placeholder-empty-channel"> </p>
             {% endif %}
             </div>
             <div class="col-10" id="chat-content">
@@ -106,7 +107,17 @@
                         </div>
                         {% endif %}
                     {% endfor %}
+                {% else %}
+                    <p id="placeholder-empty-message">
+                    {% if channel_id %}
+                        Your chat is empty
+                    {% else %}
+                        Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well
+                    </p>
+                    {% endif %}
+                {% endif %}
                 </div>
+                {% if channel_id %}
                 <div id="form_send_message_box">
                     <!-- add a textbox and a button to chat -->
                     <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
@@ -130,35 +141,6 @@
                     </fieldset>
                     </form>
                 </div>
-                {% else %} 
-                    {% if channel_id %}
-                        <p id="placeholder-message">Your chat is empty</p>
-                        <!-- add a textbox and a button to chat -->
-                        <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
-                            {{ form.hidden_tag() }}
-                            <fieldset class="form-group">
-                                <div class ="form-group">
-                                    {{ form.chat_message_desc.label }}
-                                    {% if form.chat_message_desc.errors %}
-                                        {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.chat_message_desc.errors %}
-                                                <span>{{ error }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        {{ form.chat_message_desc(class="form-control form-control-lg") }}
-                                    {% endif %}
-                                    <!-- Send message button -->
-                                    {{ form.submit_chatmsg(class="btn btn-outline-info") }}
-                                </div>
-                            </fieldset>
-                        </form>
-
-                    {% else %}
-                        <p id="placeholder-message"> Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well</p>
-                    {% endif %}
-
                 {% endif %}
             </div>
         </div>
