@@ -245,6 +245,8 @@ input:hover.search-bar{
 .container .row #inside-chat-container {
   height: 55%;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .container .row #inside-chat-container::-webkit-scrollbar {
@@ -321,10 +323,12 @@ input:hover.search-bar{
 
 #name_left {
   font-size: small;
+  display: inline-flex;
 }
 
 #name_right {
   font-size: small;
+  display: inline-flex;
 }
 
 #time_left {
@@ -335,4 +339,8 @@ input:hover.search-bar{
 #time_right {
   text-align: right;
   font-size: small;
+}
+
+#dropdownMenuLink_messages {
+  margin-left: 0.5em;
 }

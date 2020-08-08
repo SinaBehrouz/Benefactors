@@ -76,25 +76,33 @@
                     {% for message in messages %}
                         {% if owner != message.sender %}
                         <div class="message_sender" id="message_sender_left">
-                            <div class="left_content" id="left_name">
-                                <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
-                                <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
-                            </div>
-                            <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
+                            {% if message.message_status.name == "SENT" %}
+                                <div class="left_content" id="left_name">
+                                    <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
+                                    <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
+                                </div>
+                                <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
+                            {% elif message.message_status.name == "DELETED" %}
+                                <p class="msg_content" id="msg_content_left">{{ message.sender }} has deleted the message</p>  <!-- This will be the messages content-->
+                            {% endif %}
                         </div>
                         {% else %} 
                         <div class="message_sender" id="message_sender_right">
-                            <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
-                            <div class="right_content" id="right_name">
-                                <span class="msg_sender_name" id="name_right">{{ message.sender.username }} | 
-                                <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>V</small></a>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                    <a class="dropdown-item" href=#>Edit</a>
-                                    <a class="dropdown-item" href=#>Delete</a>
+                            {% if message.message_status.name == "SENT" %}
+                                <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
+                                <div class="right_content" id="right_name">
+                                    <span class="msg_sender_name" id="name_right">{{ message.sender.username }}
+                                    <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">V</a>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                        <a class="dropdown-item" href=#>Edit</a>
+                                        <a class="dropdown-item" href="{{ url_for('delete_message', channel_id=message.channel_id, message_id=message.id) }}">Delete</a>
+                                    </div>
+                                    </span> 
+                                    <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
                                 </div>
-                                </span> 
-                                <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
-                            </div>
+                            {% elif message.message_status.name == "DELETED" %}
+                                <p class="msg_content" id="msg_content_right">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
+                            {% endif %}
                         </div>
                         {% endif %}
                     {% endfor %}

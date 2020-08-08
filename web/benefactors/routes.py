@@ -5,7 +5,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, messageStatusEnum, ChatChannel, ChatMessages
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
                                PostForm, RequestResetForm, ResetPasswordForm, SearchForm, 
                                PostCommentForm, SendMessageForm)
@@ -443,7 +443,6 @@ def charge():
 def messages():
     channels = getAllChannelsForUser(current_user)
     return render_template('messages.html', owner = current_user, chatchannels=channels)
-
         
 @app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
 @login_required
@@ -472,9 +471,13 @@ def messages_chat(channel_id):
             messages = getConversationForChannel(channel_id)
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
-    
     # In case the user submits an empty message or the request.method is GET
-    return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, messages=messages, channel_id = channel_id)
+    else:
+        # Add authorization security, if authorized
+        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:   
+            return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, messages=messages, channel_id = channel_id)
+        flash("You are not authorized to access that page", 'danger')
+        return redirect(url_for('home'))
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -504,6 +507,21 @@ def create_new_chat_channel(cmt_auth_id):
             db.session.commit()
 
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
+
+@app.route("/messages/<int:channel_id>/<int:message_id>/delete", methods=['GET'])
+@login_required
+def delete_message(channel_id, message_id):
+    message = ChatMessages.query.get_or_404(message_id)
+    # Add authorization security
+    if current_user.id == message.sender_id:
+        if message.sender != current_user:
+            abort(403)
+        message.message_status = messageStatusEnum.DELETED
+        db.session.commit()
+        return redirect(url_for('messages_chat', channel_id=channel_id))
+    # If not authorized, flash an error. Redirect to home page.
+    flash("You are not authorized to access that page", 'danger')
+    return redirect(url_for('home'))
 
 # ----------------------------------Messages Helper-------------------------------------
 
@@ -547,5 +565,5 @@ def getAllChannelsForUser(user):
     return channels
 
 def getConversationForChannel(id):
-    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.asc()).all()
+    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.desc()).all()
     return conversations
