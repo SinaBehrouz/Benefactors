@@ -32,14 +32,13 @@ class categoryEnum(Enum):
 
 
 class channelStatusEnum(Enum):
-    ISREAD = 1
-    ISDELIVERED = 2
+    READ = 1
+    DELIVERED = 2
 
 
 class messageStatusEnum(Enum):
     SENT = 1
-    EDITED = 2
-    DELETED = 3
+    DELETED = 2
 
 
 @login_manager.user_loader
@@ -61,6 +60,8 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='author', lazy=True, foreign_keys='Post.user_id')
     comments = db.relationship('PostComment', backref='cmt_author', lazy=True, foreign_keys='PostComment.user_id')
     reviews = db.relationship('UserReview', backref='rev_author', lazy=True, foreign_keys='UserReview.author')
+
+    channels = db.relationship('ChatMessages', backref='channel_user', lazy=True, foreign_keys='ChatMessages.sender_id')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -125,9 +126,9 @@ class ChatChannel(db.Model):
     user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # always lower than user2_id
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    user1_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.ISREAD)
-    user2_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.ISREAD)
-
+    user1_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.READ)
+    user2_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.READ)
+    
     user_1 = db.relationship("User", backref=backref("usr_1", uselist=False), foreign_keys=[user1_id])
     user_2 = db.relationship("User", backref=backref("usr_2", uselist=False), foreign_keys=[user2_id])
 

@@ -5,7 +5,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages, UserReview
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, messageStatusEnum, channelStatusEnum, ChatChannel, ChatMessages, UserReview
 from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, DonationForm, PostForm, RequestResetForm, \
     ResetPasswordForm, SearchForm, PostCommentForm, SendMessageForm, ReviewForm
 from flask_mail import Message
@@ -91,7 +91,7 @@ def reset_token(token):
         return redirect(url_for('home'))
     user = User.verify_reset_token(token)
     if not user:
-        flash("That is an invalid or expired toekn", 'warning')
+        flash("That is an invalid or expired token", 'warning')
         return redirect(url_for('reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
@@ -310,7 +310,7 @@ def create_new_comment(post_id):
     return render_template('post.html', post=post, comments=comments, form=form)
 
 
-# Update comment
+# Update comment (NOT IMPLMENTED CURRENTLY)
 # NOTE: Backend logic is complete but front end needs work in post.html.
 # Feel free to make changes in update_comment if you are working in frontend.
 @app.route("/post/<int:post_id>/comments/<int:comment_id>/update", methods=['GET', 'POST'])
@@ -516,19 +516,27 @@ def messages_chat(channel_id):
                                        channel_id=channel_id)
             db.session.add(chatmessage)
 
+            # Update the status of the new message to another_user
+            current_channel.user1_status = channelStatusEnum.DELIVERED
+            current_channel.user2_status = channelStatusEnum.DELIVERED
+
             # Update the channel last_updated field because of new comments are made
             current_channel.last_updated = curr_time
-            # DB update is caused by channel last_update
+
+            # DB update is caused by channel last_update and status
             db.session.commit()
 
             messages = getConversationForChannel(channel_id)
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
-
     # In case the user submits an empty message or the request.method is GET
-    return render_template('messages.html', owner=current_user, chatchannels=channels, form=form, messages=messages,
-                           channel_id=channel_id)
-
+    else:
+        # Add authorization security, if authorized
+        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:   
+            return render_template('messages.html', owner=current_user, chatchannels=channels, form=form, messages=messages, 
+                                    channel_id=channel_id)
+        flash("You are not authorized to access that page", 'danger')
+        return redirect(url_for('home')), 403
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -559,6 +567,20 @@ def create_new_chat_channel(cmt_auth_id):
 
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
+@app.route("/messages/<int:channel_id>/<int:message_id>/delete", methods=['GET'])
+@login_required
+def delete_message(channel_id, message_id):
+    message = ChatMessages.query.get_or_404(message_id)
+    # Add authorization security
+    if current_user.id == message.sender_id:
+        if message.sender != current_user:
+            abort(403)
+        message.message_status = messageStatusEnum.DELETED
+        db.session.commit()
+        return redirect(url_for('messages_chat', channel_id=channel_id))
+    # If not authorized, flash an error. Redirect to home page.
+    flash("You are not authorized to access that page", 'danger')
+    return redirect(url_for('home'))
 
 # ----------------------------------Messages Helper-------------------------------------
 
@@ -602,7 +624,21 @@ def getAllChannelsForUser(user):
     channels = channels + channels_1[i:] + channels_2[j:]
     return channels
 
+# Get all messages for the Chat Channel
+def getConversationForChannel(channel_id):
+    messages = ChatMessages.query.filter_by(channel_id = channel_id).order_by(ChatMessages.message_time.desc()).all()
+    # Read all the messages and update the status
+    UpdateReadMessageStatusForChannel(channel_id)
+    return messages
 
-def getConversationForChannel(id):
-    conversations = ChatMessages.query.filter_by(channel_id=id).order_by(ChatMessages.message_time.asc()).all()
-    return conversations
+def UpdateReadMessageStatusForChannel(channel_id):
+    channel = ChatChannel.query.filter_by(id = channel_id).first()
+    # If current user equals user 1
+    if current_user.id == channel.user1_id:
+        channel.user1_status = channelStatusEnum.READ
+    # If current user equals user 2
+    else:
+        channel.user2_status = channelStatusEnum.READ
+    # Update the DB with the status.
+    db.session.commit()
+
