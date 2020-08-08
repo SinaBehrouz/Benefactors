@@ -16,8 +16,9 @@
 
         <div class="dropdown show">
           <!--Post Date-->
-          <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }} </small>
-          <small class="text-muted"> <b> {{ post.category.name }}</b> </small>
+          <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+          <small>|</small>
+          <small class="text-muted"><b>{{ post.category.name }}</b></small>
           <small>|</small>
 
           <!--Post Status-->

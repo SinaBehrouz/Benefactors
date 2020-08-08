@@ -32,6 +32,9 @@
                               {{ form.postalCode(class="form-control form-control-lg adv-search-bar", placeholder="e.g. Coquitlam Center...", id="autocomplete") }}
                           {% endif %}
                       </div>
+                      <div>
+                          {{ form.gSuggest(id="gSuggest", class="hidden_box") }}
+                      </div>
                       <div class="form-group">
                           {{ form.radius.label(class="form-control-label") }}
                           {% if form.radius.errors %}
@@ -92,6 +95,7 @@
                     <a class="mr-2">{{ post.author.username }}</a>
                     <div>
                       <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+                      <small>|</small>
                       <small class="text-muted"> <b> {{ post.category.name }}</b> </small>
                       <small class="text-muted">  |  </small>
                       {% if post.status.name == "OPEN" %}

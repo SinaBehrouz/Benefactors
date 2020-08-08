@@ -1,3 +1,7 @@
+html{
+  overflow: scroll;
+  overflow-x: hidden;
+}
 body {
   background: url("../Backgrounds/body-bg.png") no-repeat center fixed;
   -webkit-background-size: cover;
@@ -37,6 +41,16 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 10px;
+}
+
+#infoCenter.content-section{
+  background: #ffffff;
+  padding: 10px 20px;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  position:fixed;
+  transform: none;
 }
 
 #post-display.content-section:hover {
@@ -262,4 +276,11 @@ small#CanclledStatus{
 }
 small#ClosedStatus{
 color:red!important;
+}
+li#infoCenterLi{
+  margin-bottom: 5px;
+}
+
+.hidden_box{
+  display: none;
 }
