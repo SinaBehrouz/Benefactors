@@ -106,7 +106,6 @@ class PostComment(db.Model):
 
 class UserReview(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     score = db.Column(db.Integer, nullable=False)
@@ -114,7 +113,7 @@ class UserReview(db.Model):
     profile = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return f"UserReview('{self.title}', '{self.description}', '{self.score}''{self.date_posted}')"
+        return f"UserReview('{self.description}', '{self.score}''{self.date_posted}')"
 
 
 # User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1.
