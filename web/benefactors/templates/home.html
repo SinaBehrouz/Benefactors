@@ -92,7 +92,7 @@
             <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
             <div class="media-body">
                 <div class="article-metadata">
-                    <a class="mr-2">{{ post.author.username }}</a>
+                    <a class="mr-2" href="{{ url_for('other_account', user_id=post.author.id) }}">{{ post.author.username }}</a>
                     <div>
                       <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
                       <small>|</small>
