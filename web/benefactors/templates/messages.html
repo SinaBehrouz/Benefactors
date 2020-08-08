@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/main.css') }}">
     <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
     <title>Benefactors</title>
 
@@ -55,7 +55,7 @@
                 {% for channel in chatchannels %}
                 <ul class="list-group">
                     {% if ((channel.user1_id == owner.id and channel.user1_status.name == "DELIVERED") or (channel.user2_id == owner.id and channel.user2_status.name == "DELIVERED")) %}
-                        <li class="list-group-item list-group-item-light" id="channel-list" style="background-color: yellow;">
+                        <li class="list-group-item list-group-item-light" id="channel-list-delivered">
                             <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
                                 {% if channel.user_1.id == current_user.id %}
                                     {{ channel.user_2.username }}

@@ -18,6 +18,7 @@ class statusEnum(Enum):
     CANCELLED = 3
     CLOSED = 4
 
+
 class categoryEnum(Enum):
     CLEANING = 1
     DELIVERY = 2
@@ -29,13 +30,16 @@ class categoryEnum(Enum):
     MEDICATION = 8
     OTHERS = 9
 
+
 class channelStatusEnum(Enum):
     READ = 1
     DELIVERED = 2
 
+
 class messageStatusEnum(Enum):
     SENT = 1
     DELETED = 2
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -55,6 +59,7 @@ class User(db.Model, UserMixin):
 
     posts = db.relationship('Post', backref='author', lazy=True, foreign_keys='Post.user_id')
     comments = db.relationship('PostComment', backref='cmt_author', lazy=True, foreign_keys='PostComment.user_id')
+    reviews = db.relationship('UserReview', backref='rev_author', lazy=True, foreign_keys='UserReview.author')
 
     channels = db.relationship('ChatMessages', backref='channel_user', lazy=True, foreign_keys='ChatMessages.sender_id')
 
@@ -97,15 +102,28 @@ class PostComment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
     def __repr__(self):
-        return f"Post('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"
+        return f"PostComment('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"
 
-# User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1. 
+
+class UserReview(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.Text)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    score = db.Column(db.Integer, nullable=False)
+    author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    profile = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"UserReview('{self.description}', '{self.score}''{self.date_posted}')"
+
+
+# User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1.
 # You cannot have two channels between two same users twice, unless the channel is closed
 class ChatChannel(db.Model):
     __tablename__ = "chatchannel"
 
-    id = db.Column(db.Integer, primary_key = True)
-    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # always lower than user2_id
+    id = db.Column(db.Integer, primary_key=True)
+    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # always lower than user2_id
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user1_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.READ)
@@ -117,10 +135,11 @@ class ChatChannel(db.Model):
     def __repr__(self):
         return f"ChatChannel('{self.user1_id}', '{self.user2_id}', '{self.user_1.username}', '{self.user_2.username}', '{self.last_updated}')"
 
+
 class ChatMessages(db.Model):
     __tablename__ = "chatmessages"
 
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
     message_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
