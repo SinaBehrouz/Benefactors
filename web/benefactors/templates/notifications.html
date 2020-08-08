@@ -1,19 +1,41 @@
 <!--Note to self, to-do: Need to format and clean up. This is only functional, not clean and does not have proper styling-->
 {% extends "layout.html" %}
 {% block content %}
-<article class="media content-section">
-        <div class="notifications">
-            <h4 class="Notifications Title"> My Notifications </h4>
-            <h2 class="Notifications Title"> Unread Notifications </h2>
-            {% for a in unread_notifications %}
-            <p><a class="article-title" href="{{ url_for('post', post_id=a.post_id) }}">{{ a.notification_message }}</a></p>
-            {% endfor %}
-            <h2 class="Notifications Title"> Read Notifications </h2>
-            {% for b in read_notifications %}
-            <p><a class="article-title" href="{{ url_for('post', post_id=b.post_id) }}">{{ b.notification_message }}</a></p>
-            {% endfor %}
+  <!--Notifications-->
+  <div class="content-section">
+    <h3 class="notification-title">My Notifications</h3>
+    {% for notification in unread_notifications %}
+    <!-- cannot seem to make notification display tag work, even after adding it to css -->
+      <article class="media content-section" id="comment-display">
+        <div class="media-body">
+            <div class="article-metadata">
+              <!--Notification Message-->
+              <b><a class="mr-20" href="{{ url_for('post', post_id=notification.post_id) }}">{{ notification.notification_message }}</a></b>
+              <div class="dropdown show">
+                <!--Notification Date Date-->
+                <small class="text-muted">{{ notification.date_created.strftime('%Y-%m-%d %H:%M') }}</small>
+              </div>
+            </div>
         </div>
+      </article>
+    {% endfor %}
+    {% for notification in read_notifications %}
+    <!-- cannot seem to make notification display tag work, even after adding it to css -->
+      <article class="media content-section" id="comment-display">
+        <div class="media-body">
+            <div class="article-metadata">
+              <!--Notification Message-->
+              <a class="mr-20" href="{{ url_for('post', post_id=notification.post_id) }}">{{ notification.notification_message }}</a>
+              <div class="dropdown show">
+                <!--Notification Date Date-->
+                <small class="text-muted">{{ notification.date_created.strftime('%Y-%m-%d %H:%M') }}</small>
+              </div>
+            </div>
+        </div>
+      </article>
+    {% endfor %}
 
-   
-</article>
+
+  </div>
+
 {% endblock content %}

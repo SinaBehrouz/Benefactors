@@ -300,10 +300,11 @@ def volunteer(post_id):
         # notification = Notification(recipient=recipient, notifier=current_user.id, post_id=post_id, notification_message=notification_message, is_read=0, type=notificationTypeEnum.VOLUNTEER)
         # db.session.add(notification)
 
-        notification_message = "{} has volunteered for your post! The the status of your post is now taken.".format(current_user.username)
+        notification_message = "{} volunteered for your post!".format(current_user.username)
         notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
 
-        notification_message = "A post you commented on has now been is now taken by another volunteer! The status is now taken."
+        # say status is now taken?
+        notification_message = "A post you commented on has is now taken by another volunteer!"
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
        
 
@@ -328,10 +329,12 @@ def unvolunteer(post_id):
         flash('You are no longer volunteering for the post!', 'success')
 
         # ------ create notification for post owner, and all users who have commented on this post -------- # 
-        notification_message = "{} has un-volunteered for your post! The the status of your post is now open.".format(current_user.username)
+        # want to say that it's open now?
+        notification_message = "{} has un-volunteered for your post!".format(current_user.username)
         notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
 
-        notification_message = "A post you commented on has now been has lost its volunteer! The status of the post is now open."
+        # want to say that it's open now?
+        notification_message = "A post you commented on has lost its volunteer!"
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
     
     db.session.commit()
@@ -696,16 +699,16 @@ def getConversationForChannel(id):
 @login_required
 def get_notifications():
     user = User.query.filter_by(email=current_user.email).first()
-    unread_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=False).all()
-    read_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=True).all()
+    unread_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=False).order_by(Notification.date_created.desc()).all()
+    read_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=True).order_by(Notification.date_created.desc()).all()
     
     # marking all of them as read now
-    try:
-        for notification in unread_notifications:
+  
+    for notification in unread_notifications:
             notification.is_read=True
             db.session.commit()
-    except:
-        print("caught duplicate error, not adding it", flush=True)
+    # combine notification view?
+   
 
 
 

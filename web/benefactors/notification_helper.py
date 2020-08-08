@@ -4,7 +4,7 @@ from benefactors.models import User, Post, PostComment, statusEnum, notification
 from sqlalchemy import or_, desc, asc
 import json
 from sqlalchemy.exc import IntegrityError
-
+import datetime
 
 
 
@@ -27,6 +27,7 @@ def notify_commenters(post_id, notifier_user_id,notification_message, type):
                 print("volunteeered")
                 print(duplicate.notification_message, flush=True)
                 duplicate.is_read=False
+                duplicate.date_created=datetime.datetime.now()
                 db.session.commit()
             else: 
                 print("should create a notification", flush=True)
@@ -44,6 +45,7 @@ def notify_volunteer(post_id, notifier_user_id, notification_message, type):
             print("printing duplicate", flush=True)
             print(duplicate.notification_message, flush=True)
             duplicate.is_read=False
+            duplicate.date_created=datetime.datetime.now()
             db.session.commit()  
             
         else: 
@@ -63,6 +65,7 @@ def notify_post_owner(post_id, notifier_user_id, notification_message, type):
             print("printing duplicate", flush=True)
             print(duplicate.notification_message, flush=True)
             duplicate.is_read=False
+            duplicate.date_created=datetime.datetime.now()
             db.session.commit()  
         else: 
             notification = Notification(recipient=recipient, notifier=notifier_user_id, post_id=post_id, notification_message=notification_message, is_read=0, type=type)

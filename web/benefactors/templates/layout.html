@@ -59,8 +59,8 @@
          <div class="content-section" style="position:fixed; transform: none;">
            <h3>Information Center</h3>
              <ul class="list-group">
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">To Do List</a> </li>
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">My Posts</a> </li>
+               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
+               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My To-Do List</a> </li>
                <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
              </ul>
          </div>
