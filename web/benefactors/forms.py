@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField, SelectMultipleField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
 from benefactors.models import User, genderEnum, statusEnum, categoryEnum
 from .postalCodeManager import postalCodeManager
@@ -16,7 +16,7 @@ class SearchForm(FlaskForm):
     category = SelectField('Category')
     updateSearch = SubmitField('Apply Filters')
 
-    def validate_postal_code(self,postal_code):
+    def validate_postal_code(self, postal_code):
         pcm = postalCodeManager()
         if not pcm.verifyPostalCode(postal_code.data):
             raise ValidationError('That is not a valid Postal Code.')
