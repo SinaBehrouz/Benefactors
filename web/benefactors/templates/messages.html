@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" style="overflow-y:hidden">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
+    <title>Benefactors</title>
+
+</head>
+
+<body>
+<header class="site-header">
+    <nav class="navbar navbar-expand-md navbar-dark bg-header fixed-top">
+        <div class="container">
+            <a class="navbar-brand mr-4" href="/">Benefactors</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarToggle">
+                <div class="navbar-nav mr-auto">
+                    <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
+                    <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
+                </div>
+                <!-- Navbar Right Side -->
+                <div class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <a class="nav-item nav-link" href="{{ url_for('create_new_post') }}">New Post</a>
+                    <a class="nav-item nav-link" href="{{ url_for('get_account') }}">Account</a>
+                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                    <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-item nav-link" href="{{ url_for('sign_up') }}">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+    <!-- Messages Channel - This will always be populated if there are any messages, whenever the messages is opened-->
+    <div class="container">
+        <div class = "row">
+            <article class="media content-section">
+                <div class="media-body">
+                    <h2 id="welcome-message">Welcome to your message inbox, {{ owner.username }}</h2>
+                </div>
+            </article>
+        </div>
+        <div class="row">
+            {% if chatchannels %}
+            <div class="col" id="chat-sidebar">
+                {% for channel in chatchannels %}
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-light" id="channel-list">
+                        <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
+                            {% if channel.user_1.id == current_user.id %}
+                                {{ channel.user_2.username }}
+                            {% else %}
+                                {{ channel.user_1.username }}
+                            {% endif %}
+                        </a>
+                        <small id="message-last-upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </li>
+                </ul>
+                {% endfor %}
+            {% else %} 
+            {% endif %}
+            </div>
+            <div class="col-10" id="chat-content">
+                <div class="container" id="inside-chat-container">
+                {% if messages %}
+                <!-- Messages Content - This will be empty at the beginning-->                
+                    {% for message in messages %}
+                        {% if owner != message.sender %}
+                        <div class="message_sender" id="message_sender_left">
+                            <div class="left_content" id="left_name">
+                                <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
+                                <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
+                            </div>
+                            <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
+                        </div>
+                        {% else %} 
+                        <div class="message_sender" id="message_sender_right">
+                            <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
+                            <div class="right_content" id="right_name">
+                                <span class="msg_sender_name" id="name_right">{{ message.sender.username }} | 
+                                <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>V</small></a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" href=#>Edit</a>
+                                    <a class="dropdown-item" href=#>Delete</a>
+                                </div>
+                                </span> 
+                                <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div id="form_send_message_box">
+                    <!-- add a textbox and a button to chat -->
+                    <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
+                    {{ form.hidden_tag() }}
+                    <fieldset class="form-group">
+                        <div class ="form-group">
+                            {{ form.chat_message_desc.label }}
+                                {% if form.chat_message_desc.errors %}
+                                    {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.chat_message_desc.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.chat_message_desc(class="form-control form-control-lg") }}
+                                {% endif %}
+                            <!-- Send message button -->
+                            {{ form.submit_chatmsg(class="btn btn-outline-info", id="send-msg-btn") }}
+                        </div>
+                    </fieldset>
+                    </form>
+                </div>
+                {% else %} 
+                    {% if channel_id %}
+                        <p id="placeholder-message">Your chat is empty</p>
+                        <!-- add a textbox and a button to chat -->
+                        <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
+                            {{ form.hidden_tag() }}
+                            <fieldset class="form-group">
+                                <div class ="form-group">
+                                    {{ form.chat_message_desc.label }}
+                                    {% if form.chat_message_desc.errors %}
+                                        {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.chat_message_desc.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        {{ form.chat_message_desc(class="form-control form-control-lg") }}
+                                    {% endif %}
+                                    <!-- Send message button -->
+                                    {{ form.submit_chatmsg(class="btn btn-outline-info") }}
+                                </div>
+                            </fieldset>
+                        </form>
+
+                    {% else %}
+                        <p id="placeholder-message"> Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well</p>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<!-- <script type="text/javascript">
+    window.scrollTo(0,document.querySelector("#inside-chat-container").scrollHeight)
+</script> -->
+
+</body>
+</html>

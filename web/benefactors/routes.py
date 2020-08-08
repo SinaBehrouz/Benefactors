@@ -5,11 +5,13 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, ChatChannel, ChatMessages
 from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
-                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, PostCommentForm)
+                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, 
+                               PostCommentForm, SendMessageForm)
 from flask_mail import Message
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, asc
+from datetime import datetime
 from .postalCodeManager import postalCodeManager
 from .search import SearchUtil
 # -------------------------------------------Login/Logout-------------------------------------------
@@ -108,7 +110,7 @@ def home():
     choices = [("allCat", "All Categories")]
     for c in categoryEnum:
         choices.append( (c.name, c.name) )
-    form.category.choices = choices;
+    form.category.choices = choices
     if form.validate_on_submit():
         posts = []
         searchString = form.searchString.data
@@ -162,7 +164,7 @@ def create_new_post():
     choices = []
     for c in categoryEnum:
         choices.append( (c.name, c.name) )
-    form.category.choices = choices;
+    form.category.choices = choices
     if form.validate_on_submit():
         post = Post(title=form.title.data, description=form.description.data,
                     author=current_user, category=categoryEnum._member_map_[form.category.data] )
@@ -192,7 +194,7 @@ def update_post(post_id):
     choices = []
     for c in categoryEnum:
         choices.append( (c.name, c.name) )
-    form.category.choices = choices;
+    form.category.choices = choices
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
@@ -422,3 +424,117 @@ def charge():
     except:
         flash('Something went wrong!', 'danger')
         return redirect(url_for('about'))
+
+# -------------------------------------Messages-----------------------------------------
+
+@app.route("/messages", methods=['GET', 'POST'])
+@login_required
+def messages():
+    channels = getAllChannelsForUser(current_user)
+    return render_template('messages.html', owner = current_user, chatchannels=channels)
+
+        
+@app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
+@login_required
+def messages_chat(channel_id):
+    channels = getAllChannelsForUser(current_user)
+    messages = getConversationForChannel(channel_id)
+    form = SendMessageForm()
+    current_channel = ChatChannel.query.get_or_404(channel_id)
+
+    # it might need the other user id and current user id
+    # we will need to create a new channel here, depending on which user we choose to chat
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            # Get the time
+            curr_time = datetime.utcnow()
+            
+            # Parse the form
+            chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
+            db.session.add(chatmessage)
+
+            # Update the channel last_updated field because of new comments are made
+            current_channel.last_updated = curr_time
+            # DB update is caused by channel last_update
+            db.session.commit()
+
+            messages = getConversationForChannel(channel_id)
+
+            return redirect(url_for('messages_chat', channel_id=channel_id))
+    
+    # In case the user submits an empty message or the request.method is GET
+    return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, messages=messages, channel_id = channel_id)
+
+@app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
+@login_required
+def create_new_chat_channel(cmt_auth_id):
+    if request.method == 'GET':
+        # Check whether channel already exists
+        channel_id = findSpecificChannel(current_user.id, cmt_auth_id)
+
+        # If already exists retrieve messages
+        if channel_id != -1:
+            return redirect(url_for('messages_chat', channel_id=channel_id))
+        # If not, create a new channel
+        else:
+            user1 = -1 
+            user2 = -1
+
+            if current_user.id < cmt_auth_id:
+                user1 = current_user.id
+                user2 = cmt_auth_id
+            else:
+                user1 = cmt_auth_id
+                user2 = current_user.id
+            
+            newChannel = ChatChannel(user1_id=user1, user2_id=user2)
+            db.session.add(newChannel)
+            # DB update is caused by creating a new channel
+            db.session.commit()
+
+            return redirect(url_for('messages_chat', channel_id=newChannel.id))
+
+# ----------------------------------Messages Helper-------------------------------------
+
+# Find whether the channel already exists
+def findSpecificChannel(user1_id, user2_id):
+    # initialize channel
+    channel = ChatChannel.query.filter_by(user1_id = user1_id, user2_id = user2_id).first()
+
+    if user1_id > user2_id:
+        channel = ChatChannel.query.filter_by(user1_id = user2_id, user2_id = user1_id).first()
+
+    if channel == None:
+        return -1
+    
+    return channel.id
+
+# Get the channel from the current_user
+def getAllChannelsForUser(user):
+    channels = []
+
+    # Initialize two channels
+    channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+    channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+
+    # Get the size of the channels
+    size_1 = len(channels_1)
+    size_2 = len(channels_2)
+    
+    i = 0
+    j = 0
+    # Sort the channel based on the most recent, loop through two channels and merge them 
+    while i < size_1 and j < size_2:
+        if channels_1[i].last_updated > channels_2[j].last_updated:
+            channels.append(channels_1[i])
+            i += 1
+        else: 
+            channels.append(channels_2[j])
+            j += 1
+
+    channels = channels + channels_1[i:] + channels_2[j:]
+    return channels
+
+def getConversationForChannel(id):
+    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.asc()).all()
+    return conversations

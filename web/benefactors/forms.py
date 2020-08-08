@@ -108,10 +108,19 @@ class PostCommentForm(FlaskForm):
     submit_comment = SubmitField('Submit Comment')
 
     def validate_commentdesc(self, comment_desc):
-        if comment_desc.strip() == "":
+        if comment_desc.data.strip() == "":
             raise ValidationError('Comment cannot be empty')
 
 
 class DonationForm(FlaskForm):
     amount = IntegerField('Amount', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Pay with Card')
+
+
+class SendMessageForm(FlaskForm):
+    chat_message_desc = TextAreaField('', validators=[DataRequired(), Length(min=1, max=1024)])
+    submit_chatmsg = SubmitField('Send Message')
+
+    def validate_chat_message_desc(self, chat_message_desc):
+        if chat_message_desc.data.strip() == "":
+            raise ValidationError('Message cannot be empty')
