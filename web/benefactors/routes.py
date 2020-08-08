@@ -13,7 +13,7 @@ from flask_mail import Message
 from sqlalchemy import or_, desc, asc
 from datetime import datetime
 from .postalCodeManager import postalCodeManager
-
+from .search import SearchUtil
 # -------------------------------------------Login/Logout-------------------------------------------
 @app.route("/login", methods=['GET', 'POST'])
 def login():
@@ -118,7 +118,7 @@ def home():
             searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
             posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
                                                          Post.description.ilike(searchString),
-                                                         User.username.ilike(searchString))).all()
+                                                         User.username.ilike(searchString)))
         else:
             posts = db.session.query(Post).join(User, User.id==Post.user_id)
         #filter based on staus
@@ -128,27 +128,25 @@ def home():
         if (form.category.data != 'allCat'):
             posts = posts.filter(Post.category==categoryEnum._member_map_[form.category.data])
         #filter based on close by posts
-        pcm = postalCodeManager()
-        parsed_location = form.postalCode.data.split(',')
-        if(len(parsed_location) < 3):
-            flash("could not find the location, please choose one of the suggessted locations!", 'warning')
-            return render_template('home.html', posts=[], form=form)
-        else:
-            pc = pcm.getPCfromCity(parsed_location[-3])
-            if not pc:
-                if current_user.is_authenticated:
-                    flash('Unable to find the location - will use the postal code on the account', 'warning')
-                    pc = current_user.postal_code
-                else:
-                    flash('Unable to find the location - will use return search based on Vancouver Area', 'warning')
-                    pc = "V5H3Z7"
-        pcm.getNearybyPassCodes(pc, form.radius.data)
-        nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
-        # nearby_users = db.session.query(User).filter( User.postal_code.in_(nearby_postal_codes) ).all()
-        try:
-            posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
-        except:
-            pass #rare case - a random bug w sqlalchemy
+
+        if form.postalCode.data:
+            pcm = postalCodeManager()
+            searchUtil = SearchUtil()
+            searchRes =searchUtil.get_adv_pc_from_location(form)
+            if len(searchRes[1]) > 0:
+                flash(searchRes[1], 'warning')
+                if searchRes[0] < 0:
+                    return render_template('home.html', posts=[], form=form), 400
+            pc = searchRes[0]
+            pcm.getNearybyPassCodes(pc, form.radius.data)
+            nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
+            try:
+                posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
+            except:
+                flash("WTF HAPPE$NED")
+                pc = pcm.getPCfromCity(parsed_location[-3])#rare case - a random bug w sqlalchemy
+
+        flash("Search Updated!", "success")
         posts = posts.order_by(desc(Post.date_posted)).all()
         return render_template('home.html', posts=posts, form=form)
     else:
@@ -177,23 +175,14 @@ def create_new_post():
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
 
-# Function to get nearby location on Google map based on post author's postal code and post category
-def get_nearby_locations(post):
-    # TODO: Add Google Maps logic here!
-
-    postal_code = post.author.postal_code
-    category = post.category.name
-    google_map = f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{category}'+near" + postal_code
-    return google_map
-
-
 # Get specific post
 @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id=post_id)
     form = PostCommentForm()
-    nearby_locations = get_nearby_locations(post)
+    searchUtil = SearchUtil()
+    nearby_locations = searchUtil.get_nearby_locations(post)
     return render_template('post.html', post=post, comments=comments, form=form, a=nearby_locations)
 
 
