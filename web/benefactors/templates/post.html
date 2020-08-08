@@ -61,7 +61,7 @@
               <a class="btn btn-danger btn-sm mt-1 mb-1" href="{{ url_for('unvolunteer', post_id=post.id) }}">Unvolunteer</a>
             {% endif %}
             <!-- Create a new Button for Message -->
-            <a class="btn btn-info btn-sm mt-1 mb-1" href="{{ url_for('create_new_chat_channel', cmt_auth_id=post.user_id) }}">Comment</a>
+            <a class="btn btn-info btn-sm mt-1 mb-1" href="{{ url_for('create_new_chat_channel', cmt_auth_id=post.user_id) }}">Message</a>
           </div>
         {% endif %}
     </div>
@@ -75,7 +75,7 @@
         <div class="media-body">
             <div class="article-metadata">
               <!--Comment Author-->
-              <a class="mr-20" href="#">{{ comment.cmt_author.username }}</a>
+              <a class="mr-20" href="{{ url_for('other_account', user_id=comment.cmt_author.id) }}">{{ comment.cmt_author.username }}</a>
               <div class="dropdown show">
                 <!--Comment Date-->
                 <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
