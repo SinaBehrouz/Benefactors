@@ -180,7 +180,7 @@ class Notification(db.Model):
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     recipient = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     notifier = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), ondelete='CASCADE', nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', ondelete='CASCADE'), nullable=False)
     notification_message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, nullable=False, default=0)
     type = db.Column(db.Enum(notificationTypeEnum), nullable=False)
