@@ -18,7 +18,7 @@ from .search import SearchUtil
 
 # -------------------------------------------------Login/Logout---------------------------------------------------------
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login/", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if current_user.is_authenticated:
@@ -33,7 +33,7 @@ def login():
     return render_template('login.html', title='Login', form=form)
 
 
-@app.route("/logout")
+@app.route("/logout/")
 def logout():
     logout_user()
     return redirect(url_for('home'))
@@ -41,7 +41,7 @@ def logout():
 
 # ----------------------------------------------------SignUp------------------------------------------------------------
 
-@app.route("/signup", methods=['GET', 'POST'])
+@app.route("/signup/", methods=['GET', 'POST'])
 def sign_up():
     form = SignUpForm()
     if current_user.is_authenticated:
@@ -74,7 +74,7 @@ If you did not make this request, simply ignore this email and no changes will b
     mail.send(msg)
 
 
-@app.route("/reset_password", methods=['GET', 'POST'])
+@app.route("/reset_password/", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
@@ -87,7 +87,7 @@ def reset_request():
     return render_template('reset_request.html', title='Reset Password', form=form)
 
 
-@app.route("/reset_password/<token>", methods=['GET', 'POST'])
+@app.route("/reset_password/<token>/", methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
         return redirect(url_for('home'))
@@ -108,7 +108,7 @@ def reset_token(token):
 # -----------------------------------------------------Home-------------------------------------------------------------
 
 @app.route("/", methods=['GET', 'POST'])
-@app.route("/home", methods=['GET', 'POST'])
+@app.route("/home/", methods=['GET', 'POST'])
 def home():
     form = SearchForm(status=0, tag='allCat', radius=50)
     choices = [("allCat", "All Categories")]
@@ -160,7 +160,7 @@ def home():
 # ----------------------------------------------------Posts-------------------------------------------------------------
 
 # Create new post
-@app.route("/post/new", methods=['GET', 'POST'])
+@app.route("/post/new/", methods=['GET', 'POST'])
 @login_required
 def create_new_post():
     form = PostForm()
@@ -179,7 +179,7 @@ def create_new_post():
 
 
 # Get specific post
-@app.route("/post/<int:post_id>", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/", methods=['GET', 'POST'])
 def post(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id=post_id)
@@ -190,7 +190,7 @@ def post(post_id):
 
 
 # Update title/content of a specific post.
-@app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/update/", methods=['GET', 'POST'])
 @login_required
 def update_post(post_id):
     form = PostForm()
@@ -214,7 +214,7 @@ def update_post(post_id):
 
 
 # Update post status to open
-@app.route("/post/<int:post_id>/status/open", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/status/open/", methods=['GET', 'POST'])
 @login_required
 def open_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -228,7 +228,7 @@ def open_post(post_id):
 
 
 # Update post status to close
-@app.route("/post/<int:post_id>/status/close", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/status/close/", methods=['GET', 'POST'])
 @login_required
 def close_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -242,7 +242,7 @@ def close_post(post_id):
 
 
 # Assign volunteer
-@app.route("/post/<int:post_id>/volunteer", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/volunteer/", methods=['GET', 'POST'])
 @login_required
 def volunteer(post_id):
     post = Post.query.get_or_404(post_id)
@@ -260,7 +260,7 @@ def volunteer(post_id):
 
 
 # Remove volunteer
-@app.route("/post/<int:post_id>/unvolunteer", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/unvolunteer/", methods=['GET', 'POST'])
 @login_required
 def unvolunteer(post_id):
     post = Post.query.get_or_404(post_id)
@@ -277,7 +277,7 @@ def unvolunteer(post_id):
 
 
 # Delete post
-@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@app.route("/post/<int:post_id>/delete/", methods=['POST'])
 @login_required
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -292,7 +292,7 @@ def delete_post(post_id):
 # ----------------------------------------------------Comments----------------------------------------------------------
 
 # Create a new comment on a post
-@app.route("/post/<int:post_id>/comments/new", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/comments/new/", methods=['GET', 'POST'])
 @login_required
 def create_new_comment(post_id):
     post = Post.query.get_or_404(post_id)
@@ -310,7 +310,7 @@ def create_new_comment(post_id):
     return render_template('post.html', post=post, comments=comments, form=form)
 
 
-@app.route("/post/<int:post_id>/comments/<int:comment_id>/update", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/comments/<int:comment_id>/update/", methods=['GET', 'POST'])
 @login_required
 def update_comment(post_id, comment_id):
     form = PostCommentForm()
@@ -330,7 +330,7 @@ def update_comment(post_id, comment_id):
 
 
 # Delete comment
-@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete/", methods=['GET', 'POST'])
 @login_required
 def delete_comment(post_id, comment_id):
     comment = PostComment.query.get_or_404(comment_id)
@@ -355,7 +355,7 @@ def save_image(picture):
     return picture_name
 
 
-@app.route("/account/edit", methods=['GET', 'POST'])
+@app.route("/account/edit/", methods=['GET', 'POST'])
 @login_required
 def edit_account():
     form = AccountUpdateForm()
@@ -383,7 +383,7 @@ def edit_account():
     return render_template('edit_account.html', title='Edit Account', user_image=user_image, form=form)
 
 
-@app.route("/account", methods=['GET'])
+@app.route("/account/", methods=['GET'])
 @login_required
 def get_account():
     user = User.query.filter_by(email=current_user.email).first()
@@ -403,7 +403,7 @@ def get_avg_rating(reviews):
     return "No reviews available"
 
 
-@app.route("/account/<int:user_id>", methods=['GET', 'POST'])
+@app.route("/account/<int:user_id>/", methods=['GET', 'POST'])
 @login_required
 def other_account(user_id):
     account = User.query.get_or_404(user_id)
@@ -419,7 +419,7 @@ def other_account(user_id):
 # ----------------------------------------------------Reviews-----------------------------------------------------------
 
 
-@app.route("/account/<int:user_id>/reviews/new", methods=['POST'])
+@app.route("/account/<int:user_id>/reviews/new/", methods=['POST'])
 @login_required
 def add_review(user_id):
     form = ReviewForm()
@@ -439,7 +439,7 @@ def add_review(user_id):
     return redirect(url_for('other_account', user_id=user_id))
 
 
-@app.route("/account/<int:user_id>/reviews/<int:review_id>/delete", methods=['POST', 'GET'])
+@app.route("/account/<int:user_id>/reviews/<int:review_id>/delete/", methods=['POST', 'GET'])
 @login_required
 def delete_review(user_id, review_id):
     review = UserReview.query.get_or_404(review_id)
@@ -453,13 +453,13 @@ def delete_review(user_id, review_id):
 
 # ------------------------------------------------------About-----------------------------------------------------------
 
-@app.route("/about")
+@app.route("/about/")
 def about():
     form = DonationForm()
     return render_template('about.html', form=form, key=stripe_keys['publishable_key'])
 
 
-@app.route('/charge', methods=['POST'])
+@app.route('/charge/', methods=['POST'])
 def charge():
     try:
         form = DonationForm()
@@ -487,14 +487,14 @@ def charge():
 
 # ------------------------------------------------------Messages--------------------------------------------------------
 
-@app.route("/messages", methods=['GET', 'POST'])
+@app.route("/messages/", methods=['GET', 'POST'])
 @login_required
 def messages():
     channels = getAllChannelsForUser(current_user)
     return render_template('messages.html', owner=current_user, chatchannels=channels)
 
 
-@app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
+@app.route("/messages/<int:channel_id>/", methods=['GET', 'POST'])
 @login_required
 def messages_chat(channel_id):
     channels = getAllChannelsForUser(current_user)
@@ -538,7 +538,7 @@ def messages_chat(channel_id):
         return redirect(url_for('home')), 403
 
 
-@app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
+@app.route("/messages/create/<int:cmt_auth_id>/", methods=['GET'])
 @login_required
 def create_new_chat_channel(cmt_auth_id):
     if request.method == 'GET':
@@ -568,7 +568,7 @@ def create_new_chat_channel(cmt_auth_id):
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
 
-@app.route("/messages/<int:channel_id>/<int:message_id>/delete", methods=['GET'])
+@app.route("/messages/<int:channel_id>/<int:message_id>/delete/", methods=['GET'])
 @login_required
 def delete_message(channel_id, message_id):
     message = ChatMessages.query.get_or_404(message_id)
