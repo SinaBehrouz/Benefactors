@@ -103,10 +103,10 @@
                             {% if message.message_status.name == "SENT" %}
                                 <p class="msg_content">{{ message.message_content }}</p> <!-- This will be the messages content-->
                                 <div class="right_content">
-                                    <span class="name_right">{{ message.sender.username }}
+                                    <span class="name_right">{{ message.sender.username }} {{ message.id }}
                                     <a href="" role="button" class="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">X</a>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                        <a class="dropdown-item" href="{{ url_for('delete_message', channel_id=message.channel_id, message_id=message.id) }}">Delete</a>
+                                        <button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteMessage-{{message.id}}">Delete</button>
                                     </div>
                                     </span> 
                                     <span class="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
@@ -116,13 +116,36 @@
                             {% endif %}
                         </div>
                         {% endif %}
+                        <!--Delete Post Popup-->
+                        <div class="modal fade" id="deleteMessage-{{message.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteMessageLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="deleteMessageLabel">Delete Message?</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('delete_message', channel_id=message.channel_id, message_id=message.id) }}" method="POST">
+                                    <input class="btn btn-danger" type="submit" value="Delete Comment">
+                                </form>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
                     {% endfor %}
                 {% else %}
                     <p class="placeholder-empty-message">
                     {% if channel_id %}
                         Your chat is empty
+                    {% elif chatchannels %}
+                        Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well. <br><br>
+                        You can start messaging people through "Message" button on viewing other people's post, "Message" from people who comment on a post, or "Message" their profile.
                     {% else %}
-                        Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well
+                        You currently have no message channels and messages with anyone. <br><br>
+                        You can start messaging people through "Message" button on viewing other people's post, "Message" from people who comment on a post, or "Message" their profile.
                     </p>
                     {% endif %}
                 {% endif %}
@@ -155,13 +178,10 @@
             </div>
         </div>
     </div>
+
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
-<!-- <script type="text/javascript">
-    window.scrollTo(0,document.querySelector("#inside-chat-container").scrollHeight)
-</script> -->
 
 </body>
 </html>

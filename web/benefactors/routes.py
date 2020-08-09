@@ -374,7 +374,7 @@ def update_comment(post_id, comment_id):
 
 
 # Delete comment
-@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete/", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete/", methods=['POST'])
 @login_required
 def delete_comment(post_id, comment_id):
     comment = PostComment.query.get_or_404(comment_id)
@@ -612,7 +612,7 @@ def create_new_chat_channel(cmt_auth_id):
         return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
 
-@app.route("/messages/<int:channel_id>/<int:message_id>/delete/", methods=['GET'])
+@app.route("/messages/<int:channel_id>/<int:message_id>/delete/", methods=['POST'])
 @login_required
 def delete_message(channel_id, message_id):
     message = ChatMessages.query.get_or_404(message_id)
@@ -624,7 +624,7 @@ def delete_message(channel_id, message_id):
         db.session.commit()
         return redirect(url_for('messages_chat', channel_id=channel_id))
     # If not authorized, flash an error. Redirect to home page.
-    flash("You are not authorized to access that page", 'danger')
+    flash("You are not authorized to access that page, User:" + current_user.username + "You should be: " + message.sender.username , 'danger')
     return redirect(url_for('home'))
 
 

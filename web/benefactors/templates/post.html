@@ -83,9 +83,6 @@
                   <small>|</small>
                   <a class="" href="#" role="button" id="dropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>EDIT</small></a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <!-- TODO: Update comment backend logic is implemented but frontend needs work. -->
-                    <!-- Change href="{{ url_for('update_comment', post_id=post.id, comment_id=comment.id) }}" to call backend logic. -->
-                     <a class="dropdown-item" href=#>Edit</a>
                     <a class="dropdown-item" href="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}">Delete</a>
                   </div>
                 {% else %}

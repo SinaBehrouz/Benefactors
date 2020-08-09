@@ -49,8 +49,8 @@ def seed_db():
     db.session.add(ChatMessages(sender_id=2, message_content="Hi Eric, I live at apartment across from Langara Station, the nearest grocery is T&T or Safeway around Oakridge area.", channel_id=1, message_time=datetime.datetime(2020,8,1,12,6,21)))
     db.session.add(ChatMessages(sender_id=6, message_content="Oh perfect!! I would probably go more often to Safeway if that's okay with you, but I can go to T&T as well. When do you want to start and what do you want to deliver?", channel_id=1, message_time=datetime.datetime(2020,8,1,12,25,45)))
     db.session.add(ChatMessages(sender_id=2, message_content="For this week, I would like to get eggs, gluten-free bread (Please make sure it's gluten free), and 2% Milk. I will pay you for sure through interac. Can I get your email, please?", channel_id=1, message_time=datetime.datetime(2020,8,1,13,26,44)))
-    db.session.add(ChatMessages(sender_id=6, message_content="Great! I will deliver it to you tomorrow morning from Safeway, if that's okay. ", channel_id=1, message_time=datetime.datetime(2020,8,2,15,27,22)))
-    db.session.add(ChatMessages(sender_id=2, message_content="Sounds great, see you tomorrow morning" , channel_id=1, message_time=datetime.datetime(2020,8,1,16,5,11)))
+    db.session.add(ChatMessages(sender_id=6, message_content="Great! I will deliver it to you tomorrow morning from Safeway, if that's okay. ", channel_id=1, message_time=datetime.datetime(2020,8,1,16,27,22)))
+    db.session.add(ChatMessages(sender_id=2, message_content="Sounds great, see you tomorrow morning" , channel_id=1, message_time=datetime.datetime(2020,8,1,16,45,11)))
     db.session.add(ChatMessages(sender_id=6, message_content="Hi Taylah, am outside your apartment with your groceries. My email is My email is haymond@gmail.com. It is around 24.3, you can check the receipt later.", channel_id=1, message_time=datetime.datetime(2020,8,2,9,33,33)))
     db.session.add(ChatMessages(sender_id=2, message_content="Already? Thank you so much, Eric. I am heading down right now" , channel_id=1, message_time=datetime.datetime(2020,8,2,9,35,22)))
 
