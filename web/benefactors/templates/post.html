@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
+<!--Google Map-->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&libraries=places&callback=initAutocomplete" async defer></script>
+<script type="text/javascript" src="{{ url_for('static', filename='JS/post.js') }}"></script>
 
   <!--Posts-->
   <article class="media content-section">
@@ -13,19 +16,20 @@
 
         <div class="dropdown show">
           <!--Post Date-->
-          <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }} </small>
-          <small class="text-muted" style="font-weight: bold;">{{ post.category.name }}</small>
+          <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
+          <small>|</small>
+          <small class="text-muted"><b>{{ post.category.name }}</b></small>
           <small>|</small>
 
           <!--Post Status-->
           {% if post.status.name == "OPEN" %}
-            <small class="text-muted" style="color:#9cd28a!important;">{{ post.status.name }}</small>
+            <small id="openStatus" class="text-muted">{{ post.status.name }}</small>
           {% elif post.status.name == "TAKEN" %}
-            <small class="text-muted" style="color:#ffa601!important;">{{ post.status.name }}</small>
+            <small id ="takenStatus" class="text-muted">{{ post.status.name }}</small>
           {% elif post.status.name == "CANCELLED" %}
-            <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+            <small id ="CanclledStatus" class="text-muted">{{ post.status.name }}</small>
           {% elif post.status.name == "CLOSED"%}
-            <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+            <small id ="ClosedStatus" class="text-muted">{{ post.status.name }}</small>
           {% endif %}
 
           <!--Post Update Options-->
@@ -57,7 +61,7 @@
               <a class="btn btn-danger btn-sm mt-1 mb-1" href="{{ url_for('unvolunteer', post_id=post.id) }}">Unvolunteer</a>
             {% endif %}
             <!-- Create a new Button for Message -->
-            <a class="btn btn-info btn-sm mt-1 mb-1" href="{{ url_for('create_new_chat_channel', cmt_auth_id=post.user_id) }}">Comment</a>
+            <a class="btn btn-info btn-sm mt-1 mb-1" href="{{ url_for('create_new_chat_channel', cmt_auth_id=post.user_id) }}">Message</a>
           </div>
         {% endif %}
     </div>
@@ -71,7 +75,7 @@
         <div class="media-body">
             <div class="article-metadata">
               <!--Comment Author-->
-              <a class="mr-20" href="#">{{ comment.cmt_author.username }}</a>
+              <a class="mr-20" href="{{ url_for('other_account', user_id=comment.cmt_author.id) }}">{{ comment.cmt_author.username }}</a>
               <div class="dropdown show">
                 <!--Comment Date-->
                 <small class="text-muted">{{ comment.date_posted.strftime('%Y-%m-%d') }}</small>
@@ -146,39 +150,10 @@
     </div>
   </div>
 
-  <!--Google Map-->
-  <!--Ideally this should be in a separate JS file-->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&libraries=places&callback=initAutocomplete" async defer></script>
-  <script type="text/javascript">
-  let autocomplete;
-  function initAutocomplete(){
-    autocomplete = new google.maps.places.Autocomplete(
-    document.getElementById('autocomplete'), {
-      types: ['establishment'],
-      fields: ['place_id', 'geometry', 'name']
-    });
-    autocomplete.addListener('place_changed', onPlaceChanged);
-  }
-  function onPlaceChanged(){
-    update()
-  }
-  function update(){
-    var place = autocomplete.getPlace();
-    if (!place.geometry){ //whether user actually clicked a prediction or entered some text that did not result in predictions
-      document.getElementById('autocomplete').placeholder = "Search Items based on Locations";
-    }
-    let sites = 'https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q=' + place.name
-    document.getElementById('map').src = sites;
-    }
-  </script>
-
-  <div class="media content-section" style="display:grid;">
-    <h3 class="comments-title" style ="grid-row: 1;"> Relevant locations have been displayed</h3>
-    <input id="autocomplete" class="control form-control form-control-lg search-bar" type="text" placeholder="Search Items based on Locations" style:"grid-row:2; z-index: 2"/>
-    <iframe id="map" class="article-content" width="690" height="450" frameborder="0"
-      style = "border:0; -webkit-filter: grayscale(50%); filter: grayscale(50%);"
-      src={{ a }} allowfullscreen>
-    </iframe>
+  <div class="media content-section grid">
+    <h3 class="comments-title grid-r-1"> Relevant locations have been displayed</h3>
+    <input id="autocomplete" class="control form-control form-control-lg search-bar" type="text" placeholder="Search Items based on Locations"/>
+    <iframe id="map" class="article-content" width="690" height="450" src={{ a }} allowfullscreen> </iframe>
   </div>
 
 {% endblock content %}

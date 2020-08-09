@@ -5,19 +5,22 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
-from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, notificationTypeEnum,ChatChannel, ChatMessages, Notification
-from benefactors.forms import (LoginForm, SignUpForm, AccountUpdateForm, DonationForm,
-                               PostForm, RequestResetForm, ResetPasswordForm, SearchForm, 
-                               PostCommentForm, SendMessageForm)
+from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, messageStatusEnum, channelStatusEnum, \
+    ChatChannel, ChatMessages, UserReview, notificationTypeEnum, Notification
+from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, DonationForm, PostForm, RequestResetForm, \
+    ResetPasswordForm, SearchForm, PostCommentForm, SendMessageForm, ReviewForm
 from flask_mail import Message
 from sqlalchemy import or_, desc, asc
 from datetime import datetime
 from .postalCodeManager import postalCodeManager
-import json
-from sqlalchemy.exc import IntegrityError
+from .search import SearchUtil
 from benefactors.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
 
-# -------------------------------------------Login/Logout-------------------------------------------
+
+
+
+# -------------------------------------------------Login/Logout---------------------------------------------------------
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -39,7 +42,7 @@ def logout():
     return redirect(url_for('home'))
 
 
-# ----------------------------------------------SignUp----------------------------------------------
+# ----------------------------------------------------SignUp------------------------------------------------------------
 
 @app.route("/signup", methods=['GET', 'POST'])
 def sign_up():
@@ -49,7 +52,8 @@ def sign_up():
     if form.validate_on_submit():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data,
-                    email=form.email.data, phone_number=form.phone_number.data, postal_code=form.postal_code.data.upper(),
+                    email=form.email.data, phone_number=form.phone_number.data,
+                    postal_code=form.postal_code.data.upper(),
                     password=hash)
         db.session.add(user)
         db.session.commit()
@@ -60,7 +64,7 @@ def sign_up():
     return render_template('signup.html', title='Register', form=form)
 
 
-# -----------------------------------------------Forgot Pass------------------------------------------
+# ---------------------------------------------------Forgot Pass--------------------------------------------------------
 
 def send_reset_email(user):
     token = user.get_reset_token()
@@ -92,7 +96,7 @@ def reset_token(token):
         return redirect(url_for('home'))
     user = User.verify_reset_token(token)
     if not user:
-        flash("That is an invalid or expired toekn", 'warning')
+        flash("That is an invalid or expired token", 'warning')
         return redirect(url_for('reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
@@ -104,54 +108,53 @@ def reset_token(token):
     return render_template('reset_token.html', title='Reset Password', form=form)
 
 
-# -----------------------------------------------Home-------------------------------------------------
+# -----------------------------------------------------Home-------------------------------------------------------------
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home", methods=['GET', 'POST'])
 def home():
-    form = SearchForm(status=0, tag='allCat', radius= 50)
+    form = SearchForm(status=0, tag='allCat', radius=50)
     choices = [("allCat", "All Categories")]
     for c in categoryEnum:
-        choices.append( (c.name, c.name) )
+        choices.append((c.name, c.name))
     form.category.choices = choices
     if form.validate_on_submit():
         posts = []
         searchString = form.searchString.data
         if len(searchString) > 0:
-            searchString = "%{}%".format(searchString) #Post.author.username.like(searchString)
-            posts = db.session.query(Post).join(User, User.id==Post.user_id).filter( or_( Post.title.ilike(searchString),
-                                                         Post.description.ilike(searchString),
-                                                         User.username.ilike(searchString))).all()
+            searchString = "%{}%".format(searchString)  # Post.author.username.like(searchString)
+            posts = db.session.query(Post).join(User, User.id == Post.user_id).filter(
+                or_(Post.title.ilike(searchString),
+                    Post.description.ilike(searchString),
+                    User.username.ilike(searchString)))
         else:
-            posts = db.session.query(Post).join(User, User.id==Post.user_id)
-        #filter based on staus
+            posts = db.session.query(Post).join(User, User.id == Post.user_id)
+        # filter based on staus
         if (form.status.data != 'all'):
-            posts = posts.filter(Post.status==statusEnum._member_map_[form.status.data])
-        #filter based on category
+            posts = posts.filter(Post.status == statusEnum._member_map_[form.status.data])
+        # filter based on category
         if (form.category.data != 'allCat'):
-            posts = posts.filter(Post.category==categoryEnum._member_map_[form.category.data])
-        #filter based on close by posts
-        pcm = postalCodeManager()
-        parsed_location = form.postalCode.data.split(',')
-        if(len(parsed_location) < 3):
-            flash("could not find the location, please choose one of the suggessted locations!", 'warning')
-            return render_template('home.html', posts=[], form=form)
-        else:
-            pc = pcm.getPCfromCity(parsed_location[-3])
-            if not pc:
-                if current_user.is_authenticated:
-                    flash('Unable to find the location - will use the postal code on the account', 'warning')
-                    pc = current_user.postal_code
-                else:
-                    flash('Unable to find the location - will use return search based on Vancouver Area', 'warning')
-                    pc = "V5H3Z7"
-        pcm.getNearybyPassCodes(pc, form.radius.data)
-        nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
-        # nearby_users = db.session.query(User).filter( User.postal_code.in_(nearby_postal_codes) ).all()
-        try:
-            posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes] ) )
-        except:
-            pass #rare case - a random bug w sqlalchemy
+            posts = posts.filter(Post.category == categoryEnum._member_map_[form.category.data])
+        # filter based on close by posts
+
+        if form.postalCode.data:
+            pcm = postalCodeManager()
+            searchUtil = SearchUtil()
+            searchRes = searchUtil.get_adv_pc_from_location(form)
+            if len(searchRes[1]) > 0:
+                flash(searchRes[1], 'warning')
+                if searchRes[0] < 0:
+                    return render_template('home.html', posts=[], form=form)
+            pc = searchRes[0]
+            pcm.getNearybyPassCodes(pc, form.radius.data)
+            nearby_postal_codes = pcm.getNearybyPassCodes(pc, form.radius.data)
+            try:
+                posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes]))
+            except:
+                flash("WTF HAPPE$NED")
+                pc = pcm.getPCfromCity(parsed_location[-3])  # rare case - a random bug w sqlalchemy
+
+        flash("Search Updated!", "success")
         posts = posts.order_by(desc(Post.date_posted)).all()
         return render_template('home.html', posts=posts, form=form)
     else:
@@ -159,7 +162,7 @@ def home():
         return render_template('home.html', posts=posts, form=form)
 
 
-# -----------------------------------------------Posts----------------------------------------------
+# ----------------------------------------------------Posts-------------------------------------------------------------
 
 # Create new post
 @app.route("/post/new", methods=['GET', 'POST'])
@@ -168,26 +171,16 @@ def create_new_post():
     form = PostForm()
     choices = []
     for c in categoryEnum:
-        choices.append( (c.name, c.name) )
+        choices.append((c.name, c.name))
     form.category.choices = choices
     if form.validate_on_submit():
         post = Post(title=form.title.data, description=form.description.data,
-                    author=current_user, category=categoryEnum._member_map_[form.category.data] )
+                    author=current_user, category=categoryEnum._member_map_[form.category.data])
         db.session.add(post)
         db.session.commit()
         flash('Post created!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
-
-
-# Function to get nearby location on Google map based on post author's postal code and post category
-def get_nearby_locations(post):
-    # TODO: Add Google Maps logic here!
-
-    postal_code = post.author.postal_code
-    category = post.category.name
-    google_map = f"https://www.google.com/maps/embed/v1/search?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&q='{category}'+near" + postal_code
-    return google_map
 
 
 # Get specific post
@@ -196,7 +189,8 @@ def post(post_id):
     post = Post.query.get_or_404(post_id)
     comments = db.session.query(PostComment).filter_by(post_id=post_id)
     form = PostCommentForm()
-    nearby_locations = get_nearby_locations(post)
+    searchUtil = SearchUtil()
+    nearby_locations = searchUtil.get_nearby_locations(post)
     return render_template('post.html', post=post, comments=comments, form=form, a=nearby_locations)
 
 
@@ -207,7 +201,7 @@ def update_post(post_id):
     form = PostForm()
     choices = []
     for c in categoryEnum:
-        choices.append( (c.name, c.name) )
+        choices.append((c.name, c.name))
     form.category.choices = choices
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
@@ -340,7 +334,7 @@ def delete_post(post_id):
     return redirect(url_for('home'))
 
 
-# -----------------------------------------------Comments----------------------------------------------
+# ----------------------------------------------------Comments----------------------------------------------------------
 
 # Create a new comment on a post
 @app.route("/post/<int:post_id>/comments/new", methods=['GET', 'POST'])
@@ -372,9 +366,6 @@ def create_new_comment(post_id):
     return render_template('post.html', post=post, comments=comments, form=form)
 
 
-# Update comment
-# NOTE: Backend logic is complete but front end needs work in post.html.
-# Feel free to make changes in update_comment if you are working in frontend.
 @app.route("/post/<int:post_id>/comments/<int:comment_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_comment(post_id, comment_id):
@@ -407,7 +398,7 @@ def delete_comment(post_id, comment_id):
     return redirect(url_for('post', post_id=post_id))
 
 
-# --------------------------------------Account----------------------------------------
+# -----------------------------------------------------Account----------------------------------------------------------
 
 def save_image(picture):
     picture_name = uuid.uuid4().hex + '.jpg'
@@ -457,7 +448,66 @@ def get_account():
     return render_template('account.html', account=user, to_do=to_do)
 
 
-# ---------------------------------------About-----------------------------------------
+# -------------------------------------------------Other Account--------------------------------------------------------
+
+
+def get_avg_rating(reviews):
+    ratings = [review.score for review in reviews]
+    if ratings:
+        average = sum(ratings) / len(ratings)
+        return round(average, 1)
+    return "No reviews available"
+
+
+@app.route("/account/<int:user_id>", methods=['GET', 'POST'])
+@login_required
+def other_account(user_id):
+    account = User.query.get_or_404(user_id)
+    if account == current_user:
+        return redirect(url_for('get_account'))
+
+    form = ReviewForm()
+    reviews = db.session.query(UserReview).filter_by(profile=user_id)
+    avg_rating = get_avg_rating(reviews)
+    return render_template('other_account.html', account=account, reviews=reviews, avg_rating=avg_rating, form=form)
+
+
+# ----------------------------------------------------Reviews-----------------------------------------------------------
+
+
+@app.route("/account/<int:user_id>/reviews/new", methods=['POST'])
+@login_required
+def add_review(user_id):
+    form = ReviewForm()
+    if form.validate_on_submit():
+        if user_id == current_user.id:
+            flash('You cannot review yourself!', 'danger')
+            return redirect(url_for('other_account', user_id=user_id))
+
+        review = UserReview(description=form.description.data, score=form.score.data, profile=user_id,
+                            author=current_user.id)
+        db.session.add(review)
+        db.session.commit()
+        flash('Review added!', 'success')
+        return redirect(url_for('other_account', user_id=user_id))
+
+    flash('Invalid value! Score must be between 1 and 10!', 'danger')
+    return redirect(url_for('other_account', user_id=user_id))
+
+
+@app.route("/account/<int:user_id>/reviews/<int:review_id>/delete", methods=['POST', 'GET'])
+@login_required
+def delete_review(user_id, review_id):
+    review = UserReview.query.get_or_404(review_id)
+    if review.rev_author != current_user:
+        abort(403)
+    db.session.delete(review)
+    db.session.commit()
+    flash('Your review has been deleted!', 'success')
+    return redirect(url_for('other_account', user_id=user_id))
+
+
+# ------------------------------------------------------About-----------------------------------------------------------
 
 @app.route("/about")
 def about():
@@ -490,15 +540,16 @@ def charge():
         flash('Something went wrong!', 'danger')
         return redirect(url_for('about'))
 
-# -------------------------------------Messages-----------------------------------------
+
+# ------------------------------------------------------Messages--------------------------------------------------------
 
 @app.route("/messages", methods=['GET', 'POST'])
 @login_required
 def messages():
     channels = getAllChannelsForUser(current_user)
-    return render_template('messages.html', owner = current_user, chatchannels=channels)
+    return render_template('messages.html', owner=current_user, chatchannels=channels)
 
-        
+
 @app.route("/messages/<int:channel_id>", methods=['GET', 'POST'])
 @login_required
 def messages_chat(channel_id):
@@ -513,22 +564,38 @@ def messages_chat(channel_id):
         if form.validate_on_submit():
             # Get the time
             curr_time = datetime.utcnow()
-            
+
             # Parse the form
-            chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data, channel_id=channel_id)
+            chatmessage = ChatMessages(sender_id=current_user.id, message_content=form.chat_message_desc.data,
+                                       channel_id=channel_id)
             db.session.add(chatmessage)
+
+            # Update the status of the new message to another_user
+            current_channel.user1_status = channelStatusEnum.DELIVERED
+            current_channel.user2_status = channelStatusEnum.DELIVERED
 
             # Update the channel last_updated field because of new comments are made
             current_channel.last_updated = curr_time
-            # DB update is caused by channel last_update
+
+            # DB update is caused by channel last_update and status
             db.session.commit()
 
             messages = getConversationForChannel(channel_id)
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
-    
     # In case the user submits an empty message or the request.method is GET
-    return render_template('messages.html', owner = current_user, chatchannels=channels, form= form, messages=messages, channel_id = channel_id)
+    else:
+        if not checkChannelExist(channel_id):
+            flash("The message channel does not exist ", 'danger')
+            return redirect(url_for('home'))
+
+        # Add authorization security, if authorized
+        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:
+            return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
+                                   messages=messages, channel_id=channel_id)
+        flash("You are not authorized to access that page", 'danger')
+        return redirect(url_for('home'))
+
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -542,7 +609,7 @@ def create_new_chat_channel(cmt_auth_id):
             return redirect(url_for('messages_chat', channel_id=channel_id))
         # If not, create a new channel
         else:
-            user1 = -1 
+            user1 = -1
             user2 = -1
 
             if current_user.id < cmt_auth_id:
@@ -551,7 +618,7 @@ def create_new_chat_channel(cmt_auth_id):
             else:
                 user1 = cmt_auth_id
                 user2 = current_user.id
-            
+
             newChannel = ChatChannel(user1_id=user1, user2_id=user2)
             db.session.add(newChannel)
             # DB update is caused by creating a new channel
@@ -559,50 +626,93 @@ def create_new_chat_channel(cmt_auth_id):
 
             return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
-# ----------------------------------Messages Helper-------------------------------------
+
+@app.route("/messages/<int:channel_id>/<int:message_id>/delete", methods=['GET'])
+@login_required
+def delete_message(channel_id, message_id):
+    message = ChatMessages.query.get_or_404(message_id)
+    # Add authorization security
+    if current_user.id == message.sender_id:
+        if message.sender != current_user:
+            abort(403)
+        message.message_status = messageStatusEnum.DELETED
+        db.session.commit()
+        return redirect(url_for('messages_chat', channel_id=channel_id))
+    # If not authorized, flash an error. Redirect to home page.
+    flash("You are not authorized to access that page", 'danger')
+    return redirect(url_for('home'))
+
+
+# -------------------------------------------------Messages Helper------------------------------------------------------
 
 # Find whether the channel already exists
 def findSpecificChannel(user1_id, user2_id):
     # initialize channel
-    channel = ChatChannel.query.filter_by(user1_id = user1_id, user2_id = user2_id).first()
+    channel = ChatChannel.query.filter_by(user1_id=user1_id, user2_id=user2_id).first()
 
     if user1_id > user2_id:
-        channel = ChatChannel.query.filter_by(user1_id = user2_id, user2_id = user1_id).first()
+        channel = ChatChannel.query.filter_by(user1_id=user2_id, user2_id=user1_id).first()
 
     if channel == None:
         return -1
-    
+
     return channel.id
+
 
 # Get the channel from the current_user
 def getAllChannelsForUser(user):
     channels = []
 
     # Initialize two channels
-    channels_1 = ChatChannel.query.filter_by(user1_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
-    channels_2 = ChatChannel.query.filter_by(user2_id = current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+    channels_1 = ChatChannel.query.filter_by(user1_id=current_user.id).order_by(ChatChannel.last_updated.desc()).all()
+    channels_2 = ChatChannel.query.filter_by(user2_id=current_user.id).order_by(ChatChannel.last_updated.desc()).all()
 
     # Get the size of the channels
     size_1 = len(channels_1)
     size_2 = len(channels_2)
-    
+
     i = 0
     j = 0
-    # Sort the channel based on the most recent, loop through two channels and merge them 
+    # Sort the channel based on the most recent, loop through two channels and merge them
     while i < size_1 and j < size_2:
         if channels_1[i].last_updated > channels_2[j].last_updated:
             channels.append(channels_1[i])
             i += 1
-        else: 
+        else:
             channels.append(channels_2[j])
             j += 1
 
     channels = channels + channels_1[i:] + channels_2[j:]
     return channels
 
-def getConversationForChannel(id):
-    conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.asc()).all()
-    return conversations
+
+# Get all messages for the Chat Channel
+def getConversationForChannel(channel_id):
+    # Check if a channel exists
+    if checkChannelExist(channel_id):
+        messages = ChatMessages.query.filter_by(channel_id=channel_id).order_by(ChatMessages.message_time.desc()).all()
+        # Read all the messages and update the status
+        UpdateReadMessageStatusForChannel(channel_id)
+        return messages
+    # Channel does not exist, messages must not exist
+    else: 
+        return None
+
+def UpdateReadMessageStatusForChannel(channel_id):
+    channel = ChatChannel.query.filter_by(id=channel_id).first()
+    # If current user equals user 1
+    if current_user.id == channel.user1_id:
+        channel.user1_status = channelStatusEnum.READ
+    # If current user equals user 2
+    else:
+        channel.user2_status = channelStatusEnum.READ
+    # Update the DB with the status.
+    db.session.commit()
+
+def checkChannelExist(channel_id):
+    if ChatChannel.query.filter_by(id=channel_id).count() == 1:
+        return True
+    return False
 
 # --------------------------------------Notifications----------------------------------------
 
@@ -613,10 +723,8 @@ def get_notifications():
     user = User.query.filter_by(email=current_user.email).first()
     unread_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=False).order_by(Notification.date_created.desc()).all()
     read_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=True).order_by(Notification.date_created.desc()).all()
-    
     # marking all of them as read now
     for notification in unread_notifications:
-            notification.is_read=True
-            db.session.commit()
-    
+        notification.is_read=True
+        db.session.commit()
     return render_template('notifications.html', user=user, unread_notifications=unread_notifications, read_notifications=read_notifications)

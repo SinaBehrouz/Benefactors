@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" style="overflow-y:hidden">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/main.css') }}">
     <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
     <title>Benefactors</title>
 
@@ -41,7 +41,7 @@
 </header>
 
     <!-- Messages Channel - This will always be populated if there are any messages, whenever the messages is opened-->
-    <div class="container">
+    <div class="container" id="messages-container">
         <div class = "row">
             <article class="media content-section">
                 <div class="media-body">
@@ -50,23 +50,35 @@
             </article>
         </div>
         <div class="row">
-            {% if chatchannels %}
             <div class="col" id="chat-sidebar">
+            {% if chatchannels %}
                 {% for channel in chatchannels %}
                 <ul class="list-group">
-                    <li class="list-group-item list-group-item-light" id="channel-list">
-                        <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
-                            {% if channel.user_1.id == current_user.id %}
-                                {{ channel.user_2.username }}
-                            {% else %}
-                                {{ channel.user_1.username }}
-                            {% endif %}
-                        </a>
-                        <small id="message-last-upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
-                    </li>
+                    {% if ((channel.user1_id == owner.id and channel.user1_status.name == "DELIVERED") or (channel.user2_id == owner.id and channel.user2_status.name == "DELIVERED")) %}
+                        <li class="list-group-item list-group-item-light" id="channel-list-delivered">
+                            <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
+                                {% if channel.user_1.id == current_user.id %}
+                                    {{ channel.user_2.username }}
+                                {% else %}
+                                    {{ channel.user_1.username }}
+                                {% endif %}
+                            </a>
+                            <small id="message_last_upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item list-group-item-light" id="channel-list">
+                            <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
+                                {% if channel.user_1.id == current_user.id %}
+                                    {{ channel.user_2.username }}
+                                {% else %}
+                                    {{ channel.user_1.username }}
+                                {% endif %}
+                            </a>
+                            <small id="message_last_upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </li>
+                    {% endif %}
                 </ul>
                 {% endfor %}
-            {% else %} 
             {% endif %}
             </div>
             <div class="col-10" id="chat-content">
@@ -76,29 +88,46 @@
                     {% for message in messages %}
                         {% if owner != message.sender %}
                         <div class="message_sender" id="message_sender_left">
-                            <div class="left_content" id="left_name">
-                                <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
-                                <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
-                            </div>
-                            <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
+                            {% if message.message_status.name == "SENT" %}
+                                <div class="left_content" id="left_name">
+                                    <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
+                                    <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
+                                </div>
+                                <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
+                            {% elif message.message_status.name == "DELETED" %}
+                                <p class="msg_content" id="msg_content_left">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
+                            {% endif %}
                         </div>
                         {% else %} 
                         <div class="message_sender" id="message_sender_right">
-                            <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
-                            <div class="right_content" id="right_name">
-                                <span class="msg_sender_name" id="name_right">{{ message.sender.username }} | 
-                                <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>V</small></a>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                    <a class="dropdown-item" href=#>Edit</a>
-                                    <a class="dropdown-item" href=#>Delete</a>
+                            {% if message.message_status.name == "SENT" %}
+                                <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
+                                <div class="right_content" id="right_name">
+                                    <span class="msg_sender_name" id="name_right">{{ message.sender.username }}
+                                    <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">V</a>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                        <a class="dropdown-item" href="{{ url_for('delete_message', channel_id=message.channel_id, message_id=message.id) }}">Delete</a>
+                                    </div>
+                                    </span> 
+                                    <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
                                 </div>
-                                </span> 
-                                <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
-                            </div>
+                            {% elif message.message_status.name == "DELETED" %}
+                                <p class="msg_content" id="msg_content_right">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
+                            {% endif %}
                         </div>
                         {% endif %}
                     {% endfor %}
+                {% else %}
+                    <p id="placeholder-empty-message">
+                    {% if channel_id %}
+                        Your chat is empty
+                    {% else %}
+                        Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well
+                    </p>
+                    {% endif %}
+                {% endif %}
                 </div>
+                {% if channel_id %}
                 <div id="form_send_message_box">
                     <!-- add a textbox and a button to chat -->
                     <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
@@ -122,35 +151,6 @@
                     </fieldset>
                     </form>
                 </div>
-                {% else %} 
-                    {% if channel_id %}
-                        <p id="placeholder-message">Your chat is empty</p>
-                        <!-- add a textbox and a button to chat -->
-                        <form action="{{ url_for('messages_chat', channel_id=channel_id) }}" method="POST">
-                            {{ form.hidden_tag() }}
-                            <fieldset class="form-group">
-                                <div class ="form-group">
-                                    {{ form.chat_message_desc.label }}
-                                    {% if form.chat_message_desc.errors %}
-                                        {{ form.chat_message_desc(class="form-control form-control-lg is-invalid") }}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.chat_message_desc.errors %}
-                                                <span>{{ error }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        {{ form.chat_message_desc(class="form-control form-control-lg") }}
-                                    {% endif %}
-                                    <!-- Send message button -->
-                                    {{ form.submit_chatmsg(class="btn btn-outline-info") }}
-                                </div>
-                            </fieldset>
-                        </form>
-
-                    {% else %}
-                        <p id="placeholder-message"> Keep your neighbour and yourself safe by wearing mask and please stay home if you are not feeling well</p>
-                    {% endif %}
-
                 {% endif %}
             </div>
         </div>

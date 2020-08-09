@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!--User Profile-->
+<div class="content-section">
+    <div class="media">
+        <img class="rounded-circle article-img"
+             src="{{ url_for('static', filename='user_images/' + account.user_image) }}">
+        <div class="media-body">
+            <h2 class="account-heading">{{ account.first_name }} {{ account.last_name }}</h2>
+            <span class="heading"><b>Email: </b>{{ account.email }}</span><br>
+            <span class="heading"><b>User Rating: </b> {{ avg_rating}} </span><br><br>
+            <a class="btn btn-info btn-sm mt-1 mb-1"
+               href="{{ url_for('create_new_chat_channel', cmt_auth_id=account.id) }}">Message</a>
+        </div>
+    </div>
+</div>
+
+<!--Reviews-->
+<div class="content-section">
+    <h3 class="comments-title">Reviews</h3>
+    {% for review in reviews %}
+    <article class="media content-section" id="comment-display">
+        <div class="media-body">
+            <div class="article-metadata">
+                <!--Review Author-->
+                <a class="mr-20" href="{{ url_for('other_account', user_id=review.rev_author.id) }}">{{
+                    review.rev_author.username }}</a>
+                <div class="dropdown show">
+                    <!--Review Date-->
+                    <small class="text-muted">{{ review.date_posted.strftime('%Y-%m-%d') }}</small>
+                    <small>|</small>
+                    <small class="text-muted">RATING: {{ "%.1f"|format(review.score) }}</small>
+                    <!--Review Update Options-->
+                    {% if review.rev_author == current_user %}
+                    <small>|</small>
+                    <a class="" href="#" role="button" id="dropdownMenuLink2" data-toggle="dropdown"
+                       aria-haspopup="true" aria-expanded="false">
+                        <small>EDIT</small>
+                    </a>
+
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item"
+                           href="{{ url_for('delete_review', user_id=review.profile, review_id=review.id) }}">Delete</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+            <p class="article-content" id="post_content">{{ review.description }}</p>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+
+<!--Add a review-->
+<div class="content-section">
+    <h4> Add a review </h4>
+    <form action="{{ url_for('add_review', user_id=account.id) }}" method="POST">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <div class="form-group">
+                {{ form.description.label(class="form-control-label") }}
+                {% if form.description.errors %}
+                {{ form.description(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.description.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.description(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.score.label(class="form-control-label") }}
+                {% if form.score.errors %}
+                {{ form.score(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.score.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.score(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock content %}

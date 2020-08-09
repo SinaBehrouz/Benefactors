@@ -30,6 +30,7 @@ class statusEnum(Enum):
     CANCELLED = 3
     CLOSED = 4
 
+
 class categoryEnum(Enum):
     CLEANING = 1
     DELIVERY = 2
@@ -41,19 +42,23 @@ class categoryEnum(Enum):
     MEDICATION = 8
     OTHERS = 9
 
+
 class channelStatusEnum(Enum):
-    ISREAD = 1
-    ISDELIVERED = 2
+    READ = 1
+    DELIVERED = 2
+
 
 class messageStatusEnum(Enum):
     SENT = 1
-    EDITED = 2
-    DELETED = 3
+    DELETED = 2
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
+# -----------------------------------------------------Account----------------------------------------------------------
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -68,6 +73,9 @@ class User(db.Model, UserMixin):
 
     posts = db.relationship('Post', backref='author', lazy=True, foreign_keys='Post.user_id')
     comments = db.relationship('PostComment', backref='cmt_author', lazy=True, foreign_keys='PostComment.user_id')
+    reviews = db.relationship('UserReview', backref='rev_author', lazy=True, foreign_keys='UserReview.author')
+
+    channels = db.relationship('ChatMessages', backref='channel_user', lazy=True, foreign_keys='ChatMessages.sender_id')
 
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(app.config['SECRET_KEY'], expires_sec)
@@ -86,6 +94,8 @@ class User(db.Model, UserMixin):
         return f"User('{self.username}', '{self.email}', '{self.id}', '{self.user_image}')"
 
 
+# ----------------------------------------------------Posts-------------------------------------------------------------
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -100,6 +110,8 @@ class Post(db.Model):
         return f"Post('{self.title}', '{self.date_posted}')"
 
 
+# ----------------------------------------------------Comments----------------------------------------------------------
+
 class PostComment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     comment_desc = db.Column(db.Text, nullable=False)
@@ -108,31 +120,48 @@ class PostComment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
     def __repr__(self):
-        
-        return f"Post('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"
+        return f"PostComment('{self.post_id}', '{self.user_id}', '{self.comment_desc}')"
 
-# User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1. 
+
+# ----------------------------------------------------Reviews-----------------------------------------------------------
+
+class UserReview(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.Text)
+    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    score = db.Column(db.Numeric, nullable=False)
+    author = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    profile = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"UserReview('{self.description}', '{self.score}''{self.date_posted}')"
+
+
+# ------------------------------------------------------Messages--------------------------------------------------------
+
+# User1 and User2 cannot switch position, let's say user1 has a chat channel with user2, user 2 should have the same channel with user 1.
 # You cannot have two channels between two same users twice, unless the channel is closed
 class ChatChannel(db.Model):
     __tablename__ = "chatchannel"
 
-    id = db.Column(db.Integer, primary_key = True)
-    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # always lower than user2_id
+    id = db.Column(db.Integer, primary_key=True)
+    user1_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # always lower than user2_id
     user2_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_updated = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    user1_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.ISREAD)
-    user2_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.ISREAD)
-    
+    user1_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.READ)
+    user2_status = db.Column(db.Enum(channelStatusEnum), default=channelStatusEnum.READ)
+
     user_1 = db.relationship("User", backref=backref("usr_1", uselist=False), foreign_keys=[user1_id])
     user_2 = db.relationship("User", backref=backref("usr_2", uselist=False), foreign_keys=[user2_id])
 
     def __repr__(self):
         return f"ChatChannel('{self.user1_id}', '{self.user2_id}', '{self.user_1.username}', '{self.user_2.username}', '{self.last_updated}')"
 
+
 class ChatMessages(db.Model):
     __tablename__ = "chatmessages"
 
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     message_content = db.Column(db.Text, nullable=False)
     message_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -144,6 +173,7 @@ class ChatMessages(db.Model):
     def __repr__(self):
         return f"ChatMessages('{self.sender}', '{self.message_content}', '{self.message_sent}', '{self.message_time}, {self.channel_id}')"
 
+# ----------------------------------------------------Notifications-----------------------------------------------------------
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,37 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
-  <script type="text/javascript">
-    function expandSearchOpt() {
-      var hint = document.getElementById('content');
-      if (hint.style.opacity == 0){
-        hint.style.opacity = 1;
-        hint.style.visibility = "visible";
-        hint.style.maxHeight = "1000px";
-        hint.style.margin = "0px 0px 5px 0px";
-        hint.style.padding = "10px 20px";
-      }else{
-        hint.style.opacity = 0;
-        hint.style.visibility = "hidden";
-        hint.style.maxHeight = "0";
-        hint.style.margin = "0px 0px 0px 0px";
-        hint.style.padding = "0px 0px 0px 0px";
-      }
-    }
-  </script>
-
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&libraries=places&callback=initAutocomplete" async defer></script>
-  <script type="text/javascript">
-  let autocomplete;
-  function initAutocomplete(){
-    autocomplete = new google.maps.places.Autocomplete(
-    document.getElementById('autocomplete','locality','(cities)'), {
-      types: ['establishment'],
-      componentRestrictions:{'country': ['CA']},
-      fields: ['place_id', 'geometry', 'name', 'address_components', 'geometry', 'icon']
-    });
-  }
-
-</script>
+  <script type="text/javascript" src="{{ url_for('static', filename='JS/home.js') }}"></script>
 
   <form method="POST" action="" class="search-bar">
       {{ form.hidden_tag() }}
@@ -45,7 +15,7 @@
         {% else %}
             {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="e.g. Grocery Pick Up") }}
             <button type="button" onClick=expandSearchOpt() class="btn btn-primary btn-md mt-1 mb-1">Advanced Search</button>
-            <div class="media content-section" id="content" style="visibility: hidden; opacity: 0; max-height:0; margin:0; padding:0; display:grid;"  >
+            <div class="media content-section adv-search-hidden" id="content">
                   {{ form.hidden_tag() }}
                   <fieldset class="form-group">
                       <legend class="border-bottom mb-4">Configure Your Search Setting</legend>
@@ -59,8 +29,11 @@
                                   {% endfor %}
                               </div>
                           {% else %}
-                              {{ form.postalCode(class="form-control form-control-lg", placeholder="e.g. Coquitlam Center...", id="autocomplete", style="font-size: 1rem;") }}
+                              {{ form.postalCode(class="form-control form-control-lg adv-search-bar", placeholder="e.g. Coquitlam Center...", id="autocomplete") }}
                           {% endif %}
+                      </div>
+                      <div>
+                          {{ form.gSuggest(id="gSuggest", class="hidden_box") }}
                       </div>
                       <div class="form-group">
                           {{ form.radius.label(class="form-control-label") }}
@@ -72,12 +45,12 @@
                                   {% endfor %}
                               </div>
                           {% else %}
-                              {{ form.radius(class="form-control form-control-lg", style="font-size: 1rem;") }}
+                              {{ form.radius(class="form-control form-control-lg adv-search-bar") }}
                               <small class="text-muted ml-2">Default search radius is 50 km. Pick a value between 1-100 km.</small>
                           {% endif %}
                       </div>
-                      <div style = "display:grid;">
-                        <div class="form-group" style="grid-row:1; grid-column:1; margin-right:10px;">
+                      <div class="grid" >
+                        <div class="form-group grid-r-1 grid-c-1">
                             {{ form.status.label(class="form-control-label") }}
                             {% if form.status.errors %}
                                 {{ form.status(class="form-control form-control-lg is-invalid") }}
@@ -90,7 +63,7 @@
                                 {{ form.status(class="form-control form-control-lg") }}
                             {% endif %}
                         </div>
-                        <div class="form-group" style="grid-row:1; grid-column-start:2; grid-column-end:5; margin-left:10px;">
+                        <div class="form-group grid-r-1 grid-c-2-5">
                             {{ form.category.label(class="form-control-label") }}
                             {% if form.category.errors %}
                                 {{ form.category(class="form-control form-control-lg is-invalid") }}
@@ -119,19 +92,20 @@
             <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
             <div class="media-body">
                 <div class="article-metadata">
-                    <a class="mr-2">{{ post.author.username }}</a>
+                    <a class="mr-2" href="{{ url_for('other_account', user_id=post.author.id) }}">{{ post.author.username }}</a>
                     <div>
                       <small class="text-muted">{{ post.date_posted.strftime('%Y-%m-%d') }}</small>
-                      <small class="text-muted" style="font-weight: bold;">{{ post.category.name }}</small>
+                      <small>|</small>
+                      <small class="text-muted"> <b> {{ post.category.name }}</b> </small>
                       <small class="text-muted">  |  </small>
                       {% if post.status.name == "OPEN" %}
-                      <small class="text-muted" style="color:#9cd28a!important;">{{ post.status.name }}</small>
+                        <small id="openStatus" class="text-muted">{{ post.status.name }}</small>
                       {% elif post.status.name == "TAKEN" %}
-                      <small class="text-muted" style="color:#ffa601!important;">{{ post.status.name }}</small>
+                        <small id ="takenStatus" class="text-muted">{{ post.status.name }}</small>
                       {% elif post.status.name == "CANCELLED" %}
-                      <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+                        <small id ="CanclledStatus" class="text-muted">{{ post.status.name }}</small>
                       {% elif post.status.name == "CLOSED"%}
-                      <small class="text-muted" style="color:red!important;">{{ post.status.name }}</small>
+                        <small id ="ClosedStatus" class="text-muted">{{ post.status.name }}</small>
                       {% endif %}
                     </div>
                 </div>

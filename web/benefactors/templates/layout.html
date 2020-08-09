@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" style="overflow: scroll; overflow-x: hidden;">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/main.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
     <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
     <title>Benefactors</title>
 
@@ -69,12 +68,12 @@
        </div>
        {% if current_user.is_authenticated %}
        <div class="col-md-4">
-         <div class="content-section" style="position:fixed; transform: none;">
+         <div id="infoCenter" class="content-section">
            <h3>Information Center</h3>
              <ul class="list-group">
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My To-Do List</a> </li>
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
+               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">To Do List</a> </li>
+               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
+               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
              </ul>
          </div>
        </div>
@@ -87,4 +86,3 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
-
