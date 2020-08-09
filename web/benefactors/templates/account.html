@@ -20,15 +20,25 @@
 <!-- To Do List -->
 <div class="content-section">
     <h3 class="comments-title">To-Do List</h3>
-        {% for post in to_do %}
-            <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
-        {% endfor %}
+        {% if not to_do %}
+            <p>You have no items in your to-do list.</p>
+        {% else %}
+            {% for post in to_do %}
+                <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
+            {% endfor %}
+        {% endif %}
+
+        
 </div>
 <!-- My Posts -->
 <div class="content-section">
     <h3 class="comments-title">My Posts</h3>
-        {% for post in account.posts %}
-            <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
-        {% endfor %}
+        {% if not account.posts %}
+            <p>You have no posts.</p>
+        {% else %}
+            {% for post in account.posts %}
+                <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
+            {% endfor %}
+        {% endif %}
 </div> 
 {% endblock content %}
