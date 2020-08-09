@@ -304,7 +304,7 @@ def volunteer(post_id):
         notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
 
         # say status is now taken?
-        notification_message = "A post you commented on has is now taken by another volunteer!"
+        notification_message = "A post you commented on is now taken by another volunteer!"
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
        
 
@@ -541,7 +541,7 @@ def get_account():
     user = User.query.filter_by(email=current_user.email).first()
     to_do = Post.query.filter_by(volunteer=current_user.id)
     # to-do make sure only account owner can access this
-    return render_template('account.html', user=user, to_do=to_do)
+    return render_template('account.html', account=user, to_do=to_do)
 
 
 # ---------------------------------------About-----------------------------------------
