@@ -6,7 +6,7 @@ from flask import render_template, url_for, flash, redirect, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from benefactors import app, db, bcrypt, mail, stripe_keys
 from benefactors.models import User, Post, PostComment, statusEnum, categoryEnum, messageStatusEnum, channelStatusEnum, \
-    ChatChannel, ChatMessages, UserReview
+    ChatChannel, ChatMessages, UserReview, notificationTypeEnum, Notification
 from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, DonationForm, PostForm, RequestResetForm, \
     ResetPasswordForm, SearchForm, PostCommentForm, SendMessageForm, ReviewForm
 from flask_mail import Message
@@ -14,6 +14,9 @@ from sqlalchemy import or_, desc, asc
 from datetime import datetime
 from .postalCodeManager import postalCodeManager
 from .search import SearchUtil
+from benefactors.helper.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
+
+
 
 
 # -------------------------------------------------Login/Logout---------------------------------------------------------
@@ -224,6 +227,12 @@ def open_post(post_id):
     post.status = statusEnum.OPEN
     db.session.commit()
     flash('Your post is now open!', 'success')
+
+    # create notification for all users who have commented (not volunteered, because that case is not possible)
+    notification_message = "A post you commented on has now been re-opened."
+    notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.STATUS_OPEN)
+    db.session.commit()
+
     return redirect(url_for('post', post_id=post.id))
 
 
@@ -238,6 +247,12 @@ def close_post(post_id):
     post.status = statusEnum.CLOSED
     db.session.commit()
     flash('Your post is closed!', 'success')
+
+    # create notification for all users who have commented on this post 
+    notification_message = "A post you commented on has now been closed."
+    notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.STATUS_CLOSED)
+    db.session.commit()
+    
     return redirect(url_for('post', post_id=post.id))
 
 
@@ -256,6 +271,16 @@ def volunteer(post_id):
         post.status = statusEnum.TAKEN
         db.session.commit()
         flash('You are now volunteering for the post!', 'success')
+       
+        # create notification for post owner, and all users who have commented on this post 
+        notification_message = "{} volunteered for your post.".format(current_user.username)
+        notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
+
+        notification_message = "A post you commented on is now taken by another volunteer."
+        notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
+    
+    db.session.commit()
+        
     return redirect(url_for('post', post_id=post.id))
 
 
@@ -273,6 +298,14 @@ def unvolunteer(post_id):
         db.session.commit()
         flash('You are no longer volunteering for the post!', 'success')
 
+        # create notification for post owner, and all users who have commented on this post
+        notification_message = "{} has un-volunteered for your post.".format(current_user.username)
+        notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
+
+        notification_message = "A post you commented on has lost its volunteer."
+        notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
+    
+    db.session.commit()
     return redirect(url_for('post', post_id=post.id))
 
 
@@ -286,6 +319,15 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     flash('Post deleted!', 'success')
+
+    # create notification all users who have commented or volunteered for this post
+    notification_message = "A post you volunteered for has now been deleted."
+    notify_volunteer(post_id, current_user.id, notification_message, notificationTypeEnum.POST_DELETED_VOLUNTEER)
+            
+    notification_message = "A post you commented on has now been has now been deleted." 
+    notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.POST_DELETED_COM)
+    
+    db.session.commit()
     return redirect(url_for('home'))
 
 
@@ -305,6 +347,17 @@ def create_new_comment(post_id):
             db.session.add(created_comment)
             db.session.commit()
             flash('Comment added!', 'success')
+
+            # create notification for post owner + all users who have commented or volunteered for this post 
+            notification_message = "{} commented on your post.".format(current_user.username)
+            notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.COMMENT)
+            
+            notification_message = "{} commented on a post that you volunteered for.".format(current_user.username)
+            notify_volunteer(post_id, current_user.id, notification_message, notificationTypeEnum.COM_VOLUNTEER)
+            
+            notification_message = "{} commented on a post that you also commented on.".format(current_user.username) 
+            notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.COMMENT)
+       
             return redirect(url_for('post', post_id=post.id))
 
     return render_template('post.html', post=post, comments=comments, form=form)
@@ -388,8 +441,7 @@ def edit_account():
 def get_account():
     user = User.query.filter_by(email=current_user.email).first()
     to_do = Post.query.filter_by(volunteer=current_user.id)
-    # to-do make sure only account owner can access this
-    return render_template('account.html', user=user, to_do=to_do)
+    return render_template('account.html', account=user, to_do=to_do), 200
 
 
 # -------------------------------------------------Other Account--------------------------------------------------------
@@ -529,13 +581,16 @@ def messages_chat(channel_id):
             return redirect(url_for('messages_chat', channel_id=channel_id))
     # In case the user submits an empty message or the request.method is GET
     else:
+        if not checkChannelExist(channel_id):
+            flash("The message channel does not exist ", 'danger')
+            return redirect(url_for('home'))
+
         # Add authorization security, if authorized
         if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:
             return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
-                                   messages=messages,
-                                   channel_id=channel_id)
+                                   messages=messages, channel_id=channel_id)
         flash("You are not authorized to access that page", 'danger')
-        return redirect(url_for('home')), 403
+        return redirect(url_for('home'))
 
 
 @app.route("/messages/create/<int:cmt_auth_id>/", methods=['GET'])
@@ -629,11 +684,15 @@ def getAllChannelsForUser(user):
 
 # Get all messages for the Chat Channel
 def getConversationForChannel(channel_id):
-    messages = ChatMessages.query.filter_by(channel_id=channel_id).order_by(ChatMessages.message_time.desc()).all()
-    # Read all the messages and update the status
-    UpdateReadMessageStatusForChannel(channel_id)
-    return messages
-
+    # Check if a channel exists
+    if checkChannelExist(channel_id):
+        messages = ChatMessages.query.filter_by(channel_id=channel_id).order_by(ChatMessages.message_time.desc()).all()
+        # Read all the messages and update the status
+        UpdateReadMessageStatusForChannel(channel_id)
+        return messages
+    # Channel does not exist, messages must not exist
+    else: 
+        return None
 
 def UpdateReadMessageStatusForChannel(channel_id):
     channel = ChatChannel.query.filter_by(id=channel_id).first()
@@ -645,3 +704,23 @@ def UpdateReadMessageStatusForChannel(channel_id):
         channel.user2_status = channelStatusEnum.READ
     # Update the DB with the status.
     db.session.commit()
+
+def checkChannelExist(channel_id):
+    if ChatChannel.query.filter_by(id=channel_id).count() == 1:
+        return True
+    return False
+
+# --------------------------------------Notifications----------------------------------------
+
+# Show Notifications
+@app.route("/notifications", methods=['GET'])
+@login_required
+def get_notifications():
+    user = User.query.filter_by(email=current_user.email).first()
+    unread_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=False).order_by(Notification.date_created.desc()).all()
+    read_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=True).order_by(Notification.date_created.desc()).all()
+    # marking all of them as read now
+    for notification in unread_notifications:
+        notification.is_read=True
+        db.session.commit()
+    return render_template('notifications.html', user=user, unread_notifications=unread_notifications, read_notifications=read_notifications), 200

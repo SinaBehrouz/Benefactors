@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="overflow-y:hidden">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -41,7 +41,7 @@
 </header>
 
     <!-- Messages Channel - This will always be populated if there are any messages, whenever the messages is opened-->
-    <div class="container">
+    <div class="container" id="messages-container">
         <div class = "row">
             <article class="media content-section">
                 <div class="media-body">
@@ -79,8 +79,6 @@
                     {% endif %}
                 </ul>
                 {% endfor %}
-            {% else %} 
-                <p id="placeholder-empty-channel"></p>
             {% endif %}
             </div>
             <div class="col-10" id="chat-content">
@@ -97,7 +95,7 @@
                                 </div>
                                 <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
                             {% elif message.message_status.name == "DELETED" %}
-                                <p class="msg_content" id="msg_content_left">{{ message.sender }} has deleted the message</p>  <!-- This will be the messages content-->
+                                <p class="msg_content" id="msg_content_left">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
                             {% endif %}
                         </div>
                         {% else %} 
