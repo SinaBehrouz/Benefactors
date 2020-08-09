@@ -17,13 +17,12 @@ class SearchUtil():
         '''
         formPostalCode = form.postalCode.data
         gSuggest = False
-        # if len( form.postalCode.data.split(',') ) >= 4:
-        #     gSuggest= True
-
+        if len( form.postalCode.data.split(',') ) >= 4:
+            gSuggest= True
         flash_msg = ""
         if not gSuggest: #get the postal code here
             query_text = re.sub("[ ,.]", "+", formPostalCode)
-            url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={query_text}&key={self.Key}"
+            url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query=postal+code+near+{query_text}&key={self.Key}"
             response = requests.request("GET", url, headers={}, data = {}).json()
             if response["status"] == "ZERO_RESULTS":
                 flash_msg= "Cannot find the provided location - Please Try Again!"
