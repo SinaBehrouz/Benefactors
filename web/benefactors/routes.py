@@ -14,7 +14,7 @@ from sqlalchemy import or_, desc, asc
 from datetime import datetime
 from .postalCodeManager import postalCodeManager
 from .search import SearchUtil
-from benefactors.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
+from benefactors.helper.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
 
 
 
