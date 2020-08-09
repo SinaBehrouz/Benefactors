@@ -326,10 +326,6 @@ small.closed-status {
   padding-left: 2em;
 }
 
-#channel-list {
-  list-style-type: none;
-}
-
 #messages-container{
   min-width: 900px;
   width: auto !important;
@@ -367,6 +363,36 @@ small.closed-status {
   float: right;
 }
 
+.list-group-item.list-group-item-light.channel-list-delivered {
+  list-style-type: none;
+  background-color: #cfcc1b;
+}
+
+.list-group-item.list-group-item-light.channel-list {
+  list-style-type: none;
+}
+
+#account_image {
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.post_user_image {
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+#other_account_image{
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
 .row .message_sender {
   border: 0.5px solid #000000;
   border-radius: 12px;
@@ -376,21 +402,13 @@ small.closed-status {
   width: fit-content;
 }
 
-.msg_content {
-  margin-left: 1.2em;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  margin-right: 1.2em;
-  overflow-wrap: anywhere
-}
-
-#message_sender_left {
+.row .message_sender.left {
   max-width: 40%;
   background-color: #cceeff;
   border-color: transparent;
 }
 
-#message_sender_right {
+.row .message_sender.right {
   margin-left: auto;
   max-width: 40%;
   background-color: #71bcd1;
@@ -415,42 +433,38 @@ small.closed-status {
   justify-content: space-between;
 }
 
-#name_left {
+.name_left {
   font-size: small;
   display: inline-flex;
 }
 
-#name_right {
+.name_right {
   font-size: small;
   display: inline-flex;
 }
 
-#time_left {
+.time_left {
   text-align: left;
   font-size: small;
 }
 
-#time_right {
+.time_right {
   text-align: right;
   font-size: small;
 }
 
-#dropdownMenuLink_messages {
+.msg_content {
+  margin-left: 1.2em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-right: 1.2em;
+  overflow-wrap: anywhere
+}
+
+.dropdownMenuLink_messages {
   margin-left: 0.5em;
 }
 
-#placeholder-empty-message{
+.placeholder-empty-message{
   height: 100%;
-}
-
-#channel-list-delivered {
-   background-color: #cfcc1b;
-}
-
-#account_image {
-  margin-right: 20px;
-}
-
-.post_user_image {
-  margin-right: 20px;
 }

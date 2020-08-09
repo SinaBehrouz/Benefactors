@@ -45,7 +45,7 @@
         <div class = "row">
             <article class="media content-section">
                 <div class="media-body">
-                    <h2 id="welcome-message">Welcome to your message inbox, {{ owner.username }}</h2>
+                    <h2>Welcome to your message inbox, {{ owner.username }}</h2>
                 </div>
             </article>
         </div>
@@ -55,26 +55,26 @@
                 {% for channel in chatchannels %}
                 <ul class="list-group">
                     {% if ((channel.user1_id == owner.id and channel.user1_status.name == "DELIVERED") or (channel.user2_id == owner.id and channel.user2_status.name == "DELIVERED")) %}
-                        <li class="list-group-item list-group-item-light" id="channel-list-delivered">
-                            <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
+                        <li class="list-group-item list-group-item-light channel-list-delivered">
+                            <a href="{{ url_for('messages_chat', channel_id=channel.id) }}">
                                 {% if channel.user_1.id == current_user.id %}
                                     {{ channel.user_2.username }}
                                 {% else %}
                                     {{ channel.user_1.username }}
                                 {% endif %}
                             </a>
-                            <small id="message_last_upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
+                            <small>{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
                         </li>
                     {% else %}
-                        <li class="list-group-item list-group-item-light" id="channel-list">
-                            <a id="channel-name" href="{{ url_for('messages_chat', channel_id=channel.id) }}">
+                        <li class="list-group-item list-group-item-light channel-list">
+                            <a href="{{ url_for('messages_chat', channel_id=channel.id) }}">
                                 {% if channel.user_1.id == current_user.id %}
                                     {{ channel.user_2.username }}
                                 {% else %}
                                     {{ channel.user_1.username }}
                                 {% endif %}
                             </a>
-                            <small id="message_last_upd">{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
+                            <small>{{ channel.last_updated.strftime('%Y-%m-%d %H:%M') }}</small>
                         </li>
                     {% endif %}
                 </ul>
@@ -87,38 +87,38 @@
                 <!-- Messages Content - This will be empty at the beginning-->                
                     {% for message in messages %}
                         {% if owner != message.sender %}
-                        <div class="message_sender" id="message_sender_left">
+                        <div class="message_sender left">
                             {% if message.message_status.name == "SENT" %}
-                                <div class="left_content" id="left_name">
-                                    <span class="msg_sender_name" id="name_left">{{ message.sender.username }}</span>
-                                    <span class="message_time" id="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
+                                <div class="left_content">
+                                    <span class="name_left">{{ message.sender.username }}</span>
+                                    <span class="time_left">{{ message.message_time.strftime('%H:%M') }}</span>
                                 </div>
-                                <p class="msg_content" id="msg_content_left">{{ message.message_content }}</p>  <!-- This will be the messages content-->
+                                <p class="msg_content">{{ message.message_content }}</p>  <!-- This will be the messages content-->
                             {% elif message.message_status.name == "DELETED" %}
-                                <p class="msg_content" id="msg_content_left">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
+                                <p class="msg_content">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
                             {% endif %}
                         </div>
                         {% else %} 
-                        <div class="message_sender" id="message_sender_right">
+                        <div class="message_sender right">
                             {% if message.message_status.name == "SENT" %}
-                                <p class="msg_content" id="msg_content_right">{{ message.message_content }}</p> <!-- This will be the messages content-->
-                                <div class="right_content" id="right_name">
-                                    <span class="msg_sender_name" id="name_right">{{ message.sender.username }}
-                                    <a class="" href="#" role="button" id="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">V</a>
+                                <p class="msg_content">{{ message.message_content }}</p> <!-- This will be the messages content-->
+                                <div class="right_content">
+                                    <span class="name_right">{{ message.sender.username }}
+                                    <a href="" role="button" class="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">X</a>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                         <a class="dropdown-item" href="{{ url_for('delete_message', channel_id=message.channel_id, message_id=message.id) }}">Delete</a>
                                     </div>
                                     </span> 
-                                    <span class="message_time" id="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
+                                    <span class="time_right">{{ message.message_time.strftime('%H:%M') }}</span>
                                 </div>
                             {% elif message.message_status.name == "DELETED" %}
-                                <p class="msg_content" id="msg_content_right">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
+                                <p class="msg_content">{{ message.sender.username }} has deleted the message</p>  <!-- This will be the messages content-->
                             {% endif %}
                         </div>
                         {% endif %}
                     {% endfor %}
                 {% else %}
-                    <p id="placeholder-empty-message">
+                    <p class="placeholder-empty-message">
                     {% if channel_id %}
                         Your chat is empty
                     {% else %}
