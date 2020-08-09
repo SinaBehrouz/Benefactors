@@ -531,12 +531,16 @@ def messages_chat(channel_id):
             return redirect(url_for('messages_chat', channel_id=channel_id))
     # In case the user submits an empty message or the request.method is GET
     else:
+        if not checkChannelExist(channel_id):
+            flash("The message channel does not exist ", 'danger')
+            return redirect(url_for('home'))
+
         # Add authorization security, if authorized
-        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:   
+        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id :   
             return render_template('messages.html', owner=current_user, chatchannels=channels, form=form, messages=messages, 
                                     channel_id=channel_id)
         flash("You are not authorized to access that page", 'danger')
-        return redirect(url_for('home')), 403
+        return redirect(url_for('home'))
 
 @app.route("/messages/create/<int:cmt_auth_id>", methods=['GET'])
 @login_required
@@ -626,10 +630,15 @@ def getAllChannelsForUser(user):
 
 # Get all messages for the Chat Channel
 def getConversationForChannel(channel_id):
-    messages = ChatMessages.query.filter_by(channel_id = channel_id).order_by(ChatMessages.message_time.desc()).all()
-    # Read all the messages and update the status
-    UpdateReadMessageStatusForChannel(channel_id)
-    return messages
+    # Check if a channel exists
+    if checkChannelExist(channel_id):
+        messages = ChatMessages.query.filter_by(channel_id=channel_id).order_by(ChatMessages.message_time.desc()).all()
+        # Read all the messages and update the status
+        UpdateReadMessageStatusForChannel(channel_id)
+        return messages
+    # Channel does not exist, messages must not exist
+    else: 
+        return None
 
 def UpdateReadMessageStatusForChannel(channel_id):
     channel = ChatChannel.query.filter_by(id = channel_id).first()
@@ -642,3 +651,7 @@ def UpdateReadMessageStatusForChannel(channel_id):
     # Update the DB with the status.
     db.session.commit()
 
+def checkChannelExist(channel_id):
+    if ChatChannel.query.filter_by(id=channel_id).count() == 1:
+        return True
+    return False

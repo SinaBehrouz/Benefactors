@@ -308,6 +308,7 @@ li#infoCenterLi {
   padding-left: 1em;
   padding-right:1em;
   border-right: 0.5px solid #898c91;
+  max-width: fit-content;
 }
 
 .article-content #post_title {
@@ -327,6 +328,11 @@ li#infoCenterLi {
 
 #channel-list {
   list-style-type: none;
+}
+
+#messages-container{
+  min-width: 900px;
+  width: auto !important;
 }
 
 .container .row #inside-chat-container {
