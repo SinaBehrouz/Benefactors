@@ -12,7 +12,7 @@
       <div class="article-metadata">
 
         <!--Post Author-->
-        <a class="mr-2">{{ post.author.username }}</a>
+        <a class="mr-2" href="{{ url_for('other_account', user_id=post.author.id) }}">{{ post.author.username }}</a>
 
         <div class="dropdown show">
           <!--Post Date-->

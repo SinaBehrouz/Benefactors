@@ -624,7 +624,7 @@ def delete_message(channel_id, message_id):
         db.session.commit()
         return redirect(url_for('messages_chat', channel_id=channel_id))
     # If not authorized, flash an error. Redirect to home page.
-    flash("You are not authorized to access that page, User:" + current_user.username + "You should be: " + message.sender.username , 'danger')
+    flash("You are not authorized to access that page, User:" + current_user.username, 'danger')
     return redirect(url_for('home'))
 
 

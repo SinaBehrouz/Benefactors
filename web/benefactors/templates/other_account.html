@@ -32,8 +32,8 @@
                     <small>|</small>
                     <small class="text-muted">RATING: {{ "%.1f"|format(review.score) }}</small>
                     <!--Review Update Options-->
-                    <small>|</small>
                     {% if review.rev_author == current_user %}
+                    <small>|</small>
                     <button type="button" class="deleteButton" data-toggle="modal" data-target="#deleteReview-{{review.id}}">DELETE</button>
                     {% endif %}
                 </div>

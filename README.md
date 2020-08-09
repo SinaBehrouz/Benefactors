@@ -110,16 +110,3 @@ DATE        10/25
 ## Inspiration
 1. Flask tutorial - https://www.youtube.com/user/schafer5
 2. Docker tutorial - https://testdriven.io/blog/dockerizing-flask-with-postgres-gunicorn-and-nginx/
-3. People's Pictures Inspiration -
-Randall Lowry
-https://twitter.com/andremcdearmon/photo
-Taylah Rosa
-https://i2.cdn.turner.com/cnn/2008/POLITICS/10/20/centenarian.votes/art.cooper.portrait.cnn.jpg
-Sam Smith
-https://www.eclectablog.com/wp-content/uploads/2014/06/Bobby_McKenzie2.jpg
-Jess Brown
-https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSHyO-9KxOBQNuuSM5r0kfrcjLSQzYUVySK3A&usqp=CAU
-Eric Singh
-https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcTYBOb0tWfsZ21iPUEEsSEMGSFSPh70AomMdg&usqp=CAU
-Jacques Tang
-https://pbs.twimg.com/profile_images/1254266233056362496/piVEnn4n_400x400.jpg

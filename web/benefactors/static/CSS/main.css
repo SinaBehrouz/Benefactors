@@ -311,12 +311,13 @@ small.closed-status {
   max-width: fit-content;
 }
 
-.article-content #post_title {
-  margin-top: 0.5em;
+#post_title {
+  margin-top: 10px;
 }
 
-.article-content #post_content {
-  margin-top: 1em;
+#post_content {
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 #chat-content {
