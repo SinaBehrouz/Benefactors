@@ -293,7 +293,7 @@ small.closed-status {
   color:red!important;
 }
 
-.info-item{
+.info-item {
   margin-bottom: 5px;
 }
 
@@ -372,21 +372,7 @@ small.closed-status {
   list-style-type: none;
 }
 
-#account_image {
-  height: 125px;
-  width: 125px;
-  margin-right: 20px;
-  margin-bottom: 16px;
-}
-
-.post_user_image {
-  height: 125px;
-  width: 125px;
-  margin-right: 20px;
-  margin-bottom: 16px;
-}
-
-#other_account_image{
+.rounded-circle.article-img.user_image {
   height: 125px;
   width: 125px;
   margin-right: 20px;
@@ -465,6 +451,14 @@ small.closed-status {
   margin-left: 0.5em;
 }
 
-.placeholder-empty-message{
+.placeholder-empty-message {
   height: 100%;
+}
+
+.deletePostButton {
+  background: none;
+  font-size: small;
+  border: none;
+  color: red;
+  padding: 0;
 }

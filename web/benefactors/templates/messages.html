@@ -103,7 +103,7 @@
                             {% if message.message_status.name == "SENT" %}
                                 <p class="msg_content">{{ message.message_content }}</p> <!-- This will be the messages content-->
                                 <div class="right_content">
-                                    <span class="name_right">{{ message.sender.username }} {{ message.id }}
+                                    <span class="name_right">{{ message.sender.username }}
                                     <a href="" role="button" class="dropdownMenuLink_messages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">X</a>
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                         <button type="button" class="dropdown-item" data-toggle="modal" data-target="#deleteMessage-{{message.id}}">Delete</button>
