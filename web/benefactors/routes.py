@@ -50,7 +50,7 @@ def sign_up():
         hash = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, first_name=form.first_name.data, last_name=form.last_name.data,
                     email=form.email.data, phone_number=form.phone_number.data,
-                    postal_code=form.postal_code.data.upper(),
+                    postal_code=form.postal_code.data.replace(" ", "").upper(),
                     password=hash)
         db.session.add(user)
         db.session.commit()
@@ -148,9 +148,7 @@ def home():
             try:
                 posts = posts.filter(or_(*[User.postal_code.ilike(x) for x in nearby_postal_codes]))
             except:
-                flash("WTF HAPPE$NED")
-                pc = pcm.getPCfromCity(parsed_location[-3])  # rare case - a random bug w sqlalchemy
-
+                pc = searchUtil.DefPostal
         flash("Search Updated!", "success")
         posts = posts.order_by(desc(Post.date_posted)).all()
         return render_template('home.html', posts=posts, form=form)

@@ -41,7 +41,8 @@ class SignUpForm(FlaskForm):
 
     def validate_postal_code(self, postal_code):
         pcm = postalCodeManager()
-        if not pcm.verifyPostalCode(postal_code.data):
+        pc = postal_code.data.replace(" ", "").upper()
+        if not pcm.verifyPostalCode(pc):
             raise ValidationError('That is not a valid Postal Code.')
 
 

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="content-section">
-        <form method="POST" action="">
+        <form method="POST">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Join Today</legend>
@@ -113,7 +113,7 @@
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
-            <small class="required-field"> 
+            <small class="required-field">
                 Fields marked with a <em>*</em> are required
             </small>
         </form>

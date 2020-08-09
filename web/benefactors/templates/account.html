@@ -2,7 +2,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + user.user_image) }}">
+    <img alt="User's display pic" class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + user.user_image) }}">
     <div class="media-body">
         <h2 class="account-heading">{{ user.first_name }} {{ user.last_name }} </h2>
         <p class="user-info"><b>Username: </b>{{ user.username }}</p>
@@ -10,7 +10,7 @@
         <p class="user-info"><b>Phone Number: </b>{{ user.phone_number }}</p>
         <p class="user-info"><b>Postal Code: </b>{{ user.postal_code }}</p>
         <!--<a class="nav-item nav-link" href="{{ url_for('edit_account') }}"><button type="button" class="btn btn-danger btn-sm m-1">Edit Profile</button></a>-->
-        
+
     </div>
     <a class="nav-item nav-link" href="{{ url_for('edit_account') }}"><button> Edit Profile </button>
         <div class="user-posts">
@@ -25,6 +25,6 @@
             <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
             {% endfor %}
         </div>
-   
+
 </article>
 {% endblock content %}
