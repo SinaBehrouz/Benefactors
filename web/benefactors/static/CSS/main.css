@@ -455,7 +455,7 @@ small.closed-status {
   height: 100%;
 }
 
-.deletePostButton {
+.deleteButton {
   background: none;
   font-size: small;
   border: none;

@@ -81,7 +81,7 @@
                 <!--Comment Update Options-->
                 {% if comment.cmt_author == current_user %}
                   <small>|</small>
-                  <button type="button" class="deletePostButton" data-toggle="modal" data-target="#deleteComment-{{comment.id}}">DELETE</button>
+                  <button type="button" class="deleteButton" data-toggle="modal" data-target="#deleteComment-{{comment.id}}">DELETE</button>
                 {% else %}
                   <small>|</small>
                   <!-- Change to POST instead of a href-->
