@@ -35,15 +35,9 @@
       </article>
     {% endfor %}
     {% if not unread_notifications%}
-    {% if not read_notifications%}
-    <p>You have no notifications.</p>
+      {% if not read_notifications%}
+        <p>You have no notifications.</p>
+      {% endif %}
     {% endif %}
-    {% endif %}
-
-
-
-
-
   </div>
-
 {% endblock content %}

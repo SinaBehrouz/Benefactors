@@ -228,7 +228,6 @@ def update_post(post_id):
 @app.route("/post/<int:post_id>/status/open", methods=['GET', 'POST'])
 @login_required
 def open_post(post_id):
-    
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
@@ -237,7 +236,7 @@ def open_post(post_id):
     db.session.commit()
     flash('Your post is now open!', 'success')
 
-    # ------ create notification for all users who have commented  -------- # can't close if it's being volunteered for
+    # create notification for all users who have commented (not volunteered, because that case is not possible)
     notification_message = "A post you commented on has now been re-opened."
     notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.STATUS_OPEN)
     db.session.commit()
@@ -257,7 +256,7 @@ def close_post(post_id):
     db.session.commit()
     flash('Your post is closed!', 'success')
 
-    # ------ create notification for all users who have commented on this post -------- # 
+    # create notification for all users who have commented on this post 
     notification_message = "A post you commented on has now been closed."
     notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.STATUS_CLOSED)
     db.session.commit()
@@ -281,33 +280,12 @@ def volunteer(post_id):
         db.session.commit()
         flash('You are now volunteering for the post!', 'success')
        
-        # ------ create notification for post owner, and all users who have commented on this post -------- # 
-        
-        
-        # notification_message = "{} commented on a post that you also commented on.".format(current_user.username) 
-        # notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.COMMENT)
-        
-        # unique_comments = db.session.query(PostComment).filter_by(post_id=post_id).distinct(PostComment.user_id)
-        # for comment in unique_comments:  
-        #     if comment.user_id != current_user.id and comment.user_id != post.user_id : # don't want to notify the person who made the comment, or the author cus they get notification later
-        #         recipient = comment.user_id 
-        #         notification_message = "A post you commented on has now been is now taken by another volunteer! The status is now taken."
-        #         notification = Notification(recipient=recipient, notifier=current_user.id, post_id=post_id, notification_message=notification_message, is_read=0, type=notificationTypeEnum.VOLUNTEER)
-        #         db.session.add(notification)
-        
-        # recipient = post.user_id
-        # notification_message = "{} has volunteered for your post! The the status of your post is now taken.".format(current_user.username)
-        # notification = Notification(recipient=recipient, notifier=current_user.id, post_id=post_id, notification_message=notification_message, is_read=0, type=notificationTypeEnum.VOLUNTEER)
-        # db.session.add(notification)
-
-        notification_message = "{} volunteered for your post!".format(current_user.username)
+        # create notification for post owner, and all users who have commented on this post 
+        notification_message = "{} volunteered for your post.".format(current_user.username)
         notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
 
-        # say status is now taken?
-        notification_message = "A post you commented on is now taken by another volunteer!"
+        notification_message = "A post you commented on is now taken by another volunteer."
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
-       
-
     
     db.session.commit()
         
@@ -328,13 +306,11 @@ def unvolunteer(post_id):
         db.session.commit()
         flash('You are no longer volunteering for the post!', 'success')
 
-        # ------ create notification for post owner, and all users who have commented on this post -------- # 
-        # want to say that it's open now?
-        notification_message = "{} has un-volunteered for your post!".format(current_user.username)
+        # create notification for post owner, and all users who have commented on this post
+        notification_message = "{} has un-volunteered for your post.".format(current_user.username)
         notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
 
-        # want to say that it's open now?
-        notification_message = "A post you commented on has lost its volunteer!"
+        notification_message = "A post you commented on has lost its volunteer."
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
     
     db.session.commit()
@@ -352,8 +328,8 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     flash('Post deleted!', 'success')
-    # ------ create notification all users who have commented or volunteered for this post -------- # 
 
+    # create notification all users who have commented or volunteered for this post
     notification_message = "A post you volunteered for has now been deleted."
     notify_volunteer(post_id, current_user.id, notification_message, notificationTypeEnum.POST_DELETED_VOLUNTEER)
             
@@ -365,69 +341,6 @@ def delete_post(post_id):
 
 
 # -----------------------------------------------Comments----------------------------------------------
-
-# # change from commenter user id to something else 
-# def notify_commenters(post_id, notifier_user_id,notification_message, type):
-#     unique_comments = db.session.query(PostComment).filter_by(post_id=post_id).distinct(PostComment.user_id)
-#     post = Post.query.get_or_404(post_id)
-#     for comment in unique_comments:  
-#         print("made it here", flush=True)
-#         if comment.user_id != notifier_user_id and comment.user_id != post.user_id : # don't want to notify the person who made the comment, or the author cus they get notification later
-#             print("hello")
-#             print("printing unique id that we will create ication for", flush=True)
-#             print(comment.user_id, flush=True)
-#             recipient = comment.user_id 
-
-#             # should be unique 'recipient', 'notifier', 'post_id', 'is_read', 'type'
-#             duplicate = Notification.query.filter_by(recipient=recipient, notifier=notifier_user_id, post_id=post_id, type=type).first()
-#             if duplicate: 
-#                 print("printing duplicate", flush=True)
-#                 print("volunteeered")
-#                 print(duplicate.notification_message, flush=True)
-#                 duplicate.is_read=False
-#                 db.session.commit()
-#             else: 
-#                 print("should create a notification", flush=True)
-#                 notification = Notification(recipient=recipient, notifier=notifier_user_id, post_id=post_id, notification_message=notification_message, is_read=0, type=type)
-#                 db.session.add(notification)
-#                 db.session.commit()
-    
-# # change from commenter user id to something else 
-# def notify_volunteer(post_id, notifier_user_id, notification_message, type):
-#     post = Post.query.get_or_404(post_id)
-#     if post.volunteer and notifier_user_id != post.volunteer:
-#         recipient = post.volunteer 
-#         duplicate = Notification.query.filter_by(recipient=recipient, notifier=notifier_user_id, post_id=post_id, type=type).first()
-#         if duplicate: 
-#             print("printing duplicate", flush=True)
-#             print(duplicate.notification_message, flush=True)
-#             duplicate.is_read=False
-#             db.session.commit()  
-            
-#         else: 
-#             print("should nbe making it here", flush=True)
-#             recipient = post.volunteer
-#             notification = Notification(recipient=recipient, notifier=notifier_user_id, post_id=post_id, notification_message=notification_message, is_read=0, type=type)
-#             db.session.add(notification)
-#             db.session.commit()
-
-# # change from commenter user id to something else 
-# def notify_post_owner(post_id, notifier_user_id, notification_message, type):
-#     post = Post.query.get_or_404(post_id)
-#     if notifier_user_id != post.user_id:
-#         recipient = post.user_id
-#         duplicate = Notification.query.filter_by(recipient=recipient, notifier=notifier_user_id, post_id=post_id, type=type).first()
-#         if duplicate: 
-#             print("printing duplicate", flush=True)
-#             print(duplicate.notification_message, flush=True)
-#             duplicate.is_read=False
-#             db.session.commit()  
-#         else: 
-#             notification = Notification(recipient=recipient, notifier=notifier_user_id, post_id=post_id, notification_message=notification_message, is_read=0, type=type)
-#             db.session.add(notification)
-#             db.session.commit()  
-
-        
 
 # Create a new comment on a post
 @app.route("/post/<int:post_id>/comments/new", methods=['GET', 'POST'])
@@ -444,7 +357,7 @@ def create_new_comment(post_id):
             db.session.commit()
             flash('Comment added!', 'success')
 
-            # ------ create notification for post owner + all users who have commented or volunteered for this post -------- # 
+            # create notification for post owner + all users who have commented or volunteered for this post 
             notification_message = "{} commented on your post.".format(current_user.username)
             notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.COMMENT)
             
@@ -538,9 +451,9 @@ def edit_account():
 @app.route("/account", methods=['GET'])
 @login_required
 def get_account():
+    print("made it here", flush=True)
     user = User.query.filter_by(email=current_user.email).first()
     to_do = Post.query.filter_by(volunteer=current_user.id)
-    # to-do make sure only account owner can access this
     return render_template('account.html', account=user, to_do=to_do)
 
 
@@ -691,10 +604,9 @@ def getConversationForChannel(id):
     conversations = ChatMessages.query.filter_by(channel_id = id).order_by(ChatMessages.message_time.asc()).all()
     return conversations
 
-
-
 # --------------------------------------Notifications----------------------------------------
 
+# Show Notifications
 @app.route("/notifications", methods=['GET'])
 @login_required
 def get_notifications():
@@ -703,13 +615,8 @@ def get_notifications():
     read_notifications = Notification.query.filter_by(recipient=current_user.id, is_read=True).order_by(Notification.date_created.desc()).all()
     
     # marking all of them as read now
-  
     for notification in unread_notifications:
             notification.is_read=True
             db.session.commit()
-    # combine notification view?
-   
-
-
-
+    
     return render_template('notifications.html', user=user, unread_notifications=unread_notifications, read_notifications=read_notifications)

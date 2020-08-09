@@ -154,10 +154,7 @@ class Notification(db.Model):
     notification_message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, nullable=False, default=0)
     type = db.Column(db.Enum(notificationTypeEnum), nullable=False)
-    # __table_args__ = (db.UniqueConstraint('recipient', 'notifier', 'post_id', 'is_read', 'type'), )
-
 
 def __repr__(self):
         return f"Notification('{self.notification_message}', '{self.user_id}', '{self.post_id}')"
-    # to do: probably want to edit what we want to return here
 
