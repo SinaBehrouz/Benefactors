@@ -91,7 +91,7 @@ class User(db.Model, UserMixin):
         return User.query.get(user_id)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.id}', '{self.user_image}')"
+        return f"User('{self.username}', '{self.email}', '{self.user_image}')"
 
 
 # ----------------------------------------------------Posts-------------------------------------------------------------

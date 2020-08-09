@@ -315,7 +315,6 @@ def unvolunteer(post_id):
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
 def delete_post(post_id):
-# TO DO: This function is buggy atm as it seems to be causing issues with the data it's related to (e.g posts, comments)
     post = Post.query.get_or_404(post_id)
     if post.author != current_user:
         abort(403)
@@ -442,10 +441,9 @@ def edit_account():
 @app.route("/account", methods=['GET'])
 @login_required
 def get_account():
-    print("made it here", flush=True)
     user = User.query.filter_by(email=current_user.email).first()
     to_do = Post.query.filter_by(volunteer=current_user.id)
-    return render_template('account.html', account=user, to_do=to_do)
+    return render_template('account.html', account=user, to_do=to_do), 200
 
 
 # -------------------------------------------------Other Account--------------------------------------------------------
@@ -727,4 +725,4 @@ def get_notifications():
     for notification in unread_notifications:
         notification.is_read=True
         db.session.commit()
-    return render_template('notifications.html', user=user, unread_notifications=unread_notifications, read_notifications=read_notifications)
+    return render_template('notifications.html', user=user, unread_notifications=unread_notifications, read_notifications=read_notifications), 200

@@ -20,10 +20,6 @@
 <!-- To Do List -->
 <div class="content-section">
     <h3 class="comments-title">To-Do List</h3>
-        <!-- {% if to_do is none %}
-            <p>You have no items on your to-do list. </p>
-        {% endif %} -->
-        
         {% for post in to_do %}
             <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
         {% endfor %}
@@ -31,9 +27,6 @@
 <!-- My Posts -->
 <div class="content-section">
     <h3 class="comments-title">My Posts</h3>
-        <!-- {% if not account.posts%}
-            <p>You have no posts.</p>
-        {% endif %} -->
         {% for post in account.posts %}
             <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
         {% endfor %}
