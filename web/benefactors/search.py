@@ -83,7 +83,7 @@ class SearchUtil():
     def get_nearby_locations(self,post):
         postal_code = post.author.postal_code
         category = post.category.name
-        if category != categoryEnum.OTHERS.name and category in self.relatedLocations:
+        if category in self.relatedLocations:
             category = self.relatedLocations[category]
             google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q={category}+near+{postal_code}&zoom=12"
         else:
