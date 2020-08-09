@@ -4,17 +4,25 @@ import json
 import requests
 import re
 
-
+"""
+    SearchUtil provides location search based on users text input
+"""
 class SearchUtil():
+    """
+        Constructor
+    """
     def __init__(self):
         self.pcm = postalCodeManager()
         self.DefPostal = "V5H3Z7"
         self.Key = "AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U"
+
+    """
+        gets the state of the location field in advanced search and return the calculated postal code.
+        In case where it is unable to find the postal code it will return -1 as postal code field
+
+        :param form: SearchForm object containing search query information
+    """
     def get_adv_pc_from_location(self, form):
-        '''
-            gets the state of the location field in advanced search and return the calculated postal code.
-            In case where it is unable to find the postal code it will return -1 as postal code field
-        '''
         formPostalCode = form.postalCode.data
         gSuggest = False
         if len( form.postalCode.data.split(',') ) >= 4:
@@ -59,10 +67,13 @@ class SearchUtil():
         if len(pc) != 6:
             pc = self.DefPostal
         return (pc, flash_msg)
+
+    """
+        Function to get nearby location on Google map based on post author's postal code and post category
+
+        :param post: postForm object containing specific information regarding the post
+    """
     def get_nearby_locations(self,post):
-        '''
-            Function to get nearby location on Google map based on post author's postal code and post category
-        '''
         postal_code = post.author.postal_code
         category = post.category.name
         google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q='{category}'+near" + postal_code

@@ -6,7 +6,7 @@
 
   <!--Posts-->
   <article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
+    <img alt="User's display pic" class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
     <div class="media-body">
       <!--Post Top Bar-->
       <div class="article-metadata">
@@ -20,18 +20,16 @@
           <small>|</small>
           <small class="text-muted"><b>{{ post.category.name }}</b></small>
           <small>|</small>
-
           <!--Post Status-->
           {% if post.status.name == "OPEN" %}
-            <small id="openStatus" class="text-muted">{{ post.status.name }}</small>
+            <small class="open-status text-muted">{{ post.status.name }}</small>
           {% elif post.status.name == "TAKEN" %}
-            <small id ="takenStatus" class="text-muted">{{ post.status.name }}</small>
+            <small class="taken-status text-muted">{{ post.status.name }}</small>
           {% elif post.status.name == "CANCELLED" %}
-            <small id ="CanclledStatus" class="text-muted">{{ post.status.name }}</small>
+            <small class="canclled-status text-muted">{{ post.status.name }}</small>
           {% elif post.status.name == "CLOSED"%}
-            <small id ="ClosedStatus" class="text-muted">{{ post.status.name }}</small>
+            <small class="closed-status text-muted">{{ post.status.name }}</small>
           {% endif %}
-
           <!--Post Update Options-->
           {% if post.author == current_user %}
           <small>|</small>
@@ -54,7 +52,7 @@
         {% if post.author != current_user %}
           <div>
             <!--Volunteer Button-->
-            {% if post.status.name == 'OPEN' %} 
+            {% if post.status.name == 'OPEN' %}
               <a class="btn btn-success btn-sm mt-1 mb-1"  href="{{ url_for('volunteer', post_id=post.id) }}">Volunteer</a>
             <!--Unvolunteer Button-->
             {% elif post.volunteer == current_user.id %}
@@ -71,7 +69,7 @@
   <div class="content-section">
     <h3 class="comments-title">Comments</h3>
     {% for comment in comments %}
-      <article class="media content-section" id="comment-display">
+      <article class="media content-section comment-display">
         <div class="media-body">
             <div class="article-metadata">
               <!--Comment Author-->
@@ -98,7 +96,7 @@
               </div>
 
             </div>
-            <p class="article-content" id="comment-desc-display">{{ comment.comment_desc }}</p>
+            <p class="article-content comment-desc-display">{{ comment.comment_desc }}</p>
         </div>
       </article>
     {% endfor %}

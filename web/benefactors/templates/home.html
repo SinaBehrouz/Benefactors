@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U&libraries=places&callback=initAutocomplete" async defer></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='JS/home.js') }}"></script>
+  <script src="{{ url_for('static', filename='JS/home.js') }}"></script>
 
-  <form method="POST" action="" class="search-bar">
+  <form method="POST" class="search-bar">
       {{ form.hidden_tag() }}
         {% if form.searchString.errors %}
             {{ form.searchString(class="form-control form-control-lg is-invalid") }}
@@ -16,7 +16,6 @@
             {{ form.searchString(class="form-control form-control-lg search-bar", placeholder="e.g. Grocery Pick Up") }}
             <button type="button" onClick=expandSearchOpt() class="btn btn-primary btn-md mt-1 mb-1">Advanced Search</button>
             <div class="media content-section adv-search-hidden" id="content">
-                  {{ form.hidden_tag() }}
                   <fieldset class="form-group">
                       <legend class="border-bottom mb-4">Configure Your Search Setting</legend>
                       <label class="form-control-label">Approximate Area</label>
@@ -88,8 +87,8 @@
 
 
     {% for post in posts %}
-        <article class="media content-section" id="post-display">
-            <img class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
+        <article class="media content-section home-post">
+            <img alt="User's display pic" class="rounded-circle article-img post_user_image" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
             <div class="media-body">
                 <div class="article-metadata">
                     <a class="mr-2" href="{{ url_for('other_account', user_id=post.author.id) }}">{{ post.author.username }}</a>
@@ -99,13 +98,13 @@
                       <small class="text-muted"> <b> {{ post.category.name }}</b> </small>
                       <small class="text-muted">  |  </small>
                       {% if post.status.name == "OPEN" %}
-                        <small id="openStatus" class="text-muted">{{ post.status.name }}</small>
+                        <small class="open-status text-muted">{{ post.status.name }}</small>
                       {% elif post.status.name == "TAKEN" %}
-                        <small id ="takenStatus" class="text-muted">{{ post.status.name }}</small>
+                        <small class="taken-status text-muted">{{ post.status.name }}</small>
                       {% elif post.status.name == "CANCELLED" %}
-                        <small id ="CanclledStatus" class="text-muted">{{ post.status.name }}</small>
+                        <small class="canclled-status text-muted">{{ post.status.name }}</small>
                       {% elif post.status.name == "CLOSED"%}
-                        <small id ="ClosedStatus" class="text-muted">{{ post.status.name }}</small>
+                        <small class="closed-status text-muted">{{ post.status.name }}</small>
                       {% endif %}
                     </div>
                 </div>
