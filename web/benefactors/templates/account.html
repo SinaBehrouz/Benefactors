@@ -26,9 +26,7 @@
             {% for post in to_do %}
                 <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
             {% endfor %}
-        {% endif %}
-
-        
+        {% endif %}  
 </div>
 <!-- My Posts -->
 <div class="content-section">
