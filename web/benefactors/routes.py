@@ -248,11 +248,11 @@ def close_post(post_id):
     db.session.commit()
     flash('Your post is closed!', 'success')
 
-    # create notification for all users who have commented on this post 
+    # create notification for all users who have commented on this post
     notification_message = "A post you commented on has now been closed."
     notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.STATUS_CLOSED)
     db.session.commit()
-    
+
     return redirect(url_for('post', post_id=post.id))
 
 
@@ -271,16 +271,16 @@ def volunteer(post_id):
         post.status = statusEnum.TAKEN
         db.session.commit()
         flash('You are now volunteering for the post!', 'success')
-       
-        # create notification for post owner, and all users who have commented on this post 
+
+        # create notification for post owner, and all users who have commented on this post
         notification_message = "{} volunteered for your post.".format(current_user.username)
         notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
 
         notification_message = "A post you commented on is now taken by another volunteer."
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
-    
+
     db.session.commit()
-        
+
     return redirect(url_for('post', post_id=post.id))
 
 
@@ -304,13 +304,13 @@ def unvolunteer(post_id):
 
         notification_message = "A post you commented on has lost its volunteer."
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.UN_VOLUNTEER)
-    
+
     db.session.commit()
     return redirect(url_for('post', post_id=post.id))
 
 
 # Delete post
-@app.route("/post/<int:post_id>/delete/", methods=['POST'])
+@app.route("/post/<int:post_id>/delete/", methods=['DELETE', 'POST'])
 @login_required
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -319,22 +319,13 @@ def delete_post(post_id):
     db.session.delete(post)
     db.session.commit()
     flash('Post deleted!', 'success')
-
-    # create notification all users who have commented or volunteered for this post
-    notification_message = "A post you volunteered for has now been deleted."
-    notify_volunteer(post_id, current_user.id, notification_message, notificationTypeEnum.POST_DELETED_VOLUNTEER)
-            
-    notification_message = "A post you commented on has now been has now been deleted." 
-    notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.POST_DELETED_COM)
-    
-    db.session.commit()
     return redirect(url_for('home'))
 
 
 # ----------------------------------------------------Comments----------------------------------------------------------
 
 # Create a new comment on a post
-@app.route("/post/<int:post_id>/comments/new/", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/comments/new/", methods=['POST'])
 @login_required
 def create_new_comment(post_id):
     post = Post.query.get_or_404(post_id)
@@ -348,16 +339,16 @@ def create_new_comment(post_id):
             db.session.commit()
             flash('Comment added!', 'success')
 
-            # create notification for post owner + all users who have commented or volunteered for this post 
+            # create notification for post owner + all users who have commented or volunteered for this post
             notification_message = "{} commented on your post.".format(current_user.username)
             notify_post_owner(post_id, current_user.id, notification_message, notificationTypeEnum.COMMENT)
-            
+
             notification_message = "{} commented on a post that you volunteered for.".format(current_user.username)
             notify_volunteer(post_id, current_user.id, notification_message, notificationTypeEnum.COM_VOLUNTEER)
-            
-            notification_message = "{} commented on a post that you also commented on.".format(current_user.username) 
+
+            notification_message = "{} commented on a post that you also commented on.".format(current_user.username)
             notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.COMMENT)
-       
+
             return redirect(url_for('post', post_id=post.id))
 
     return render_template('post.html', post=post, comments=comments, form=form)
@@ -691,7 +682,7 @@ def getConversationForChannel(channel_id):
         UpdateReadMessageStatusForChannel(channel_id)
         return messages
     # Channel does not exist, messages must not exist
-    else: 
+    else:
         return None
 
 def UpdateReadMessageStatusForChannel(channel_id):

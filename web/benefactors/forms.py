@@ -142,7 +142,7 @@ class SearchForm(FlaskForm):
     radius = IntegerField('Radius(Km)', validators=[Optional(), NumberRange(min=1, max=100)])
     status = SelectField('Status',
                          choices=[('all', 'All'), (statusEnum.OPEN.name, 'Open'), (statusEnum.TAKEN.name, 'Taken'),
-                                  (statusEnum.CLOSED.name, 'Closed'), ('pending', 'Pending')])
+                                  (statusEnum.CLOSED.name, 'Closed')])
     category = SelectField('Category')
     updateSearch = SubmitField('Apply Filters')
 
