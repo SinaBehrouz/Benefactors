@@ -28,7 +28,7 @@
                 <!-- Navbar Right Side -->
                 <div class="navbar-nav">
                     {% if current_user.is_authenticated %}
-                    
+
                     <!-- if unread notifications, show bell icon with "!"" -->
                       {% if unread_notifications %}
                         <a class="nav-item nav-link" href="{{ url_for('get_notifications') }}">
@@ -52,7 +52,7 @@
         </div>
     </nav>
 </header>
-<main role="main" class="container">
+<main class="container">
      <div class="row">
        <div class="col-md-8">
          {% with messages = get_flashed_messages(with_categories=true) %}
@@ -71,9 +71,9 @@
          <div id="infoCenter" class="content-section">
            <h3>Information Center</h3>
              <ul class="list-group">
-               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">To Do List</a> </li>
-               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
-               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
+               <li class="list-group-item list-group-item-light info-item"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">To Do List</a> </li>
+               <li class="list-group-item list-group-item-light info-item"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
+               <li class="list-group-item list-group-item-light info-item"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
              </ul>
          </div>
        </div>

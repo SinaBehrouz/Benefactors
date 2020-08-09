@@ -41,7 +41,8 @@ class SignUpForm(FlaskForm):
 
     def validate_postal_code(self, postal_code):
         pcm = postalCodeManager()
-        if not pcm.verifyPostalCode(postal_code.data):
+        pc = postal_code.data.replace(" ", "").upper()
+        if not pcm.verifyPostalCode(pc):
             raise ValidationError('That is not a valid Postal Code.')
 
 
@@ -141,7 +142,7 @@ class SearchForm(FlaskForm):
     radius = IntegerField('Radius(Km)', validators=[Optional(), NumberRange(min=1, max=100)])
     status = SelectField('Status',
                          choices=[('all', 'All'), (statusEnum.OPEN.name, 'Open'), (statusEnum.TAKEN.name, 'Taken'),
-                                  (statusEnum.CLOSED.name, 'Closed'), ('pending', 'Pending')])
+                                  (statusEnum.CLOSED.name, 'Closed')])
     category = SelectField('Category')
     updateSearch = SubmitField('Apply Filters')
 

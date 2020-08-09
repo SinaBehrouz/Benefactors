@@ -4,7 +4,7 @@
 <!--Account Profile-->
 <div class="content-section">
     <div class="media">
-        <img class="rounded-circle article-img"
+        <img alt="User's display pic" class="rounded-circle article-img"
              src="{{ url_for('static', filename='user_images/' + account.user_image) }}">
         <div class="media-body">
             <h2 class="account-heading">{{ account.first_name }} {{ account.last_name }}</h2>
@@ -29,6 +29,7 @@
     <h3 class="comments-title">My Posts</h3>
         {% for post in account.posts %}
             <p><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></p>
-        {% endfor %}
-</div> 
+            {% endfor %}
+</div>
+
 {% endblock content %}
