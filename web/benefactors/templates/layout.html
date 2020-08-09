@@ -6,7 +6,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/main.css') }}">
-
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
     <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
     <title>Benefactors</title>
 
@@ -28,9 +28,21 @@
                 <!-- Navbar Right Side -->
                 <div class="navbar-nav">
                     {% if current_user.is_authenticated %}
-                    <a class="nav-item nav-link" href="{{ url_for('create_new_post') }}">New Post</a>
-                    <a class="nav-item nav-link" href="{{ url_for('get_account') }}">Account</a>
-                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    
+                    <!-- if unread notifications, show bell icon with "!"" -->
+                      {% if unread_notifications %}
+                        <a class="nav-item nav-link" href="{{ url_for('get_notifications') }}">
+                        <span class="material-icons md-36">notification_important</span>
+                      </a>
+                      {% else %}
+                        <a class="nav-item nav-link" href="{{ url_for('get_notifications') }}">
+                          <span class="material-icons md-36">notifications</span>
+                        <!-- </span> -->
+                        </a>
+                      {% endif %}
+                      <a class="nav-item nav-link" href="{{ url_for('create_new_post') }}">New Post</a>
+                      <a class="nav-item nav-link" href="{{ url_for('get_account') }}">Account</a>
+                      <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                     {% else %}
                     <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
                     <a class="nav-item nav-link" href="{{ url_for('sign_up') }}">Sign Up</a>
@@ -59,8 +71,8 @@
          <div id="infoCenter" class="content-section">
            <h3>Information Center</h3>
              <ul class="list-group">
-               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="#">To Do List</a> </li>
-               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="#">My Posts</a> </li>
+               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">To Do List</a> </li>
+               <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
                <li id="infoCenterLi" class="list-group-item list-group-item-light"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
              </ul>
          </div>

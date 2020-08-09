@@ -11,6 +11,18 @@ class genderEnum(Enum):
     female = 2
     others = 3
 
+class notificationTypeEnum(Enum):
+    VOLUNTEER = 1
+    UN_VOLUNTEER = 2
+    COMMENT = 3
+    STATUS = 4
+    COM_VOLUNTEER = 5
+    STATUS_CLOSED = 6
+    STATUS_OPEN = 7
+    DELETED = 8
+    POST_DELETED_VOLUNTEER = 9
+    POST_DELETED_COM = 10
+
 
 class statusEnum(Enum):
     OPEN = 1
@@ -160,3 +172,19 @@ class ChatMessages(db.Model):
 
     def __repr__(self):
         return f"ChatMessages('{self.sender}', '{self.message_content}', '{self.message_sent}', '{self.message_time}, {self.channel_id}')"
+
+# ----------------------------------------------------Notifications-----------------------------------------------------------
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    recipient = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    notifier = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    notification_message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, nullable=False, default=0)
+    type = db.Column(db.Enum(notificationTypeEnum), nullable=False)
+
+def __repr__(self):
+        return f"Notification('{self.notification_message}', '{self.user_id}', '{self.post_id}')"
+
