@@ -364,6 +364,7 @@ small.closed-status {
   background-color: white;
   margin-top: 0.5em;
   background-image: none;
+  float: right;
 }
 
 .row .message_sender {
@@ -444,4 +445,12 @@ small.closed-status {
 
 #channel-list-delivered {
    background-color: #cfcc1b;
+}
+
+#account_image {
+  margin-right: 20px;
+}
+
+#post_user_image {
+  margin-right: 20px;
 }

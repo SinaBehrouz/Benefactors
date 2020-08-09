@@ -5,7 +5,7 @@
 <div class="content-section">
     <div class="media">
         <img alt="User's display pic" class="rounded-circle article-img"
-             src="{{ url_for('static', filename='user_images/' + account.user_image) }}">
+             src="{{ url_for('static', filename='user_images/' + account.user_image) }}" id="account_image">
         <div class="media-body">
             <h2 class="account-heading">{{ account.first_name }} {{ account.last_name }}</h2>
             <span class="heading"><b>Username: </b>{{ account.username }}</span><br>
