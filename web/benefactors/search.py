@@ -3,7 +3,7 @@ from flask_login import current_user
 import json
 import requests
 import re
-
+from .models import categoryEnum
 """
     SearchUtil provides location search based on users text input
 """
@@ -15,6 +15,13 @@ class SearchUtil():
         self.pcm = postalCodeManager()
         self.DefPostal = "V5H3Z7"
         self.Key = "AIzaSyCZ2UdTtgsGg7Jbx7UmtnGPFh_pVRi2n4U"
+        self.relatedLocations = {
+        "CLEANING": "mart",
+        "ERRANDS":"mart",
+        "LABOUR":"construction+stores",
+        "GROCERY":"GROCERY",
+        "MEDICATION":"pharmacy"
+        }
 
     """
         gets the state of the location field in advanced search and return the calculated postal code.
@@ -76,5 +83,9 @@ class SearchUtil():
     def get_nearby_locations(self,post):
         postal_code = post.author.postal_code
         category = post.category.name
-        google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q='{category}'+near" + postal_code
+        if category in self.relatedLocations:
+            category = self.relatedLocations[category]
+            google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q={category}+near+{postal_code}&zoom=12"
+        else:
+            google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q={postal_code}&zoom=12"
         return google_map
