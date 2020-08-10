@@ -52,7 +52,7 @@ The recent pandemic has altered the way of life for a lot of people across the g
 ![LoginScreen](docs/resources/LoginScreen.PNG)
 
 #### View profile and activities.
-Want to view your profile and keep track of your activities? Head on over to your account page.
+Head on over to your account page to view your profile, posts, to-do list, and more!
 ![MyAccount](docs/resources/MyAccount.PNG)
 
 #### Update your profile picture.
