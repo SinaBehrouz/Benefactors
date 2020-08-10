@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+<main class="container">
+     <div class="row">
+       <div class="col-md-8">
+         <h1>Oh no! Page not Found</h1>
+         <h2>Click here to go back to <a href="{{ url_for('home') }}">home</a> page</h2>
+         <img id="error-img" src="{{ url_for('static', filename='Backgrounds/error.jpg') }}" alt="error image">
+       </div>
+     </div>
+</main>
+{% endblock content %}

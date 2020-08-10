@@ -713,3 +713,9 @@ def get_notifications():
         notification.is_read=True
         db.session.commit()
     return render_template('notifications.html', user=user, unread_notifications=unread_notifications, read_notifications=read_notifications), 200
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    # returns a 200 (not a 404) with the following contents:
+    return render_template('error.html')

@@ -456,6 +456,18 @@ small.closed-status {
   height: 100%;
 }
 
+.post_user_image {
+  margin-right: 20px;
+}
+
+#error-img{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 70%;
+}
+
 .deleteButton {
   background: none;
   font-size: small;
