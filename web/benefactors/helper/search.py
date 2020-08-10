@@ -85,5 +85,5 @@ class SearchUtil():
             category = self.relatedLocations[category]
             google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q={category}+near+{postal_code}&zoom=12"
         else:
-            google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q={postal_code}&zoom=12"
+            google_map = f"https://www.google.com/maps/embed/v1/search?key={self.Key}&q={postal_code}&zoom=15"
         return google_map
