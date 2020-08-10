@@ -66,9 +66,8 @@ The recent pandemic has altered the way of life for a lot of people across the g
 3. blah
 
 #### Want to know more about the task? Comment on the post.
-1. blah
-2. blah 
-3. blah
+1. User can view comments, message the comment's author, delete (if you are the owner comment)
+![PostCommentSection](docs/resources/PostCommentSection.png)
 
 #### Want to reach out directly? Direct message the user - There are three ways to contact the user
 1. Through the Post Author Message Button
@@ -77,6 +76,16 @@ The recent pandemic has altered the way of life for a lot of people across the g
 ![PostCommentMsg](docs/resources/PostCommentMsg.png)
 3. Through Profile Page
 ![ProfilePageMsg](docs/resources/ProfilePageMsg.png)
+
+#### Interface for direct message - The direct message will not be auto-refreshed; however, the user will know when a new message appears.
+- Every time the user sends a message, if scrollable it will auto-scroll to the bottom.
+- The message will be shown on the right if you are the sender
+1. This screenshot below is a user interface for messages
+![InitialMessages](docs/resources/InitialMessages.png)
+2. Here is the highlighted part whenever a new message appears
+![NewMessageAndPlaceholder](docs/resources/NewMessageAndPlaceholder.png)
+3. Messages can also be deleted using the X button on the corner
+![DeleteMessages](docs/resources/DeleteMessages.png)
 
 #### Want to find nearby amenities? Find it using Google maps integration.
 1. blah
