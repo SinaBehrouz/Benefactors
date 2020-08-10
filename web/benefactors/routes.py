@@ -17,8 +17,6 @@ from .search import SearchUtil
 from benefactors.helper.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
 
 
-
-
 # -------------------------------------------------Login/Logout---------------------------------------------------------
 
 @app.route("/login/", methods=['GET', 'POST'])
@@ -265,7 +263,7 @@ def volunteer(post_id):
     if post.author == current_user:
         flash("You can't volunteer for your own post!", 'warning')
     elif post.status != statusEnum.OPEN:
-        flash('Post must be open to volunteer!', 'warning')
+        flash('Post status must be OPEN to volunteer!', 'warning')
     else:
         post.volunteer = current_user.id
         post.status = statusEnum.TAKEN
@@ -278,8 +276,6 @@ def volunteer(post_id):
 
         notification_message = "A post you commented on is now taken by another volunteer."
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
-
-    db.session.commit()
 
     return redirect(url_for('post', post_id=post.id))
 
@@ -374,7 +370,7 @@ def update_comment(post_id, comment_id):
 
 
 # Delete comment
-@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete/", methods=['GET', 'POST'])
+@app.route("/post/<int:post_id>/comments/<int:comment_id>/delete/", methods=['POST'])
 @login_required
 def delete_comment(post_id, comment_id):
     comment = PostComment.query.get_or_404(comment_id)
@@ -431,7 +427,7 @@ def edit_account():
 @login_required
 def get_account():
     user = User.query.filter_by(email=current_user.email).first()
-    to_do = Post.query.filter_by(volunteer=current_user.id)
+    to_do = Post.query.filter_by(volunteer=current_user.id).all() 
     return render_template('account.html', account=user, to_do=to_do), 200
 
 
@@ -530,7 +526,7 @@ def charge():
 
 # ------------------------------------------------------Messages--------------------------------------------------------
 
-@app.route("/messages/", methods=['GET', 'POST'])
+@app.route("/messages/", methods=['GET'])
 @login_required
 def messages():
     channels = getAllChannelsForUser(current_user)
@@ -571,50 +567,49 @@ def messages_chat(channel_id):
 
             return redirect(url_for('messages_chat', channel_id=channel_id))
     # In case the user submits an empty message or the request.method is GET
-    else:
-        if not checkChannelExist(channel_id):
-            flash("The message channel does not exist ", 'danger')
-            return redirect(url_for('home'))
-
-        # Add authorization security, if authorized
-        if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:
-            return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
-                                   messages=messages, channel_id=channel_id)
-        flash("You are not authorized to access that page", 'danger')
+    if not checkChannelExist(channel_id):
+        flash("The message channel does not exist ", 'danger')
         return redirect(url_for('home'))
 
+    # Add authorization security, if authorized
+    if not (current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id):
+        flash("You are not authorized to access that page", 'danger')
+        return render_template('messages.html', owner=current_user, chatchannels=channels)
 
-@app.route("/messages/create/<int:cmt_auth_id>/", methods=['GET'])
+    return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
+                        messages=messages, channel_id=channel_id)
+
+
+@app.route("/messages/create/<int:cmt_auth_id>/", methods=['GET', 'POST'])
 @login_required
 def create_new_chat_channel(cmt_auth_id):
-    if request.method == 'GET':
-        # Check whether channel already exists
-        channel_id = findSpecificChannel(current_user.id, cmt_auth_id)
+    # Check whether channel already exists
+    channel_id = findSpecificChannel(current_user.id, cmt_auth_id)
 
-        # If already exists retrieve messages
-        if channel_id != -1:
-            return redirect(url_for('messages_chat', channel_id=channel_id))
-        # If not, create a new channel
+    # If already exists retrieve messages
+    if channel_id != -1:
+        return redirect(url_for('messages_chat', channel_id=channel_id))
+    # If not, create a new channel
+    else:
+        user1 = -1
+        user2 = -1
+
+        if current_user.id < cmt_auth_id:
+            user1 = current_user.id
+            user2 = cmt_auth_id
         else:
-            user1 = -1
-            user2 = -1
+            user1 = cmt_auth_id
+            user2 = current_user.id
 
-            if current_user.id < cmt_auth_id:
-                user1 = current_user.id
-                user2 = cmt_auth_id
-            else:
-                user1 = cmt_auth_id
-                user2 = current_user.id
+        newChannel = ChatChannel(user1_id=user1, user2_id=user2)
+        db.session.add(newChannel)
+        # DB update is caused by creating a new channel
+        db.session.commit()
 
-            newChannel = ChatChannel(user1_id=user1, user2_id=user2)
-            db.session.add(newChannel)
-            # DB update is caused by creating a new channel
-            db.session.commit()
-
-            return redirect(url_for('messages_chat', channel_id=newChannel.id))
+        return redirect(url_for('messages_chat', channel_id=newChannel.id))
 
 
-@app.route("/messages/<int:channel_id>/<int:message_id>/delete/", methods=['GET'])
+@app.route("/messages/<int:channel_id>/<int:message_id>/delete/", methods=['POST'])
 @login_required
 def delete_message(channel_id, message_id):
     message = ChatMessages.query.get_or_404(message_id)
@@ -626,7 +621,7 @@ def delete_message(channel_id, message_id):
         db.session.commit()
         return redirect(url_for('messages_chat', channel_id=channel_id))
     # If not authorized, flash an error. Redirect to home page.
-    flash("You are not authorized to access that page", 'danger')
+    flash("You are not authorized to access that page, User:" + current_user.username, 'danger')
     return redirect(url_for('home'))
 
 
@@ -685,6 +680,7 @@ def getConversationForChannel(channel_id):
     else:
         return None
 
+
 def UpdateReadMessageStatusForChannel(channel_id):
     channel = ChatChannel.query.filter_by(id=channel_id).first()
     # If current user equals user 1
@@ -696,10 +692,12 @@ def UpdateReadMessageStatusForChannel(channel_id):
     # Update the DB with the status.
     db.session.commit()
 
+
 def checkChannelExist(channel_id):
     if ChatChannel.query.filter_by(id=channel_id).count() == 1:
         return True
     return False
+
 
 # --------------------------------------Notifications----------------------------------------
 
