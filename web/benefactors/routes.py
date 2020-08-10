@@ -17,8 +17,6 @@ from .search import SearchUtil
 from benefactors.helper.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
 
 
-
-
 # -------------------------------------------------Login/Logout---------------------------------------------------------
 
 @app.route("/login/", methods=['GET', 'POST'])
@@ -265,7 +263,7 @@ def volunteer(post_id):
     if post.author == current_user:
         flash("You can't volunteer for your own post!", 'warning')
     elif post.status != statusEnum.OPEN:
-        flash('Post must be open to volunteer!', 'warning')
+        flash('Post status must be OPEN to volunteer!', 'warning')
     else:
         post.volunteer = current_user.id
         post.status = statusEnum.TAKEN
@@ -278,8 +276,6 @@ def volunteer(post_id):
 
         notification_message = "A post you commented on is now taken by another volunteer."
         notify_commenters(post_id, current_user.id, notification_message, notificationTypeEnum.VOLUNTEER)
-
-    db.session.commit()
 
     return redirect(url_for('post', post_id=post.id))
 
@@ -685,6 +681,7 @@ def getConversationForChannel(channel_id):
     else:
         return None
 
+
 def UpdateReadMessageStatusForChannel(channel_id):
     channel = ChatChannel.query.filter_by(id=channel_id).first()
     # If current user equals user 1
@@ -696,10 +693,12 @@ def UpdateReadMessageStatusForChannel(channel_id):
     # Update the DB with the status.
     db.session.commit()
 
+
 def checkChannelExist(channel_id):
     if ChatChannel.query.filter_by(id=channel_id).count() == 1:
         return True
     return False
+
 
 # --------------------------------------Notifications----------------------------------------
 
