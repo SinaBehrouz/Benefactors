@@ -1,3 +1,4 @@
+
 # Benefactors
 The recent pandemic has altered the way of life for a lot of people across the globe. Some communities have been impacted so severely that basic necessities like delivery of food and medicines to quarantined neighbourhoods has become a formidable challenge. To mitigate the situation, we envisioned a platform to bring people together while practicing social distancing. Benefactors allows people in need to connect with volunteers to tackle essential services and errands efficiently and at no cost. Expected services include, delivery, shopping, medical supplies, and others.
 
@@ -9,6 +10,7 @@ The recent pandemic has altered the way of life for a lot of people across the g
     3. [To Terminate](#to-terminate)
 2. [Getting started](#getting-started)
     1. [Create a new account.](#create-a-new-account.)
+    1. [View Profile and Activities.](#view-profile-and-activities.)
     1. [Update your profile picture.](#update-your-profile-picture.)
     2. [Need assistance? Create a new post.](#need-assistance-create-a-new-post)
     3. [Want to help? Volunteer for a task.](#want-to-help-volunteer-for-a-task)
@@ -17,7 +19,7 @@ The recent pandemic has altered the way of life for a lot of people across the g
     6. [Want to find nearby amenities? Find it using Google maps integration.](#want-to-find-nearby-amenities-find-it-using-google-maps-integration)
     7. [Want to find postings in a specific area? Find it using advance search.](#want-to-find-postings-in-a-specific-area-find-it-using-advance-search)
     8. [Want to appreciate a user? Review the user.](#want-to-appreciate-a-volunteer-review-the-user)
-    9. [You will never miss an update with real time notifications.](#you-will-never-miss-an-update-with-real-time-notifications)
+    9. [You will never miss an update with real time notifications.](#you-will-never-miss-an-update-with-real-time-notifications.)
     10. [Want to support the platform? Consider donating via credit/debit card.](#want-to-support-the-platform-consider-donating-via-creditdebit-card.)
 
 3. [Inspiration](#inspiration)
@@ -49,6 +51,9 @@ The recent pandemic has altered the way of life for a lot of people across the g
 1. SignUp 
 ![LoginScreen](docs/resources/LoginScreen.PNG)
 
+#### View profile and activities.
+Head on over to your account page to view your profile, posts, to-do list, and more! You can do this by clicking "Account" in your navigation bar.
+![MyAccount](docs/resources/MyAccount.PNG)
 
 #### Update your profile picture.
 1. blah
@@ -103,9 +108,9 @@ For your convenience, we have designed a simple review form with description and
 
 
 #### You will never miss an update with real time notifications.
-1. blah
-2. blah 
-3. blah
+Head on over to your notification center in order to view your most up to date notifications! You can access this via the bell icon in your navigation bar.
+![NotificationCenter](docs/resources/NotificationCenter.png)
+
 
 #### Want to support the platform? Consider donating via credit/debit card.
 Benefactors is a non-profit social welfare website for the people, by the people. Your continued donations keep Benefactors running.
