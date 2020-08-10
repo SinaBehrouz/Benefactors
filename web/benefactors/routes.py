@@ -576,11 +576,12 @@ def messages_chat(channel_id):
         return redirect(url_for('home'))
 
     # Add authorization security, if authorized
-    if current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id:
-        return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
-                                messages=messages, channel_id=channel_id)
-    flash("You are not authorized to access that page", 'danger')
-    return redirect(url_for('home'))
+    if not (current_user.id == current_channel.user1_id or current_user.id == current_channel.user2_id):
+        flash("You are not authorized to access that page", 'danger')
+        return render_template('messages.html', owner=current_user, chatchannels=channels)
+
+    return render_template('messages.html', owner=current_user, chatchannels=channels, form=form,
+                        messages=messages, channel_id=channel_id)
 
 
 @app.route("/messages/create/<int:cmt_auth_id>/", methods=['GET', 'POST'])
