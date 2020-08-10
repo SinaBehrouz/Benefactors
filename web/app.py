@@ -1,6 +1,6 @@
 from flask.cli import FlaskGroup
 from benefactors import app, db
-from benefactors.models import User, Post, PostComment, ChatChannel, ChatMessages
+from benefactors.models import User, Post, PostComment, ChatChannel, ChatMessages, notificationTypeEnum, Notification
 
 import datetime
 
@@ -33,6 +33,7 @@ def seed_db():
     db.session.add(Post(title="Bi-weekly Groceries Run", category="GROCERY", status="TAKEN", description="I would need someone to help me with my bi-weekly groceries to the nearest store. I would like to know where you live as well because I prefer someone who lives close to me. The groceries that I am buying are mostly food like canned food, meat, fresh vegetables, fruits, sometimes paper towel and toilet paper.  A little background on myself, I have grow old these last few days, and I am really scared of going out right now. I would appreciate if someone is kind enough and spend their time to help me with this simple task. Thank you to you all.", user_id=2, volunteer=6, date_posted=datetime.datetime(2020,7,31,10,0,0)))
     db.session.add(Post(title="Need to Get My Medications A.S.A.P", category="MEDICATION", status="TAKEN", description="I'm in no condition to go out to my local pharmacy, and I would really appreciate if someone could buy them up for me. The medication I would like to buy are Tylenols, and maybe along with medical masks and hand sanitizers if they still exist on local store. I do really need them soon because I need to go work everyday using a bus, and I am risking myself everyday without mask and surgical mask.", user_id=2, volunteer=1))
     db.session.add(Post(title="Need an extra hand or two to MOVE", category="MOVING", status="CLOSED", description="Hey it's the end of the month, and I am getting kicked out of my apartment. I would need someone that can drive a U-Haul truck to bring my furnitures, stuffs, and shoes. This is because I cannot drive and I have no money. Thank you for the help!", user_id=4, date_posted=datetime.datetime(2020,7,30,11,25,0)))
+    db.session.add(Post(title="Need Help Getting My Groceries", category="GROCERY", status="TAKEN", description="I am need in need of getting groceries this week. I am not feeling that great this week, and do not think I should be going into public spaces. I would really appreciate it if someone could help me out.", user_id=2, volunteer=3, date_posted=datetime.datetime(2020,7,31,10,0,0)))
 
     db.session.commit()
 
@@ -40,6 +41,16 @@ def seed_db():
     db.session.add(PostComment(comment_desc="Thanks everyone, but I've been helped. Closing this post soon", user_id=2, post_id=3, date_posted=datetime.datetime(2020,8,2,15,20,55)))
     db.session.add(PostComment(comment_desc="Hi I just saw this post and see this post is still open, do you still need help?", user_id=7, post_id=3, date_posted=datetime.datetime(2020,8,9,22,25,30)))
     db.session.add(PostComment(comment_desc="Closing this post as I used an uber driver to move instead, I needed to move on July 31st!!", user_id=4, post_id=5, date_posted=datetime.datetime(2020,8,1,22,44,45)))
+    db.session.add(PostComment(comment_desc="Hi, I'm interested in helping out! When do you need this done by?", user_id=1, post_id=1, date_posted=datetime.datetime(2020,8,9,22,25,30)))
+    db.session.add(PostComment(comment_desc="I work at a grocery store, and can for sure help get your groceries for you!", user_id=4, post_id=1, date_posted=datetime.datetime(2020,8,9,22,25,30)))
+    db.session.add(PostComment(comment_desc="I can help, I sent you a message about it!", user_id=5, post_id=1, date_posted=datetime.datetime(2020,8,9,22,25,30)))
+
+    db.session.commit()
+    
+    notification = Notification(recipient=3, notifier=1, post_id=1, notification_message="SamSmith commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
+    notification = Notification(recipient=3, notifier=4, post_id=1, notification_message="Jackie commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
+    notification = Notification(recipient=3, notifier=5, post_id=1, notification_message="RL commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
+
 
     db.session.add(ChatChannel(user1_id=2, user2_id=6, last_updated=datetime.datetime(2020,8,1,12,5,30)))
 
