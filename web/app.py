@@ -44,7 +44,8 @@ def seed_db():
     db.session.add(PostComment(comment_desc="I work at a grocery store, and can for sure help get your groceries for you!", user_id=4, post_id=1, date_posted=datetime.datetime(2020,8,9,22,25,30)))
     db.session.add(PostComment(comment_desc="I can help, I sent you a message about it!", user_id=5, post_id=1, date_posted=datetime.datetime(2020,8,9,22,25,30)))
 
-  
+    db.session.commit()
+    
     notification = Notification(recipient=3, notifier=1, post_id=1, notification_message="SamSmith commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
     notification = Notification(recipient=3, notifier=4, post_id=1, notification_message="Jackie commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
     notification = Notification(recipient=3, notifier=5, post_id=1, notification_message="RL commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
