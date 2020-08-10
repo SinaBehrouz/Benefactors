@@ -111,7 +111,9 @@ class AccountUpdateForm(FlaskForm):
         if not pcm.verifyPostalCode(postal_code.data):
             raise ValidationError('That is not a valid Postal Code.')
 
-
+    def validate_phone_number(self, phone_number):
+        if not phone_number.data.isnumeric():
+            raise ValidationError('phone number must consist of only integers')
 # ----------------------------------------------------Comments----------------------------------------------------------
 
 class PostCommentForm(FlaskForm):
