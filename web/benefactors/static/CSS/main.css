@@ -454,3 +454,10 @@ small.closed-status {
 .post_user_image {
   margin-right: 20px;
 }
+
+#error-img{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
