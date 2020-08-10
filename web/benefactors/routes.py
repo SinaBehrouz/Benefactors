@@ -12,8 +12,8 @@ from benefactors.forms import LoginForm, SignUpForm, AccountUpdateForm, Donation
 from flask_mail import Message
 from sqlalchemy import or_, desc, asc
 from datetime import datetime
-from .postalCodeManager import postalCodeManager
-from .search import SearchUtil
+from benefactors.helper.postalCodeManager import postalCodeManager
+from benefactors.helper.search import SearchUtil
 from benefactors.helper.notification_helper import notify_commenters, notify_volunteer, notify_post_owner
 
 
@@ -427,7 +427,7 @@ def edit_account():
 @login_required
 def get_account():
     user = User.query.filter_by(email=current_user.email).first()
-    to_do = Post.query.filter_by(volunteer=current_user.id).all() 
+    to_do = Post.query.filter_by(volunteer=current_user.id).all()
     return render_template('account.html', account=user, to_do=to_do), 200
 
 

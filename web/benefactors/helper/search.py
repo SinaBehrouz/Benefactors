@@ -1,9 +1,7 @@
 from .postalCodeManager import postalCodeManager
 from flask_login import current_user
-import json
 import requests
 import re
-from .models import categoryEnum
 """
     SearchUtil provides location search based on users text input
 """
