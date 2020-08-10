@@ -431,7 +431,7 @@ def edit_account():
 @login_required
 def get_account():
     user = User.query.filter_by(email=current_user.email).first()
-    to_do = Post.query.filter_by(volunteer=current_user.id)
+    to_do = Post.query.filter_by(volunteer=current_user.id).all() 
     return render_template('account.html', account=user, to_do=to_do), 200
 
 
