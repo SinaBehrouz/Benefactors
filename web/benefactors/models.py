@@ -167,7 +167,7 @@ class ChatMessages(db.Model):
     message_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     message_status = db.Column(db.Enum(messageStatusEnum), default=messageStatusEnum.SENT)
 
-    channel_id = db.Column(db.Integer, db.ForeignKey('chatchannel.id'), nullable=False)
+    channel_id = db.Column(db.Integer, db.ForeignKey('chatchannel.id', ondelete='CASCADE'), nullable=False)
     sender = db.relationship("User", backref=backref("usr_snd", uselist=False), foreign_keys=[sender_id])
 
     def __repr__(self):

@@ -4,7 +4,7 @@
 <!--User Profile-->
 <div class="content-section">
     <div class="media">
-        <img alt="User's display pic" class="rounded-circle article-img"
+        <img alt="User's display pic" class="rounded-circle article-img user_image"
              src="{{ url_for('static', filename='user_images/' + account.user_image) }}">
         <div class="media-body">
             <h2 class="account-heading">{{ account.first_name }} {{ account.last_name }}</h2>
@@ -34,20 +34,30 @@
                     <!--Review Update Options-->
                     {% if review.rev_author == current_user %}
                     <small>|</small>
-                    <a class="" href="#" role="button" id="dropdownMenuLink2" data-toggle="dropdown"
-                       aria-haspopup="true" aria-expanded="false">
-                        <small>EDIT</small>
-                    </a>
-
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <a class="dropdown-item"
-                           href="{{ url_for('delete_review', user_id=review.profile, review_id=review.id) }}">Delete</a>
-                    </div>
+                    <button type="button" class="deleteButton" data-toggle="modal" data-target="#deleteReview-{{review.id}}">DELETE</button>
                     {% endif %}
                 </div>
-
             </div>
             <p class="article-content" id="post_content">{{ review.description }}</p>
+                <!--Delete Specific Review Popup-->
+            <div class="modal fade" id="deleteReview-{{review.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteReviewLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteReviewLabel">Delete Review?</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <form action="{{ url_for('delete_review', user_id=review.profile, review_id=review.id) }}" method="POST">
+                            <input class="btn btn-danger" type="submit" value="Delete Review">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </article>
     {% endfor %}

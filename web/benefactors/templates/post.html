@@ -6,13 +6,13 @@
 
   <!--Posts-->
   <article class="media content-section">
-    <img alt="User's display pic" class="rounded-circle article-img" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
+    <img alt="User's display pic" class="rounded-circle article-img user_image" src="{{ url_for('static', filename='user_images/' + post.author.user_image) }}">
     <div class="media-body">
       <!--Post Top Bar-->
       <div class="article-metadata">
 
         <!--Post Author-->
-        <a class="mr-2">{{ post.author.username }}</a>
+        <a class="mr-2" href="{{ url_for('other_account', user_id=post.author.id) }}">{{ post.author.username }}</a>
 
         <div class="dropdown show">
           <!--Post Date-->
@@ -80,20 +80,32 @@
                 <!--Comment Update Options-->
                 {% if comment.cmt_author == current_user %}
                   <small>|</small>
-                  <a class="" href="#" role="button" id="dropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><small>EDIT</small></a>
-                  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                    <!-- TODO: Update comment backend logic is implemented but frontend needs work. -->
-                    <!-- Change href="{{ url_for('update_comment', post_id=post.id, comment_id=comment.id) }}" to call backend logic. -->
-                     <a class="dropdown-item" href=#>Edit</a>
-                    <a class="dropdown-item" href="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}">Delete</a>
-                  </div>
+                  <button type="button" class="deleteButton" data-toggle="modal" data-target="#deleteComment-{{comment.id}}">DELETE</button>
                 {% else %}
                   <small>|</small>
                   <!-- Change to POST instead of a href-->
                   <a class="" href="{{ url_for('create_new_chat_channel', cmt_auth_id=comment.cmt_author.id) }}"><small>MESSAGE</small></a>
                 {% endif %}
               </div>
-
+              <!--Delete Specific Comment Popup-->
+              <div class="modal fade" id="deleteComment-{{comment.id}}" tabindex="-1" role="dialog" aria-labelledby="deleteCommentLabel">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteCommentLabel">Delete Comment?</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <form action="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}" method="POST">
+                        <input class="btn btn-danger" type="submit" value="Delete Comment">
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <p class="article-content comment-desc-display">{{ comment.comment_desc }}</p>
         </div>
