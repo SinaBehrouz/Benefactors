@@ -48,6 +48,13 @@ class SignUpForm(FlaskForm):
     def validate_phone_number(self, phone_number):
         if not phone_number.data.isnumeric():
             raise ValidationError('phone number must consist of only integers')
+
+    def validate_username(self, username):
+        allowed_symbols = ['_', '.']
+        for c in username.data:
+            if ( not c.isalpha() ) and ( not c.isnumeric() ) and ( c not in allowed_symbols ):
+                raise ValidationError("username must only be made out of numbers and characters - only symbols allowed are '_ .' ")
+
 # ---------------------------------------------------Forgot Pass--------------------------------------------------------
 
 class RequestResetForm(FlaskForm):
