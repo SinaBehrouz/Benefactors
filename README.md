@@ -50,7 +50,6 @@ The recent pandemic has altered the way of life for a lot of people across the g
 ![LoginScreen](docs/resources/LoginScreen.PNG)
 
 
-
 #### Update your profile picture.
 1. blah
 2. blah 
@@ -71,10 +70,13 @@ The recent pandemic has altered the way of life for a lot of people across the g
 2. blah 
 3. blah
 
-#### Want to reach out directly? Direct message the user. 
-1. blah
-2. blah 
-3. blah
+#### Want to reach out directly? Direct message the user - There are three ways to contact the user
+1. Through the Post Author Message Button
+![PostAuthorMsg](docs/resources/PostAuthorMsg.png)
+2. Through the Post Comment | Message button (This is intended mainly for the post author, but also available to post viewers) 
+![PostCommentMsg](docs/resources/PostCommentMsg.png)
+3. Through Profile Page
+![ProfilePageMsg](docs/resources/ProfilePageMsg.png)
 
 #### Want to find nearby amenities? Find it using Google maps integration.
 1. blah
