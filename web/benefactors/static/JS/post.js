@@ -3,6 +3,7 @@ function initAutocomplete(){
   autocomplete = new google.maps.places.Autocomplete(
   document.getElementById('autocomplete'), {
     types: ['establishment'],
+    componentRestrictions:{'country': ['CA']},
     fields: ['place_id', 'geometry', 'name']
   });
   autocomplete.addListener('place_changed', onPlaceChanged);

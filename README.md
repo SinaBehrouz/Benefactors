@@ -99,16 +99,20 @@ Direct message option is available on multiple locations for your convenience.
 ![DeleteMessages](docs/resources/DeleteMessages.png)
 
 #### Want to find nearby amenities? Find it using Google maps integration.
-1. blah
-2. blah 
-3. blah
+1. Suggested Locations!
+![mapSuggestions](docs/resources/mapSuggestions.png)
+2. You can change the search or choose from the suggested options based on your text!
+![mapSearch](docs/resources/mapSearch.png)
 
 #### Want to find postings in a specific area? Find it using the advance search.
-1. blah
-2. blah 
-3. blah
+1. filter posts based on category, status and location!
+![advSearch](docs/resources/advSearch.png)
+2. will suggest posts that are nearby your specified location with the given radius.
+![advSearch-location](docs/resources/advSearch-location.png)
+3. You can enter your location or choose one of the suggested ones based on your text!
+![advSearch-nearby](docs/resources/advSearch-nearby.png)
 
-#### Want to appreciate a user? Review the user. 
+#### Want to appreciate a user? Review the user.
 Your feedback is highly appreciated and will help us to improve our ability to serve you and other users of our web sites.
 For your convenience, we have designed a simple review form with description and user ratings. You can review users by heading to their profile.
 ![Review](docs/resources/Reviews.PNG)
