@@ -403,8 +403,12 @@ def edit_account():
     form = AccountUpdateForm()
     if form.validate_on_submit():
         if form.picture.data:
-            picture_name = save_image(form.picture.data)
-            current_user.user_image = picture_name
+            try:
+                picture_name = save_image(form.picture.data)
+                current_user.user_image = picture_name
+            except:
+                flash("Invalid image extension! ", "danger")
+                return redirect(url_for('edit_account'))
         current_user.username = form.username.data
         current_user.first_name = form.first_name.data
         current_user.last_name = form.last_name.data
