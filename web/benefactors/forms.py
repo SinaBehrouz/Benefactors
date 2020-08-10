@@ -89,7 +89,7 @@ class AccountUpdateForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
     last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
-    phone_number = StringField('Phone ', validators=[DataRequired(), Length(max=16)])
+    phone_number = StringField('Phone ', validators=[DataRequired(), Length(min=10,max=16)])
     postal_code = StringField('Postal Code ', validators=[DataRequired(), Length(max=6)])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg'])])
     submit = SubmitField('Update')
@@ -111,7 +111,9 @@ class AccountUpdateForm(FlaskForm):
         if not pcm.verifyPostalCode(postal_code.data):
             raise ValidationError('That is not a valid Postal Code.')
 
-
+    def validate_phone_number(self, phone_number):
+        if not phone_number.data.isnumeric():
+            raise ValidationError('phone number must consist of only integers')
 # ----------------------------------------------------Comments----------------------------------------------------------
 
 class PostCommentForm(FlaskForm):
