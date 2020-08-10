@@ -42,6 +42,8 @@ def seed_db():
     db.session.add(PostComment(comment_desc="Closing this post as I used an uber driver to move instead, I needed to move on July 31st!!", user_id=4, post_id=5, date_posted=datetime.datetime(2020,8,1,22,44,45)))
 
     db.session.add(ChatChannel(user1_id=2, user2_id=6, last_updated=datetime.datetime(2020,8,1,12,5,30)))
+    db.session.add(ChatChannel(user1_id=1, user2_id=3, last_updated=datetime.datetime(2020,8,11,19,35,22)))
+    db.session.add(ChatChannel(user1_id=2, user2_id=3, last_updated=datetime.datetime(2020,8,8,18,5,30)))
 
     db.session.commit()
 
@@ -53,6 +55,13 @@ def seed_db():
     db.session.add(ChatMessages(sender_id=2, message_content="Sounds great, see you tomorrow morning" , channel_id=1, message_time=datetime.datetime(2020,8,1,16,45,11)))
     db.session.add(ChatMessages(sender_id=6, message_content="Hi Taylah, am outside your apartment with your groceries. My email is My email is haymond@gmail.com. It is around 24.3, you can check the receipt later.", channel_id=1, message_time=datetime.datetime(2020,8,2,9,33,33)))
     db.session.add(ChatMessages(sender_id=2, message_content="Already? Thank you so much, Eric. I am heading down right now" , channel_id=1, message_time=datetime.datetime(2020,8,2,9,35,22)))
+    db.session.add(ChatMessages(sender_id=1, message_content="Hi Ms. Brown. My name is Sam, I am interested and available to help you on the 17th." , channel_id=2, message_time=datetime.datetime(2020,8,10,8,15,22)))
+    db.session.add(ChatMessages(sender_id=3, message_content="Oh hey there! Yes please, I live around North Van near Lonsdale Quay terminal" , channel_id=2, message_time=datetime.datetime(2020,8,10,8,35,22)))
+    db.session.add(ChatMessages(sender_id=1, message_content="Sounds good what do I need to bring?" , channel_id=2, message_time=datetime.datetime(2020,8,10,9,15,22)))
+    db.session.add(ChatMessages(sender_id=3, message_content="Just a lot of patience, the dog can be woeful sometimes. Anyway, have fun! I will leave the door open as my neighbourhood is very safe anyway. My address is #### 6th Street East" , channel_id=2, message_time=datetime.datetime(2020,8,10,9,35,22)))
+    db.session.add(ChatMessages(sender_id=1, message_content="It seems like I will have a great time" , channel_id=2, message_time=datetime.datetime(2020,8,11,18,35,22)))
+    db.session.add(ChatMessages(sender_id=3, message_content="Thank you!" , channel_id=2, message_time=datetime.datetime(2020,8,11,19,35,22)))
+    db.session.add(ChatMessages(sender_id=3, message_content="Hi Taylah, how are you doing?" , channel_id=2, message_time=datetime.datetime(2020,8,8,18,5,30)))
 
     db.session.commit()
 
