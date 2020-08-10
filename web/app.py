@@ -47,9 +47,9 @@ def seed_db():
 
     db.session.commit()
     
-    notification = Notification(recipient=3, notifier=1, post_id=1, notification_message="SamSmith commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
-    notification = Notification(recipient=3, notifier=4, post_id=1, notification_message="Jackie commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
-    notification = Notification(recipient=3, notifier=5, post_id=1, notification_message="RL commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT)
+    db.session.add(Notification(recipient=3, notifier=1, post_id=1, notification_message="SamSmith commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT))
+    db.session.add(notification = Notification(recipient=3, notifier=4, post_id=1, notification_message="Jackie commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT))
+    db.session.add(notification = Notification(recipient=3, notifier=5, post_id=1, notification_message="RL commented on your post.", is_read=0, type=notificationTypeEnum.COMMENT))
 
 
     db.session.add(ChatChannel(user1_id=2, user2_id=6, last_updated=datetime.datetime(2020,8,1,12,5,30)))
