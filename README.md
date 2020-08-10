@@ -1,3 +1,4 @@
+
 # Benefactors
 The recent pandemic has altered the way of life for a lot of people across the globe. Some communities have been impacted so severely that basic necessities like delivery of food and medicines to quarantined neighbourhoods has become a formidable challenge. To mitigate the situation, we envisioned a platform to bring people together while practicing social distancing. Benefactors allows people in need to connect with volunteers to tackle essential services and errands efficiently and at no cost. Expected services include, delivery, shopping, medical supplies, and others.
 
@@ -51,7 +52,7 @@ The recent pandemic has altered the way of life for a lot of people across the g
 ![LoginScreen](docs/resources/LoginScreen.PNG)
 
 #### View profile and activities.
-Head on over to your account page to view your profile, posts, to-do list, and more! You can access this by clicking "Account" in your navigation bar. 
+Want to view your profile and keep track of your activities? Head on over to your account page.
 ![MyAccount](docs/resources/MyAccount.PNG)
 
 #### Update your profile picture.
@@ -107,7 +108,7 @@ For your convenience, we have designed a simple review form with description and
 
 
 #### You will never miss an update with real time notifications.
-Head on over to your notification center in order to view your most up to date notifications! You can access them via the bell icon in your navigation bar.
+Head on over to your notification center in order to view your most up to date notifications! You can access this via the bell icon in your navigation bar.
 ![NotificationCenter](docs/resources/NotificationCenter.png)
 
 
