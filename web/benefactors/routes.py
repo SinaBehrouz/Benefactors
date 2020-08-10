@@ -205,12 +205,14 @@ def update_post(post_id):
     if form.validate_on_submit():
         post.title = form.title.data
         post.description = form.description.data
+        post.category = form.category.data
         db.session.commit()
         flash('Post updated!', 'success')
         return redirect(url_for('post', post_id=post.id))
     if request.method == 'GET':
         form.title.data = post.title
         form.description.data = post.description
+        form.category.data = post.category.name
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
 
 
