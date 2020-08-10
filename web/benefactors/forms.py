@@ -4,7 +4,7 @@ from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
 from benefactors.models import User, genderEnum, statusEnum, categoryEnum
-from .postalCodeManager import postalCodeManager
+from benefactors.helper.postalCodeManager import postalCodeManager
 
 
 # -------------------------------------------------Login/Logout---------------------------------------------------------
