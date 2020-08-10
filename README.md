@@ -99,7 +99,7 @@ Direct message option is available on multiple locations for your convenience.
 ![DeleteMessages](docs/resources/DeleteMessages.png)
 
 #### Want to find nearby amenities? Find it using Google maps integration.
-1. Suggested Locations!
+1. Suggested Locations based on the post!
 ![mapSuggestions](docs/resources/mapSuggestions.png)
 2. You can change the search or choose from the suggested options based on your text!
 ![mapSearch](docs/resources/mapSearch.png)
