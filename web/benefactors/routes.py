@@ -111,7 +111,7 @@ def reset_token(token):
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/home/", methods=['GET', 'POST'])
 def home():
-    form = SearchForm(status=0, tag='allCat', radius=50)
+    form = SearchForm(status=0, tag='allCat', radius=10)
     choices = [("allCat", "All Categories")]
     for c in categoryEnum:
         choices.append((c.name, c.name))
