@@ -13,7 +13,7 @@ def create_db():
     db.create_all()
     db.session.commit()
 
- 
+
 @cli.command("seed_db")
 def seed_db():
     # user: 1@1.com
@@ -21,10 +21,10 @@ def seed_db():
 
     db.session.add(User(id=0, username="NULL", first_name="NULL", last_name="NULL", email="NULL", phone_number="NULL", postal_code="NULL", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
     db.session.add(User(username="SamSmith", first_name="Sam", last_name="Smith", email="samsmith@gmail.com", phone_number="7782234554", postal_code="V3E3B5", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="b06567b4c614462ab0ec5283d9d8b206.jpg"))
-    db.session.add(User(username="Taylah", first_name="Taylah", last_name="Rosa", email="trosa@yahoo.com", phone_number="6043454565", postal_code="V5Z0G7", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="592d3d0ff7754784b50c7ed0f17dd499.jpg"))
+    db.session.add(User(username="Taylah", first_name="Taylah", last_name="Rosa", email="trosa@yahoo.com", phone_number="6043454565", postal_code="V3E3A7", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="592d3d0ff7754784b50c7ed0f17dd499.jpg"))
     db.session.add(User(username="Jezzie", first_name="Jess", last_name="Brown", email="jezzie@gmail.com", phone_number="6045557777", postal_code="V3H1L6", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="ad2f902b324c4aca9284cc97baa73dfa.jpg"))
     db.session.add(User(username="Jackie", first_name="Jacques", last_name="Tang", email="jjques@gmail.com", phone_number="7786562245", postal_code="V5K0A1", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="744be000d8f94d5e8f44c0b0d83547ff.jpg"))
-    db.session.add(User(username="RL", first_name="Randall", last_name="Lowry", email="rrlowry@gmail.com", phone_number="6045001700", postal_code="V9Y8G9", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="afb14fd47ff846efb8b73179275cd531.jpg"))
+    db.session.add(User(username="RL", first_name="Randall", last_name="Lowry", email="rrlowry@gmail.com", phone_number="6045001700", postal_code="V1M2R1", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="afb14fd47ff846efb8b73179275cd531.jpg"))
     db.session.add(User(username="EricH", first_name="Eric", last_name="Singh", email="erichsingh@gmail.com", phone_number="7788787799", postal_code="V3T2E4", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y", user_image="02173210948342908c4e4087551747e7.jpg"))
     db.session.add(User(username="Arsalan", first_name="Arsalan", last_name="Mackie", email="1@1.com", phone_number="7786637867", postal_code="V6B0M3", password="$2b$12$ppAg.mOnlIo15d0m7gPYr.1LZaUvuO29JVVBkv6bkQzQz6zK.f66y"))
 
