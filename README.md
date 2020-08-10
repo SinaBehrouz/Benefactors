@@ -60,7 +60,7 @@ Create a new account to have full access to the website. Sign up is just a one s
 
 #### View profile and activities.
 Head on over to your account page to view your profile, posts, to-do list, and more! You can do this by clicking "Account" in your navigation bar.
-![MyAccount](docs/resources/MyAccount.PNG)
+![MyAccount](docs/resources/MyAccount.png)
 
 #### Update your profile.
 Once you have created your account you can always update your information including profile picture.
@@ -111,7 +111,7 @@ Direct message option is available on multiple locations for your convenience.
 #### Want to appreciate a user? Review the user. 
 Your feedback is highly appreciated and will help us to improve our ability to serve you and other users of our web sites.
 For your convenience, we have designed a simple review form with description and user ratings. You can review users by heading to their profile.
-![Review](docs/resources/Reviews.png)
+![Review](docs/resources/Reviews.PNG)
 
 
 
@@ -132,7 +132,7 @@ CVC         100
 DATE        10/25
 ```
 
-![Payments](docs/resources/Payments.png)
+![Payments](docs/resources/Payments.PNG)
 
 
 ## Inspiration
