@@ -4,7 +4,7 @@ from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, IntegerField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, NumberRange, Optional
 from benefactors.models import User, genderEnum, statusEnum, categoryEnum
-from .postalCodeManager import postalCodeManager
+from benefactors.helper.postalCodeManager import postalCodeManager
 
 
 # -------------------------------------------------Login/Logout---------------------------------------------------------
@@ -23,7 +23,7 @@ class SignUpForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
     last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
-    phone_number = StringField('Phone ', validators=[DataRequired(), Length(max=16)])
+    phone_number = StringField('Phone ', validators=[DataRequired(), Length(min=10, max=16)])
     postal_code = StringField('Postal Code ', validators=[DataRequired(), Length(max=10)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=60)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -45,6 +45,15 @@ class SignUpForm(FlaskForm):
         if not pcm.verifyPostalCode(pc):
             raise ValidationError('That is not a valid Postal Code.')
 
+    def validate_phone_number(self, phone_number):
+        if not phone_number.data.isnumeric():
+            raise ValidationError('phone number must consist of only integers')
+
+    def validate_username(self, username):
+        allowed_symbols = ['_', '.']
+        for c in username.data:
+            if ( not c.isalpha() ) and ( not c.isnumeric() ) and ( c not in allowed_symbols ):
+                raise ValidationError("username must only be made out of numbers and characters - only symbols allowed are '_ .' ")
 
 # ---------------------------------------------------Forgot Pass--------------------------------------------------------
 

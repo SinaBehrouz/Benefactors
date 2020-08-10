@@ -293,7 +293,7 @@ small.closed-status {
   color:red!important;
 }
 
-.info-item{
+.info-item {
   margin-bottom: 5px;
 }
 
@@ -311,12 +311,13 @@ small.closed-status {
   max-width: fit-content;
 }
 
-.article-content #post_title {
-  margin-top: 0.5em;
+#post_title {
+  margin-top: 10px;
 }
 
-.article-content #post_content {
-  margin-top: 1em;
+#post_content {
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 #chat-content {
@@ -324,10 +325,6 @@ small.closed-status {
   float: right; /* Make this div as wide as its contents */
   min-height: 110vh;
   padding-left: 2em;
-}
-
-#channel-list {
-  list-style-type: none;
 }
 
 #messages-container{
@@ -367,6 +364,22 @@ small.closed-status {
   float: right;
 }
 
+.list-group-item.list-group-item-light.channel-list-delivered {
+  list-style-type: none;
+  background-color: #cfcc1b;
+}
+
+.list-group-item.list-group-item-light.channel-list {
+  list-style-type: none;
+}
+
+.rounded-circle.article-img.user_image {
+  height: 125px;
+  width: 125px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
 .row .message_sender {
   border: 0.5px solid #000000;
   border-radius: 12px;
@@ -376,21 +389,13 @@ small.closed-status {
   width: fit-content;
 }
 
-.msg_content {
-  margin-left: 1.2em;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  margin-right: 1.2em;
-  overflow-wrap: anywhere
-}
-
-#message_sender_left {
+.row .message_sender.left {
   max-width: 40%;
   background-color: #cceeff;
   border-color: transparent;
 }
 
-#message_sender_right {
+.row .message_sender.right {
   margin-left: auto;
   max-width: 40%;
   background-color: #71bcd1;
@@ -415,42 +420,58 @@ small.closed-status {
   justify-content: space-between;
 }
 
-#name_left {
+.name_left {
   font-size: small;
   display: inline-flex;
 }
 
-#name_right {
+.name_right {
   font-size: small;
   display: inline-flex;
 }
 
-#time_left {
+.time_left {
   text-align: left;
   font-size: small;
 }
 
-#time_right {
+.time_right {
   text-align: right;
   font-size: small;
 }
 
-#dropdownMenuLink_messages {
+.msg_content {
+  margin-left: 1.2em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-right: 1.2em;
+  overflow-wrap: anywhere
+}
+
+.dropdownMenuLink_messages {
   margin-left: 0.5em;
 }
 
-#placeholder-empty-message{
+.placeholder-empty-message {
   height: 100%;
-}
-
-#channel-list-delivered {
-   background-color: #cfcc1b;
-}
-
-#account_image {
-  margin-right: 20px;
 }
 
 .post_user_image {
   margin-right: 20px;
+}
+
+#error-img{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 70%;
+}
+
+.deleteButton {
+  background: none;
+  font-size: small;
+  border: none;
+  color: red;
+  padding: 0;
 }
