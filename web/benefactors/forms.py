@@ -139,7 +139,7 @@ class SendMessageForm(FlaskForm):
 # ----------------------------------------------------Reviews-----------------------------------------------------------
 
 class ReviewForm(FlaskForm):
-    description = TextAreaField('Review', validators=[DataRequired()])
+    description = TextAreaField('Review')
     score = DecimalField('Rate - (1 to 10) ', validators=[DataRequired(), NumberRange(min=1, max=10)])
     submit = SubmitField('Submit')
 
