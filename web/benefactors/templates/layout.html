@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/main.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
+    <script src="https://use.fontawesome.com/releases/v5.13.0/js/all.js" crossorigin="anonymous"></script>
     <title>Benefactors</title>
+
 </head>
 
 <body>
@@ -20,13 +23,26 @@
             <div class="collapse navbar-collapse" id="navbarToggle">
                 <div class="navbar-nav mr-auto">
                     <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
+                    <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
                 </div>
                 <!-- Navbar Right Side -->
                 <div class="navbar-nav">
                     {% if current_user.is_authenticated %}
-                    <a class="nav-item nav-link" href="{{ url_for('create_new_post') }}">New Post</a>
-                    <a class="nav-item nav-link" href="{{ url_for('get_account') }}">Account</a>
-                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+
+                    <!-- if unread notifications, show bell icon with "!"" -->
+                      {% if unread_notifications %}
+                        <a class="nav-item nav-link" href="{{ url_for('get_notifications') }}">
+                        <span class="material-icons md-36">notification_important</span>
+                      </a>
+                      {% else %}
+                        <a class="nav-item nav-link" href="{{ url_for('get_notifications') }}">
+                          <span class="material-icons md-36">notifications</span>
+                        <!-- </span> -->
+                        </a>
+                      {% endif %}
+                      <a class="nav-item nav-link" href="{{ url_for('create_new_post') }}">New Post</a>
+                      <a class="nav-item nav-link" href="{{ url_for('get_account') }}">Account</a>
+                      <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                     {% else %}
                     <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
                     <a class="nav-item nav-link" href="{{ url_for('sign_up') }}">Sign Up</a>
@@ -36,7 +52,7 @@
         </div>
     </nav>
 </header>
-<main role="main" class="container">
+<main class="container">
      <div class="row">
        <div class="col-md-8">
          {% with messages = get_flashed_messages(with_categories=true) %}
@@ -52,12 +68,12 @@
        </div>
        {% if current_user.is_authenticated %}
        <div class="col-md-4">
-         <div class="content-section" style="position:fixed; transform: none;">
+         <div id="infoCenter" class="content-section">
            <h3>Information Center</h3>
              <ul class="list-group">
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">To Do List</a> </li>
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">My Posts</a> </li>
-               <li class="list-group-item list-group-item-light" style="margin-bottom: 5px;"> <a class="list-group-item-light" href="#">Messages</a> </li>
+               <li class="list-group-item list-group-item-light info-item"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">To Do List</a> </li>
+               <li class="list-group-item list-group-item-light info-item"> <a class="list-group-item-light" href="{{ url_for('get_account') }}">My Posts</a> </li>
+               <li class="list-group-item list-group-item-light info-item"> <a class="list-group-item-light" href="{{ url_for('messages') }}">Messages</a> </li>
              </ul>
          </div>
        </div>

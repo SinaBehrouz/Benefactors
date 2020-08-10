@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- ABOUT -->
+<div class="content-section">
+    <h3 class="border-bottom mb-4">ABOUT</h3>
+
+    <h4>What is the inspiration behind Benefactors?</h4>
+    <p>
+        The recent pandemic has altered the way of life for a lot of people across the globe. Some communities have
+        been
+        impacted so severely that basic necessities like delivery of food and medicines to quarantined
+        neighbourhoods
+        has become a formidable challenge.
+        To mitigate the situation, we envisioned a platform to bring people together while practicing social
+        distancing.
+        Benefactors allows people in need to connect with volunteers to tackle essential services and errands
+        efficiently and at no
+        cost. Expected services include, delivery, shopping, medical supplies, and others.
+    </p>
+</div>
+
+<!-- WANT TO CONTRIBUTE?-->
+<div class="content-section">
+    <h3 class="border-bottom mb-4">WANT TO CONTRIBUTE?</h3>
+    <form action="{{ url_for('charge') }}" method="POST">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <div class="form-group required">
+                {{ form.amount.label(class="form-control-label") }}
+                {% if form.amount.errors %}
+                {{ form.amount(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.amount.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.amount(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <script
+                        src="https://checkout.stripe.com/checkout.js"
+                        class="stripe-button"
+                        data-key="{{ key }}"
+                        data-description="Donation"
+                        data-amount=this.value
+                        data-locale="auto">
+                </script>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<!-- OUR AMAZING TEAM -->
+<div class="content-section">
+    <h3 class="border-bottom mb-4">OUR AMAZING TEAM</h3>
+    <div class="row">
+      <div class="col-lg-4">
+          <div class="team-member">
+              <img class="mx-auto rounded-circle" src="{{ url_for('static', filename='team/simran.jpg') }}" alt="Dev's Image"/>
+              <h4>Simran Gulati</h4>
+              <p class="text-muted">Lead Developer</p>
+              <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/simran-gulati/"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+      </div>
+        <div class="col-lg-4">
+            <div class="team-member">
+                <img class="mx-auto rounded-circle" src="{{ url_for('static', filename='team/martin.jpg') }}" alt="Dev's Image"/>
+                <h4>Martin Jo</h4>
+                <p class="text-muted">Lead Developer</p>
+                <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/martin-jo/"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="team-member">
+                <img class="mx-auto rounded-circle" src="{{ url_for('static', filename='team/arsalan.jpg') }}" alt="Dev's Image"/>
+                <h4>Arsalan Macknojia</h4>
+                <p class="text-muted">Lead Developer</p>
+                <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/arsalanmacknojia"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="team-member">
+                <img class="mx-auto rounded-circle" src="{{ url_for('static', filename='team/sina.jpg') }}" alt="Dev's Image"/>
+                <h4>Sina Ahmadian-Behrouz</h4>
+                <p class="text-muted">Lead Developer</p>
+                <a class="btn btn-dark btn-social mx-2" href="https://www.linkedin.com/in/sina-ahmadian-behrouz/"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    </div>
+</div>
+
+
+{% endblock content %}
